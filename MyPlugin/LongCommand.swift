@@ -28,11 +28,13 @@ class LongCommand: NSObject, XCSourceEditorCommand {
             // 去掉最后一个回车
             endString = String(endString.prefix(endString.count - 1))
         }
-        if startLine != endLine {
-            // 跨行选中
-            var string = String(lines[startLine].prefix(startColumn))
+        if startLine != endLine {// 跨行选中
+            // 第一行从选中位置开始，后面的字符串
+            var string = String(lines[startLine].suffix(lines[startLine].count - startColumn))
             selectStrings.append(string)
+            // 中间选中
             selectStrings += lines[startLine + 1..<endLine]
+            // 选中中的最后一行，到最后选中位置前的字符串
             string = String(lines[endLine].prefix(endColumn))
             selectStrings.append(string)
         } else {
@@ -41,9 +43,10 @@ class LongCommand: NSObject, XCSourceEditorCommand {
             selectStrings.append(string)
         }
         var tempString = selectStrings.joined(separator: "")
-        if tempString.hasPrefix("/*"), tempString.hasSuffix("*/") {
+        if let sRange = tempString.range(of: "/*"), let eRange = tempString.range(of: "*/", options: .backwards) {
             // 存在/*1*/
-            tempString = String(tempString[2..<tempString.count - 2])
+            tempString = tempString.replacingOccurrences(of: "*/", with: "", range: eRange)
+            tempString = tempString.replacingOccurrences(of: "/*", with: "", range: sRange)
             if startLine == endLine {
                 endColumn -= 4
             } else {
@@ -70,6 +73,3 @@ class LongCommand: NSObject, XCSourceEditorCommand {
     }
 }
 
-extension XCSourceEditorCommandInvocation {
-    func longCommand() throws {}
-}
