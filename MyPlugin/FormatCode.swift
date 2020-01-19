@@ -76,7 +76,8 @@ class FormatCode : NSObject, XCSourceEditorCommand {
             removeIndexSet = IndexSet(range.start.line...endLine)
         }
         guard !selectString.isEmpty else { return }
-        let array = try selectString.format()
+        //let array = try selectString.format()
+        let array = try formatWith(ocCode: selectString)
         if array.count > 0 {
             // 将格式化后的内容替换旧内容
             invocation.buffer.lines.removeObjects(at: removeIndexSet)
@@ -128,6 +129,25 @@ class FormatCode : NSObject, XCSourceEditorCommand {
         let end = XCSourceTextPosition(line: finalLine - difference, column: 0)
 
         return XCSourceTextRange(start: start, end: end)
+    }
+    
+    // 需要通过homebrew安装uncrustify
+    // 命令：brew install uncrustify
+    // 使用本地的uncrustify
+    func formatWith(ocCode:String) throws -> [String] {
+        guard let cachesPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first else { return [] }
+        let filePath = URL(fileURLWithPath: cachesPath).appendingPathComponent("\(Date().timeIntervalSince1970)")
+        try ocCode.write(to: filePath, atomically: true, encoding: .utf8)
+        guard let path = Bundle.main.path(forResource: "uncrustify", ofType: nil) else { return [] }
+        guard let cfgPath = Bundle.main.path(forResource: "uncrustify.cfg", ofType: nil) else { return [] }
+        let command = [path, "-c", cfgPath, "-l", "OC", "-q", "--no-backup", "--replace", filePath.path]
+        let shell = Shell()
+        let result = shell.capture(command)
+        _ = try result.get()
+        let data = try Data(contentsOf: filePath)
+        try? FileManager.default.removeItem(at: filePath)
+        guard let string = String(data: data, encoding: .utf8) else { return [] }
+        return string.components(separatedBy: "\n")
     }
 }
 

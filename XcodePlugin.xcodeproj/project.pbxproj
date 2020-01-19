@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EF5EF26D23D3E8C30070032C /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26523D3E8C30070032C /* Shell.swift */; };
+		EF5EF26E23D3E8C30070032C /* String+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26623D3E8C30070032C /* String+Extras.swift */; };
+		EF5EF26F23D3E8C30070032C /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26723D3E8C30070032C /* Environment.swift */; };
+		EF5EF27023D3E8C30070032C /* PathKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26823D3E8C30070032C /* PathKit.swift */; };
+		EF5EF27123D3E8C30070032C /* ProcessRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26923D3E8C30070032C /* ProcessRunner.swift */; };
+		EF5EF27223D3E8C30070032C /* Result+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26A23D3E8C30070032C /* Result+Extras.swift */; };
+		EF5EF27323D3E8C30070032C /* ShellError.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26B23D3E8C30070032C /* ShellError.swift */; };
+		EF5EF27423D3E8C30070032C /* ProcessRunnerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26C23D3E8C30070032C /* ProcessRunnerError.swift */; };
 		EF88AF8B238D341900A70AEA /* libswiftCore.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = EFB8D67E238D2E8C0081C450 /* libswiftCore.tbd */; };
 		EFC9780D238529EE006ED781 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9780C238529EE006ED781 /* AppDelegate.swift */; };
 		EFC97811238529F1006ED781 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFC97810238529F1006ED781 /* Assets.xcassets */; };
@@ -20,14 +28,6 @@
 		EFC978392385342C006ED781 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC978382385342C006ED781 /* String.swift */; };
 		EFC9783B23853806006ED781 /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9783A23853806006ED781 /* CommandLine.swift */; };
 		EFC9783D23853B8C006ED781 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9783C23853B8C006ED781 /* Util.swift */; };
-		EFC97847238541A4006ED781 /* ProcessRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9783F238541A4006ED781 /* ProcessRunner.swift */; };
-		EFC97848238541A4006ED781 /* String+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC97840238541A4006ED781 /* String+Extras.swift */; };
-		EFC97849238541A4006ED781 /* PathKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC97841238541A4006ED781 /* PathKit.swift */; };
-		EFC9784A238541A4006ED781 /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC97842238541A4006ED781 /* Environment.swift */; };
-		EFC9784B238541A4006ED781 /* ShellError.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC97843238541A4006ED781 /* ShellError.swift */; };
-		EFC9784C238541A4006ED781 /* Result+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC97844238541A4006ED781 /* Result+Extras.swift */; };
-		EFC9784D238541A4006ED781 /* ProcessRunnerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC97845238541A4006ED781 /* ProcessRunnerError.swift */; };
-		EFC9784E238541A4006ED781 /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC97846238541A4006ED781 /* Shell.swift */; };
 		EFC97850238541C3006ED781 /* FormatCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9784F238541C3006ED781 /* FormatCode.swift */; };
 		EFC97854238544E3006ED781 /* uncrustify.cfg in Resources */ = {isa = PBXBuildFile; fileRef = EFC97852238544E3006ED781 /* uncrustify.cfg */; };
 		EFC97855238544E3006ED781 /* uncrustify in Resources */ = {isa = PBXBuildFile; fileRef = EFC97853238544E3006ED781 /* uncrustify */; };
@@ -96,6 +96,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		EF5EF26523D3E8C30070032C /* Shell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
+		EF5EF26623D3E8C30070032C /* String+Extras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Extras.swift"; sourceTree = "<group>"; };
+		EF5EF26723D3E8C30070032C /* Environment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
+		EF5EF26823D3E8C30070032C /* PathKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PathKit.swift; sourceTree = "<group>"; };
+		EF5EF26923D3E8C30070032C /* ProcessRunner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessRunner.swift; sourceTree = "<group>"; };
+		EF5EF26A23D3E8C30070032C /* Result+Extras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Result+Extras.swift"; sourceTree = "<group>"; };
+		EF5EF26B23D3E8C30070032C /* ShellError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShellError.swift; sourceTree = "<group>"; };
+		EF5EF26C23D3E8C30070032C /* ProcessRunnerError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessRunnerError.swift; sourceTree = "<group>"; };
 		EFB8D67E238D2E8C0081C450 /* libswiftCore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftCore.tbd; path = usr/lib/swift/libswiftCore.tbd; sourceTree = SDKROOT; };
 		EFC97809238529EE006ED781 /* XCode插件.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "XCode插件.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFC9780C238529EE006ED781 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -114,14 +122,6 @@
 		EFC978382385342C006ED781 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		EFC9783A23853806006ED781 /* CommandLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLine.swift; sourceTree = "<group>"; };
 		EFC9783C23853B8C006ED781 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
-		EFC9783F238541A4006ED781 /* ProcessRunner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessRunner.swift; sourceTree = "<group>"; };
-		EFC97840238541A4006ED781 /* String+Extras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Extras.swift"; sourceTree = "<group>"; };
-		EFC97841238541A4006ED781 /* PathKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PathKit.swift; sourceTree = "<group>"; };
-		EFC97842238541A4006ED781 /* Environment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
-		EFC97843238541A4006ED781 /* ShellError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShellError.swift; sourceTree = "<group>"; };
-		EFC97844238541A4006ED781 /* Result+Extras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Result+Extras.swift"; sourceTree = "<group>"; };
-		EFC97845238541A4006ED781 /* ProcessRunnerError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessRunnerError.swift; sourceTree = "<group>"; };
-		EFC97846238541A4006ED781 /* Shell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
 		EFC9784F238541C3006ED781 /* FormatCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatCode.swift; sourceTree = "<group>"; };
 		EFC97852238544E3006ED781 /* uncrustify.cfg */ = {isa = PBXFileReference; lastKnownFileType = text; name = uncrustify.cfg; path = MyPlugin/uncrustify.cfg; sourceTree = SOURCE_ROOT; };
 		EFC97853238544E3006ED781 /* uncrustify */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = uncrustify; path = MyPlugin/uncrustify; sourceTree = SOURCE_ROOT; };
@@ -233,14 +233,14 @@
 		EFC9783E238541A4006ED781 /* Shell */ = {
 			isa = PBXGroup;
 			children = (
-				EFC9783F238541A4006ED781 /* ProcessRunner.swift */,
-				EFC97840238541A4006ED781 /* String+Extras.swift */,
-				EFC97841238541A4006ED781 /* PathKit.swift */,
-				EFC97842238541A4006ED781 /* Environment.swift */,
-				EFC97843238541A4006ED781 /* ShellError.swift */,
-				EFC97844238541A4006ED781 /* Result+Extras.swift */,
-				EFC97845238541A4006ED781 /* ProcessRunnerError.swift */,
-				EFC97846238541A4006ED781 /* Shell.swift */,
+				EF5EF26723D3E8C30070032C /* Environment.swift */,
+				EF5EF26823D3E8C30070032C /* PathKit.swift */,
+				EF5EF26923D3E8C30070032C /* ProcessRunner.swift */,
+				EF5EF26C23D3E8C30070032C /* ProcessRunnerError.swift */,
+				EF5EF26A23D3E8C30070032C /* Result+Extras.swift */,
+				EF5EF26523D3E8C30070032C /* Shell.swift */,
+				EF5EF26B23D3E8C30070032C /* ShellError.swift */,
+				EF5EF26623D3E8C30070032C /* String+Extras.swift */,
 			);
 			path = Shell;
 			sourceTree = "<group>";
@@ -434,34 +434,34 @@
 				EFCC7EFD2386204300B6407B /* ParsingHelpers.swift in Sources */,
 				EFCC7EF92386204300B6407B /* Arguments.swift in Sources */,
 				EFC97850238541C3006ED781 /* FormatCode.swift in Sources */,
+				EF5EF27123D3E8C30070032C /* ProcessRunner.swift in Sources */,
 				EFC978392385342C006ED781 /* String.swift in Sources */,
-				EFC9784A238541A4006ED781 /* Environment.swift in Sources */,
 				EFCC7F0E238669F100B6407B /* LongCommand.swift in Sources */,
 				EFCC7EFF2386204300B6407B /* Rules.swift in Sources */,
 				EFC9782623852A17006ED781 /* SourceEditorExtension.swift in Sources */,
-				EFC9784B238541A4006ED781 /* ShellError.swift in Sources */,
+				EF5EF26E23D3E8C30070032C /* String+Extras.swift in Sources */,
 				EFCC7EF72386204300B6407B /* Globs.swift in Sources */,
+				EF5EF27023D3E8C30070032C /* PathKit.swift in Sources */,
 				EFCC7EF52386204300B6407B /* Examples.swift in Sources */,
 				EFCC7F032386204300B6407B /* SwiftFormat.swift in Sources */,
+				EF5EF27323D3E8C30070032C /* ShellError.swift in Sources */,
 				EFCC7EF32386204300B6407B /* RulesStore.swift in Sources */,
 				EFCC7F012386204300B6407B /* Formatter.swift in Sources */,
 				EFC9783323852B0D006ED781 /* CopyLine.swift in Sources */,
 				EFC9783D23853B8C006ED781 /* Util.swift in Sources */,
 				EFC9783523852EF1006ED781 /* DeleteLine.swift in Sources */,
-				EFC9784D238541A4006ED781 /* ProcessRunnerError.swift in Sources */,
-				EFC97849238541A4006ED781 /* PathKit.swift in Sources */,
 				EFCC7EEF2386204300B6407B /* EnumAssociable.swift in Sources */,
+				EF5EF26F23D3E8C30070032C /* Environment.swift in Sources */,
 				EFCC7F052386204300B6407B /* OptionsDescriptor.swift in Sources */,
 				EFCC7EEB2386204300B6407B /* OptionsStore.swift in Sources */,
 				EFCC7EF12386204300B6407B /* Inference.swift in Sources */,
 				EFC9783723853244006ED781 /* Capitalization.swift in Sources */,
-				EFC97847238541A4006ED781 /* ProcessRunner.swift in Sources */,
+				EF5EF27223D3E8C30070032C /* Result+Extras.swift in Sources */,
 				EFCC7EED2386204300B6407B /* Options.swift in Sources */,
 				EFC9783B23853806006ED781 /* CommandLine.swift in Sources */,
-				EFC97848238541A4006ED781 /* String+Extras.swift in Sources */,
+				EF5EF27423D3E8C30070032C /* ProcessRunnerError.swift in Sources */,
+				EF5EF26D23D3E8C30070032C /* Shell.swift in Sources */,
 				EFCC7EFB2386204300B6407B /* Tokenizer.swift in Sources */,
-				EFC9784E238541A4006ED781 /* Shell.swift in Sources */,
-				EFC9784C238541A4006ED781 /* Result+Extras.swift in Sources */,
 				EFCC7F082386298500B6407B /* InsertEnter.swift in Sources */,
 				EFCC7F0B2386322900B6407B /* AddImport.swift in Sources */,
 			);
@@ -610,12 +610,14 @@
 				CODE_SIGN_ENTITLEMENTS = "XcodePlugin/Supporting Files/XcodePlugin.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = E3N24VTN26;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.49.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				SWIFT_VERSION = 5.0;
@@ -630,12 +632,14 @@
 				CODE_SIGN_ENTITLEMENTS = "XcodePlugin/Supporting Files/XcodePlugin.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = E3N24VTN26;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.49.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				SWIFT_VERSION = 5.0;
@@ -649,6 +653,7 @@
 				CODE_SIGN_ENTITLEMENTS = "MyPlugin/Supporting Files/MyPlugin.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = E3N24VTN26;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -660,6 +665,7 @@
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/swift",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.49.XcodePlugin.MyPlugin;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;
@@ -676,6 +682,7 @@
 				CODE_SIGN_ENTITLEMENTS = "MyPlugin/Supporting Files/MyPlugin.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = E3N24VTN26;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -687,6 +694,7 @@
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/swift",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.49.XcodePlugin.MyPlugin;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;

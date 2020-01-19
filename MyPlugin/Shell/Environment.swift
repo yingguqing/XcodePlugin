@@ -1,5 +1,6 @@
 import Foundation
 
+
 protocol EnvironmentProtocol {
     /// It looks up an executable in the given paths and current directory.
     ///
@@ -31,7 +32,11 @@ class Environment: EnvironmentProtocol {
     ///   - currentWorkingDirectory: Path to the current working directory.
     /// - Returns: List of paths exposed through the PATH environment variable.
     func searchPaths(pathString: String?, currentWorkingDirectory: Path) -> [Path] {
-        return (pathString ?? "").split(separator: ":").map(String.init).compactMap { pathString in
+        var paths = pathString
+        if paths?.range(of: "/usr/local/bin") == nil {
+            paths?.append(":/usr/local/bin")
+        }
+        return (paths ?? "").split(separator: ":").map(String.init).compactMap { pathString in
             if pathString.first == "/" {
                 return Path(pathString)
             }

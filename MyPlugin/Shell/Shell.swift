@@ -1,6 +1,7 @@
 import Foundation
 import class Foundation.ProcessInfo
 
+
 /// Class tu run commands in the system.
 open class Shell {
     /// Process runner.
@@ -40,9 +41,8 @@ open class Shell {
     ///
     /// - Parameter arguments: Command arguments.
     /// - Returns: Command result.
-    public func sync(_ arguments: [String], standardInput:String?=nil) -> Result<Void, ShellError> {
+    public func sync(_ arguments: [String]) -> Result<Void, ShellError> {
         return self.sync(arguments,
-                         standardInput: standardInput,
                          shouldBeTerminatedOnParentExit: true,
                          workingDirectoryPath: nil,
                          env: nil,
@@ -61,7 +61,6 @@ open class Shell {
     ///   - onStderr: Closure to send the standard error through.
     /// - Returns: Command result.
     public func sync(_ arguments: [String],
-                     standardInput:String?,
                      shouldBeTerminatedOnParentExit: Bool,
                      workingDirectoryPath: Path?,
                      env: [String: String]?,
@@ -78,7 +77,6 @@ open class Shell {
             }
         }
         let result = self.runner.runSync(arguments: arguments,
-                                         standardInput: standardInput,
                                          shouldBeTerminatedOnParentExit: shouldBeTerminatedOnParentExit,
                                          workingDirectoryPath: workingDirectoryPath,
                                          env: env,
@@ -92,9 +90,8 @@ open class Shell {
     /// - Parameters:
     ///   - arguments: Command arguments.
     ///   - onCompletion: Closure to notify the completion of the task.
-    public func async(_ arguments: [String], standardInput:String? , onCompletion: @escaping (Result<Void, ShellError>) -> Void) {
+    public func async(_ arguments: [String], onCompletion: @escaping (Result<Void, ShellError>) -> Void) {
         self.async(arguments,
-                   standardInput: standardInput,
                    shouldBeTerminatedOnParentExit: true,
                    workingDirectoryPath: nil,
                    env: nil,
@@ -116,12 +113,11 @@ open class Shell {
     /// - Returns: The process that runs the task.
     @discardableResult
     public func async(_ arguments: [String],
-                      standardInput: String?,
                       shouldBeTerminatedOnParentExit: Bool,
-                      workingDirectoryPath: Path?=nil,
-                      env: [String: String]?=nil,
-                      onStdout: ((String) -> Void)?=nil,
-                      onStderr: ((String) -> Void)?=nil,
+                      workingDirectoryPath: Path?,
+                      env: [String: String]?,
+                      onStdout: ((String) -> Void)?,
+                      onStderr: ((String) -> Void)?,
                       onCompletion: @escaping (Result<Void, ShellError>) -> Void) -> Process? {
         let onStdoutData: (Data) -> Void = { data in
             if let onStdout = onStdout, let string = String(data: data, encoding: .utf8) { onStdout(string) }
@@ -133,7 +129,6 @@ open class Shell {
             onCompletion(result.flatMapError { .failure(ShellError(processError: $0)) })
         }
         return self.runner.runAsync(arguments: arguments,
-                                    standardInput: standardInput,
                                     shouldBeTerminatedOnParentExit: shouldBeTerminatedOnParentExit,
                                     workingDirectoryPath: workingDirectoryPath,
                                     env: env,
@@ -146,8 +141,8 @@ open class Shell {
     ///
     /// - Parameter arguments: Command arguments.
     /// - Returns: The result with either the standard output or a shell error.
-    public func capture(_ arguments: [String], standardInput:String?) -> Result<String, ShellError> {
-        return self.capture(arguments, standardInput: standardInput, workingDirectoryPath: nil, env: nil)
+    public func capture(_ arguments: [String]) -> Result<String, ShellError> {
+        return self.capture(arguments, workingDirectoryPath: nil, env: nil)
     }
 
     /// Runs the given command and returns the captured output.
@@ -158,7 +153,6 @@ open class Shell {
     ///   - env: Environment variables to be exposed to the command.
     /// - Returns: The result with either the standard output or a shell error.
     public func capture(_ arguments: [String],
-                        standardInput: String?,
                         workingDirectoryPath: Path?,
                         env: [String: String]?) -> Result<String, ShellError> {
         var output = ""
@@ -176,7 +170,6 @@ open class Shell {
         }
 
         let result = self.runner.runSync(arguments: arguments,
-                                         standardInput: standardInput,
                                          shouldBeTerminatedOnParentExit: true,
                                          workingDirectoryPath: workingDirectoryPath,
                                          env: env,

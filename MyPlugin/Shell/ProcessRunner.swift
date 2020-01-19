@@ -1,5 +1,6 @@
 import Foundation
 
+
 public protocol ProcessRunning {
     /// Runs the process synchronously and returns the result.
     ///
@@ -12,7 +13,6 @@ public protocol ProcessRunning {
     ///   - onStderr: Called when new data is forwarded through the standard error.
     /// - Returns: Task execution result.
     func runSync(arguments: [String],
-                 standardInput:String?,
                  shouldBeTerminatedOnParentExit: Bool,
                  workingDirectoryPath: Path?,
                  env: [String: String]?,
@@ -32,7 +32,6 @@ public protocol ProcessRunning {
     /// - Returns: The process.
     @discardableResult
     func runAsync(arguments: [String],
-                  standardInput:String?,
                   shouldBeTerminatedOnParentExit: Bool,
                   workingDirectoryPath: Path?,
                   env: [String: String]?,
@@ -63,7 +62,6 @@ public final class ProcessRunner: ProcessRunning {
     ///   - onStderr: Called when new data is forwarded through the standard error.
     /// - Returns: Task execution result.
     public func runSync(arguments: [String],
-                        standardInput:String?,
                         shouldBeTerminatedOnParentExit: Bool,
                         workingDirectoryPath: Path?,
                         env: [String: String]? = nil,
@@ -74,7 +72,6 @@ public final class ProcessRunner: ProcessRunning {
                                   attributes: [],
                                   autoreleaseFrequency: .inherit)
         let processResult = self.process(arguments: arguments,
-                                         standardInput: standardInput,
                                          shouldBeTerminatedOnParentExit: shouldBeTerminatedOnParentExit,
                                          workingDirectoryPath: workingDirectoryPath,
                                          env: env,
@@ -111,7 +108,6 @@ public final class ProcessRunner: ProcessRunning {
     /// - Returns: The process.
     @discardableResult
     public func runAsync(arguments: [String],
-                         standardInput:String?,
                          shouldBeTerminatedOnParentExit: Bool,
                          workingDirectoryPath: Path?,
                          env: [String: String]?,
@@ -123,7 +119,6 @@ public final class ProcessRunner: ProcessRunning {
                                   attributes: [],
                                   autoreleaseFrequency: .inherit)
         let processResult = self.process(arguments: arguments,
-                                         standardInput: standardInput,
                                          shouldBeTerminatedOnParentExit: shouldBeTerminatedOnParentExit,
                                          workingDirectoryPath: workingDirectoryPath,
                                          env: env,
@@ -166,7 +161,6 @@ public final class ProcessRunner: ProcessRunning {
     ///   - onStderr: Called when new data is forwarded through the standard error.
     /// - Returns: A result with either the process instance or a process runner error.
     private func process(arguments: [String],
-                         standardInput:String?,
                          shouldBeTerminatedOnParentExit: Bool,
                          workingDirectoryPath: Path?,
                          env: [String: String]?,
@@ -180,7 +174,6 @@ public final class ProcessRunner: ProcessRunning {
         }
 
         let process = Process()
-        //process.standardInput = standardInput
         process.launchPath = launchpath.string
         process.arguments = Array(arguments.dropFirst())
 
@@ -200,14 +193,7 @@ public final class ProcessRunner: ProcessRunning {
         if let env = env {
             process.environment = env
         }
-        if let input = standardInput, let data = input.data(using: .utf8) {
-            let inputPipe = Pipe()
-            process.standardInput = inputPipe
-            let stdinHandle = inputPipe.fileHandleForWriting
-            stdinHandle.write(data)
-            stdinHandle.closeFile()
-        }
-        
+
         // Because FileHandle's readabilityHandler might be called from a
         // different queue from the calling queue, avoid a data race by
         // protecting reads and writes to outputData and errorData on
@@ -249,7 +235,11 @@ public final class ProcessRunner: ProcessRunning {
     /// - Parameter name: Executable to be looked up.
     /// - Returns: Executable path if found.
     private func lookupExecutable(_ name: String) -> Path? {
-        let searchPaths = environment.searchPaths()
-        return environment.lookupExecutable(name: name, in: searchPaths)
+        if let _ = name.range(of: "/") {
+            return Path(name)
+        } else {
+            let searchPaths = environment.searchPaths()
+            return environment.lookupExecutable(name: name, in: searchPaths)
+        }
     }
 }
