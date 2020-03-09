@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE7B0C072415DE8200D16F65 /* ToColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE7B0C062415DE8200D16F65 /* ToColor.swift */; };
 		EF5EF26D23D3E8C30070032C /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26523D3E8C30070032C /* Shell.swift */; };
 		EF5EF26E23D3E8C30070032C /* String+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26623D3E8C30070032C /* String+Extras.swift */; };
 		EF5EF26F23D3E8C30070032C /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26723D3E8C30070032C /* Environment.swift */; };
@@ -96,6 +97,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BE7B0C062415DE8200D16F65 /* ToColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToColor.swift; sourceTree = "<group>"; };
 		EF5EF26523D3E8C30070032C /* Shell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
 		EF5EF26623D3E8C30070032C /* String+Extras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Extras.swift"; sourceTree = "<group>"; };
 		EF5EF26723D3E8C30070032C /* Environment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
@@ -224,6 +226,7 @@
 				EFCC7F062386298500B6407B /* InsertEnter.swift */,
 				EFCC7F092386322900B6407B /* AddImport.swift */,
 				EFCC7F0C238669F100B6407B /* LongCommand.swift */,
+				BE7B0C062415DE8200D16F65 /* ToColor.swift */,
 				EFC9782923852A17006ED781 /* Info.plist */,
 				EFC97851238544D6006ED781 /* Supporting Files */,
 			);
@@ -435,6 +438,7 @@
 				EFCC7EF92386204300B6407B /* Arguments.swift in Sources */,
 				EFC97850238541C3006ED781 /* FormatCode.swift in Sources */,
 				EF5EF27123D3E8C30070032C /* ProcessRunner.swift in Sources */,
+				BE7B0C072415DE8200D16F65 /* ToColor.swift in Sources */,
 				EFC978392385342C006ED781 /* String.swift in Sources */,
 				EFCC7F0E238669F100B6407B /* LongCommand.swift in Sources */,
 				EFCC7EFF2386204300B6407B /* Rules.swift in Sources */,

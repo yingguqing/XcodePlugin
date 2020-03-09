@@ -34,6 +34,14 @@
 			<array>
 				<dict>
 					<key>XCSourceEditorCommandClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).ToColor</string>
+					<key>XCSourceEditorCommandIdentifier</key>
+					<string>yingguqing.ToColor</string>
+					<key>XCSourceEditorCommandName</key>
+					<string>转颜色代码</string>
+				</dict>
+				<dict>
+					<key>XCSourceEditorCommandClassName</key>
 					<string>$(PRODUCT_MODULE_NAME).CopyLine</string>
 					<key>XCSourceEditorCommandIdentifier</key>
 					<string>yingguqing.CopyLineUp</string>
