@@ -8,6 +8,7 @@
 
 import Cocoa
 import XcodeKit
+// xcode自带删除选中行功能
 class DeleteLine : NSObject, XCSourceEditorCommand {
     // MARK: 删除选中行代码
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {

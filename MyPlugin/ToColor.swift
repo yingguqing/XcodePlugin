@@ -21,26 +21,41 @@ class ToColor: NSObject, XCSourceEditorCommand {
         let selectLine = invocation.lines[startLine]
         var nowString = selectLine
         var colorCode = ""
-        if startColumn != endColumn {
+        let inputStart = "<#"
+        let inputEnd = "#>"
+        var selectString = String(selectLine[startColumn..<endColumn])
+        if startColumn != endColumn, !selectString.hasPrefix(inputStart), !selectString.hasSuffix(inputEnd) {
             // 选中内容
-            var selectString = String(selectLine[startColumn..<endColumn])
-            if selectString.count == 6, startColumn > 0 {
+            if selectString.count == 8, startColumn > 11, selectString.hasPrefix("0x") {
+                let tag = "UIColorHex("
+                let temp = String(selectLine[startColumn - tag.count..<startColumn])
+                if temp == tag, let string = NSPasteboard.general.string(forType: .string), !string.isEmpty {
+                    let color = string.color
+                    if !color.isEmpty {
+                        colorCode = "0x\(color)"
+                    }
+                }
+            } else if selectString.count == 6, startColumn > 0 {
                 let temp = String(selectLine[startColumn - 1..<startColumn])
                 if temp == "#" {
                     selectString = "#\(selectString)"
                 }
             }
-            let color = selectString.color
-            guard !color.isEmpty else { return completionHandler(nil) }
-            colorCode = color.ocColorCode
+            if colorCode.isEmpty {
+                let color = selectString.color
+                guard !color.isEmpty else { return completionHandler(nil) }
+                colorCode = color.ocColorCode
+            }
             nowString = selectLine.replacingOccurrences(of: selectString, with: colorCode)
         } else {
             // 剪切板有内容
-            let pasteboard = NSPasteboard.general
-            guard let selectString = pasteboard.string(forType: .string), !selectString.isEmpty else { return completionHandler(nil) }
+            guard let selectString = NSPasteboard.general.string(forType: .string), !selectString.isEmpty else { return completionHandler(nil) }
             let color = selectString.color
             guard !color.isEmpty else { return completionHandler(nil) }
             colorCode = color.ocColorCode
+            if let selectRange = Range(NSRange(location: startColumn, length: endColumn - startColumn), in: nowString) {
+                nowString.removeSubrange(selectRange)
+            }
             let index = nowString.index(nowString.startIndex, offsetBy: startColumn)
             nowString.insert(contentsOf: colorCode, at: index)
         }
@@ -52,6 +67,7 @@ class ToColor: NSObject, XCSourceEditorCommand {
         invocation.buffer.selections.setArray([updatedSelection])
         completionHandler(nil)
     }
+    
 }
 
 private extension String {

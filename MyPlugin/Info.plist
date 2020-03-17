@@ -58,14 +58,6 @@
 				</dict>
 				<dict>
 					<key>XCSourceEditorCommandClassName</key>
-					<string>$(PRODUCT_MODULE_NAME).DeleteLine</string>
-					<key>XCSourceEditorCommandIdentifier</key>
-					<string>yingguqing.DeleteLine</string>
-					<key>XCSourceEditorCommandName</key>
-					<string>删除当前行</string>
-				</dict>
-				<dict>
-					<key>XCSourceEditorCommandClassName</key>
 					<string>$(PRODUCT_MODULE_NAME).CommandLine</string>
 					<key>XCSourceEditorCommandIdentifier</key>
 					<string>yingguqing.Command</string>
