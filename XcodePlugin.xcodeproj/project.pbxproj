@@ -349,7 +349,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1100;
+				LastUpgradeCheck = 1140;
 				ORGANIZATIONNAME = "影孤清";
 				TargetAttributes = {
 					EFC97808238529EE006ED781 = {
@@ -617,6 +617,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = X4G4XZKQ74;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -641,6 +642,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = X4G4XZKQ74;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -664,6 +666,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = X4G4XZKQ74;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -695,6 +698,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = X4G4XZKQ74;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
