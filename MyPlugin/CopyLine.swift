@@ -40,8 +40,8 @@ class CopyLine : NSObject, XCSourceEditorCommand {
         var stringDuel = ""
         let startLine = range.start.line
         var endLine = range.end.line
-        // 如果最后一行是在第0个位置，则减少一行，防止使用像上下移动代码这种功能，会把下一行也复制
-        if (range.start.column > 0 && range.end.column == 0) {
+        // 当选中多行时，如果最后一行是在第0个位置，则减少一行，防止使用像上下移动代码这种功能，会把下一行也复制
+        if (startLine != endLine && range.end.column == 0) {
             endLine -= 1
         }
         guard endLine >= startLine else {

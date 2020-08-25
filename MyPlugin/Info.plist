@@ -22,6 +22,7 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>DVTPlugInCompatibilityUUIDs</key>
 	<array>
+		<string>C80A9C11-3902-4885-944E-A035869BA910</string>
 		<string>2FD51EF8-522D-4532-9698-980C4C497FD1</string>
 	</array>
 	<key>LSMinimumSystemVersion</key>
