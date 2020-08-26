@@ -616,15 +616,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = X4G4XZKQ74;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = Y3Q5R46TH5;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.49.XcodePlugin;
+				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -641,15 +641,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = X4G4XZKQ74;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = Y3Q5R46TH5;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.49.XcodePlugin;
+				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -665,8 +665,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = X4G4XZKQ74;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = Y3Q5R46TH5;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -678,7 +678,7 @@
 					"$(SDKROOT)/usr/lib/swift",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.49.XcodePlugin.MyPlugin;
+				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -697,8 +697,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = X4G4XZKQ74;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = Y3Q5R46TH5;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -710,7 +710,7 @@
 					"$(SDKROOT)/usr/lib/swift",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.49.XcodePlugin.MyPlugin;
+				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
