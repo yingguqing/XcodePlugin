@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		84A30FEE255153580082233F /* XcodeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; };
+		84A30FEF255153580082233F /* XcodeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		BE7B0C072415DE8200D16F65 /* ToColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE7B0C062415DE8200D16F65 /* ToColor.swift */; };
 		EF5EF26D23D3E8C30070032C /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26523D3E8C30070032C /* Shell.swift */; };
 		EF5EF26E23D3E8C30070032C /* String+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26623D3E8C30070032C /* String+Extras.swift */; };
@@ -83,6 +85,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		84A30FF0255153580082233F /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				84A30FEF255153580082233F /* XcodeKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EFC9783123852A17006ED781 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -97,6 +110,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		84A30FED255153580082233F /* XcodeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XcodeKit.framework; path = Library/Frameworks/XcodeKit.framework; sourceTree = DEVELOPER_DIR; };
 		BE7B0C062415DE8200D16F65 /* ToColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToColor.swift; sourceTree = "<group>"; };
 		EF5EF26523D3E8C30070032C /* Shell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
 		EF5EF26623D3E8C30070032C /* String+Extras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Extras.swift"; sourceTree = "<group>"; };
@@ -164,6 +178,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84A30FEE255153580082233F /* XcodeKit.framework in Frameworks */,
 				EF88AF8B238D341900A70AEA /* libswiftCore.tbd in Frameworks */,
 				EFC9782323852A17006ED781 /* Cocoa.framework in Frameworks */,
 			);
@@ -204,6 +219,7 @@
 		EFC9782123852A17006ED781 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				84A30FED255153580082233F /* XcodeKit.framework */,
 				EFB8D67E238D2E8C0081C450 /* libswiftCore.tbd */,
 				EFC9782223852A17006ED781 /* Cocoa.framework */,
 			);
@@ -332,6 +348,7 @@
 				EFC9781C23852A17006ED781 /* Sources */,
 				EFC9781D23852A17006ED781 /* Frameworks */,
 				EFC9781E23852A17006ED781 /* Resources */,
+				84A30FF0255153580082233F /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
