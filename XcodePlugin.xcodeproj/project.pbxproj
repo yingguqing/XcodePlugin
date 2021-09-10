@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		84A30FEE255153580082233F /* XcodeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; };
-		84A30FEF255153580082233F /* XcodeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8465639626784D42007BD521 /* XcodeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; };
+		8465639726784D42007BD521 /* XcodeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		BE7B0C072415DE8200D16F65 /* ToColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE7B0C062415DE8200D16F65 /* ToColor.swift */; };
 		EF5EF26D23D3E8C30070032C /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26523D3E8C30070032C /* Shell.swift */; };
 		EF5EF26E23D3E8C30070032C /* String+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26623D3E8C30070032C /* String+Extras.swift */; };
@@ -85,13 +85,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		84A30FF0255153580082233F /* Embed Frameworks */ = {
+		8465639826784D42007BD521 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				84A30FEF255153580082233F /* XcodeKit.framework in Embed Frameworks */,
+				8465639726784D42007BD521 /* XcodeKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -178,7 +178,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84A30FEE255153580082233F /* XcodeKit.framework in Frameworks */,
+				8465639626784D42007BD521 /* XcodeKit.framework in Frameworks */,
 				EF88AF8B238D341900A70AEA /* libswiftCore.tbd in Frameworks */,
 				EFC9782323852A17006ED781 /* Cocoa.framework in Frameworks */,
 			);
@@ -348,7 +348,7 @@
 				EFC9781C23852A17006ED781 /* Sources */,
 				EFC9781D23852A17006ED781 /* Frameworks */,
 				EFC9781E23852A17006ED781 /* Resources */,
-				84A30FF0255153580082233F /* Embed Frameworks */,
+				8465639826784D42007BD521 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -676,7 +676,6 @@
 		EFC9782F23852A17006ED781 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_ENTITLEMENTS = "MyPlugin/Supporting Files/MyPlugin.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -708,7 +707,6 @@
 		EFC9783023852A17006ED781 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_ENTITLEMENTS = "MyPlugin/Supporting Files/MyPlugin.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
