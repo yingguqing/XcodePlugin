@@ -18,21 +18,13 @@ class InsertEnter : NSObject, XCSourceEditorCommand {
             return
         }
         
-        var direction:LineDirection = .UP
-        if identifier == "yingguqing.UpInsertEnter" {
-            // 向上复制选中代码
-            direction = .UP
-        } else if identifier == "yingguqing.DownInsertEnter" {
-            // 向下复制选中代码
-            direction = .Down
-        }
+        let direction:LineDirection = LineDirection(rawValue: identifier) ?? .UP
         guard let selection = invocation.buffer.selections.firstObject as? XCSourceTextRange, let lines = invocation.buffer.lines as? [String] else {
             completionHandler(CommandError.noSelection)
             return
         }
         var index = 0
-
-        let insertIndex = selection.start.line + direction.rawValue
+        let insertIndex = selection.start.line + direction.row
         var string:String
         if ((insertIndex == 0) || direction != .UP) {
             string = lines[selection.start.line]

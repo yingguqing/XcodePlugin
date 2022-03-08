@@ -37,7 +37,7 @@ extension FormatRule {
     }
 }
 
-extension FormatOptions.Descriptor {
+extension OptionDescriptor {
     // If this extension won't compile have a look at
     // https://stackoverflow.com/questions/35673290/extension-of-a-nested-type-in-swift
     // https://bugs.swift.org/browse/SR-631
@@ -54,18 +54,25 @@ final class RulesViewController: NSViewController {
 
     @IBOutlet var tableView: NSTableView!
     @IBOutlet var inferOptionsButton: NSButton!
+    @IBOutlet var swiftVersionDropDown: NSPopUpButton!
+    @IBOutlet var searchField: NSSearchField!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         inferOptionsButton.state = optionStore.inferOptions ? .on : .off
+        swiftVersionDropDown.removeAllItems()
+        swiftVersionDropDown.addItems(withTitles: ["auto"] + swiftVersions)
+        updateSelectedVersion()
         viewModels = buildRules()
-        NotificationCenter.default.addObserver(self, selector: #selector(didLoadNewConfiguration), name: .applicationDidLoadNewConfiguration, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didLoadNewConfiguration),
+                                               name: .applicationDidLoadNewConfiguration, object: nil)
     }
 
     @objc private func didLoadNewConfiguration(_: Notification) {
         viewModels = buildRules()
         tableView?.reloadData()
         inferOptionsButton?.state = (optionStore.inferOptions ? .on : .off)
+        updateSelectedVersion()
     }
 
     @IBAction private func toggleInferOptions(_ sender: NSButton) {
@@ -74,25 +81,44 @@ final class RulesViewController: NSViewController {
         tableView?.reloadData()
     }
 
+    @IBAction func selectVersion(_ sender: NSPopUpButton) {
+        var formatOptions = optionStore.formatOptions
+        let version = Version(rawValue: sender.selectedItem?.title ?? "0") ?? .undefined
+        formatOptions.swiftVersion = version
+        optionStore.save(formatOptions)
+    }
+
+    private func updateSelectedVersion() {
+        let currentVersion = optionStore.formatOptions.swiftVersion
+        var selectedIndex = 0
+        for (i, versionString) in (["0"] + swiftVersions).enumerated() {
+            if currentVersion >= Version(rawValue: versionString) ?? .undefined {
+                selectedIndex = i
+            }
+        }
+        swiftVersionDropDown.selectItem(at: selectedIndex)
+    }
+
     private func buildRules() -> [UserSelectionType] {
         let optionsByName = Dictionary(uniqueKeysWithValues: optionStore
             .options
             .map { ($0.descriptor.argumentName, $0) })
+        let filterText = searchField.stringValue.trimmingCharacters(in: CharacterSet.alphanumerics.inverted).lowercased()
 
         var results = [UserSelectionType]()
         ruleStore
             .rules
+            .filter { filterText.isEmpty || $0.name.lowercased().contains(filterText) }
             .sorted()
             .forEach { rule in
-                let formatRule = FormatRules.byName[rule.name]!
+                guard let formatRule = FormatRules.byName[rule.name] else { return }
 
                 let associatedOptions = formatRule
                     .options
                     .compactMap { optionName in optionsByName[optionName] }
                     .sorted { $0.descriptor.displayName < $1.descriptor.displayName }
                     .compactMap { option -> UserSelectionType? in
-                        guard !option.isDeprecated,
-                            option.descriptor.argumentName != FormatOptions.Descriptor.indentation.argumentName else {
+                        guard !option.isDeprecated else {
                             return nil
                         }
                         let descriptor = option.descriptor
@@ -130,7 +156,7 @@ final class RulesViewController: NSViewController {
                             )
                             return UserSelectionType.list(list)
 
-                        case .text, .set:
+                        case .text, .int, .set, .array:
                             let freeText = UserSelectionFreeText(
                                 identifier: descriptor.argumentName,
                                 title: descriptor.displayName,
@@ -157,7 +183,7 @@ final class RulesViewController: NSViewController {
                                                 var updatedRule = rule
                                                 updatedRule.isEnabled = $0
                                                 self?.ruleStore.save(updatedRule)
-                })
+                                            })
 
                 results.append(UserSelectionType.binary(d))
                 results.append(contentsOf: associatedOptions)
@@ -168,6 +194,17 @@ final class RulesViewController: NSViewController {
 
     func model(forRow row: Int) -> UserSelectionType {
         return viewModels[row]
+    }
+}
+
+// MARK: - Search Field Delegate
+
+extension RulesViewController: NSSearchFieldDelegate {
+    func controlTextDidChange(_ obj: Notification) {
+        if obj.object as? NSTextField == searchField {
+            viewModels = buildRules()
+            tableView?.reloadData()
+        }
     }
 }
 

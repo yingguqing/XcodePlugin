@@ -7,8 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4DB1DA1327D7678E0031CA5C /* FormattingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */; };
+		4DB1DA1527D767BE0031CA5C /* OptionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */; };
+		4DB1DA1727D768140031CA5C /* SupportedContentUTIs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */; };
+		4DB1DA1927D768DD0031CA5C /* CommandErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1827D768DD0031CA5C /* CommandErrors.swift */; };
+		4DB1DA1B27D769260031CA5C /* XCSourceTextBuffer+SwiftFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1A27D769260031CA5C /* XCSourceTextBuffer+SwiftFormat.swift */; };
+		4DB1DA1C27D7694C0031CA5C /* OptionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */; };
+		4DB1DA1E27D76FC50031CA5C /* RulesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE02386204300B6407B /* RulesStore.swift */; };
+		4DB1DA1F27D770AA0031CA5C /* FormattingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */; };
 		8465639626784D42007BD521 /* XcodeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; };
-		8465639726784D42007BD521 /* XcodeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8465639726784D42007BD521 /* XcodeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		BE7B0C072415DE8200D16F65 /* ToColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE7B0C062415DE8200D16F65 /* ToColor.swift */; };
 		EF5EF26D23D3E8C30070032C /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26523D3E8C30070032C /* Shell.swift */; };
 		EF5EF26E23D3E8C30070032C /* String+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5EF26623D3E8C30070032C /* String+Extras.swift */; };
@@ -42,7 +50,6 @@
 		EFCC7EEF2386204300B6407B /* EnumAssociable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EDE2386204300B6407B /* EnumAssociable.swift */; };
 		EFCC7EF02386204300B6407B /* Inference.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EDF2386204300B6407B /* Inference.swift */; };
 		EFCC7EF12386204300B6407B /* Inference.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EDF2386204300B6407B /* Inference.swift */; };
-		EFCC7EF22386204300B6407B /* RulesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE02386204300B6407B /* RulesStore.swift */; };
 		EFCC7EF32386204300B6407B /* RulesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE02386204300B6407B /* RulesStore.swift */; };
 		EFCC7EF42386204300B6407B /* Examples.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE12386204300B6407B /* Examples.swift */; };
 		EFCC7EF52386204300B6407B /* Examples.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE12386204300B6407B /* Examples.swift */; };
@@ -60,8 +67,6 @@
 		EFCC7F012386204300B6407B /* Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE72386204300B6407B /* Formatter.swift */; };
 		EFCC7F022386204300B6407B /* SwiftFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE82386204300B6407B /* SwiftFormat.swift */; };
 		EFCC7F032386204300B6407B /* SwiftFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE82386204300B6407B /* SwiftFormat.swift */; };
-		EFCC7F042386204300B6407B /* OptionsDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE92386204300B6407B /* OptionsDescriptor.swift */; };
-		EFCC7F052386204300B6407B /* OptionsDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE92386204300B6407B /* OptionsDescriptor.swift */; };
 		EFCC7F082386298500B6407B /* InsertEnter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7F062386298500B6407B /* InsertEnter.swift */; };
 		EFCC7F0B2386322900B6407B /* AddImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7F092386322900B6407B /* AddImport.swift */; };
 		EFCC7F0E238669F100B6407B /* LongCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7F0C238669F100B6407B /* LongCommand.swift */; };
@@ -110,6 +115,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormattingHelpers.swift; sourceTree = "<group>"; };
+		4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionDescriptor.swift; sourceTree = "<group>"; };
+		4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SupportedContentUTIs.swift; sourceTree = "<group>"; };
+		4DB1DA1827D768DD0031CA5C /* CommandErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandErrors.swift; sourceTree = "<group>"; };
+		4DB1DA1A27D769260031CA5C /* XCSourceTextBuffer+SwiftFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCSourceTextBuffer+SwiftFormat.swift"; sourceTree = "<group>"; };
 		84A30FED255153580082233F /* XcodeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XcodeKit.framework; path = Library/Frameworks/XcodeKit.framework; sourceTree = DEVELOPER_DIR; };
 		BE7B0C062415DE8200D16F65 /* ToColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToColor.swift; sourceTree = "<group>"; };
 		EF5EF26523D3E8C30070032C /* Shell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
@@ -154,7 +164,6 @@
 		EFCC7EE62386204300B6407B /* Rules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rules.swift; sourceTree = "<group>"; };
 		EFCC7EE72386204300B6407B /* Formatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Formatter.swift; sourceTree = "<group>"; };
 		EFCC7EE82386204300B6407B /* SwiftFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftFormat.swift; sourceTree = "<group>"; };
-		EFCC7EE92386204300B6407B /* OptionsDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionsDescriptor.swift; sourceTree = "<group>"; };
 		EFCC7F062386298500B6407B /* InsertEnter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertEnter.swift; sourceTree = "<group>"; };
 		EFCC7F092386322900B6407B /* AddImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddImport.swift; sourceTree = "<group>"; };
 		EFCC7F0C238669F100B6407B /* LongCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongCommand.swift; sourceTree = "<group>"; };
@@ -278,20 +287,24 @@
 		EFCC7EDB2386204300B6407B /* SwiftFormat */ = {
 			isa = PBXGroup;
 			children = (
-				EFCC7EDC2386204300B6407B /* OptionsStore.swift */,
-				EFCC7EDD2386204300B6407B /* Options.swift */,
-				EFCC7EDE2386204300B6407B /* EnumAssociable.swift */,
-				EFCC7EDF2386204300B6407B /* Inference.swift */,
-				EFCC7EE02386204300B6407B /* RulesStore.swift */,
-				EFCC7EE12386204300B6407B /* Examples.swift */,
-				EFCC7EE22386204300B6407B /* Globs.swift */,
 				EFCC7EE32386204300B6407B /* Arguments.swift */,
-				EFCC7EE42386204300B6407B /* Tokenizer.swift */,
+				4DB1DA1827D768DD0031CA5C /* CommandErrors.swift */,
+				EFCC7EDE2386204300B6407B /* EnumAssociable.swift */,
+				EFCC7EE12386204300B6407B /* Examples.swift */,
+				EFCC7EE72386204300B6407B /* Formatter.swift */,
+				4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */,
+				EFCC7EE22386204300B6407B /* Globs.swift */,
+				EFCC7EDF2386204300B6407B /* Inference.swift */,
+				4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */,
+				EFCC7EDD2386204300B6407B /* Options.swift */,
+				EFCC7EDC2386204300B6407B /* OptionsStore.swift */,
 				EFCC7EE52386204300B6407B /* ParsingHelpers.swift */,
 				EFCC7EE62386204300B6407B /* Rules.swift */,
-				EFCC7EE72386204300B6407B /* Formatter.swift */,
+				EFCC7EE02386204300B6407B /* RulesStore.swift */,
+				4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */,
 				EFCC7EE82386204300B6407B /* SwiftFormat.swift */,
-				EFCC7EE92386204300B6407B /* OptionsDescriptor.swift */,
+				EFCC7EE42386204300B6407B /* Tokenizer.swift */,
+				4DB1DA1A27D769260031CA5C /* XCSourceTextBuffer+SwiftFormat.swift */,
 			);
 			path = SwiftFormat;
 			sourceTree = "<group>";
@@ -366,7 +379,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1140;
+				LastUpgradeCheck = 1320;
 				ORGANIZATIONNAME = "影孤清";
 				TargetAttributes = {
 					EFC97808238529EE006ED781 = {
@@ -386,7 +399,7 @@
 				Base,
 			);
 			mainGroup = EFC97800238529EE006ED781;
-			productRefGroup = EFC9780A238529EE006ED781 /* Products */;
+			productRefGroup = EFC97800238529EE006ED781;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -428,20 +441,21 @@
 				EFCC7F252386857A00B6407B /* String.swift in Sources */,
 				EFCC7F1B23867FA700B6407B /* ListSelectionTableCellView.swift in Sources */,
 				EFCC7F1C23867FA700B6407B /* UserSelection.swift in Sources */,
+				4DB1DA1E27D76FC50031CA5C /* RulesStore.swift in Sources */,
 				EFCC7EFE2386204300B6407B /* Rules.swift in Sources */,
 				EFCC7EEE2386204300B6407B /* EnumAssociable.swift in Sources */,
 				EFCC7F1A23867FA700B6407B /* RulesViewController.swift in Sources */,
 				EFCC7EEC2386204300B6407B /* Options.swift in Sources */,
+				4DB1DA1F27D770AA0031CA5C /* FormattingHelpers.swift in Sources */,
 				EFCC7EF02386204300B6407B /* Inference.swift in Sources */,
 				EFCC7EFC2386204300B6407B /* ParsingHelpers.swift in Sources */,
 				EFCC7EEA2386204300B6407B /* OptionsStore.swift in Sources */,
 				EFCC7EFA2386204300B6407B /* Tokenizer.swift in Sources */,
+				4DB1DA1C27D7694C0031CA5C /* OptionDescriptor.swift in Sources */,
 				EFCC7F1923867FA700B6407B /* FreeTextTableCellView.swift in Sources */,
 				EFCC7F1D23867FA700B6407B /* BinarySelectionTableCellView.swift in Sources */,
 				EFCC7F022386204300B6407B /* SwiftFormat.swift in Sources */,
 				EFCC7F002386204300B6407B /* Formatter.swift in Sources */,
-				EFCC7EF22386204300B6407B /* RulesStore.swift in Sources */,
-				EFCC7F042386204300B6407B /* OptionsDescriptor.swift in Sources */,
 				EFC9780D238529EE006ED781 /* AppDelegate.swift in Sources */,
 				EFCC7EF62386204300B6407B /* Globs.swift in Sources */,
 			);
@@ -463,17 +477,20 @@
 				EF5EF26E23D3E8C30070032C /* String+Extras.swift in Sources */,
 				EFCC7EF72386204300B6407B /* Globs.swift in Sources */,
 				EF5EF27023D3E8C30070032C /* PathKit.swift in Sources */,
+				4DB1DA1927D768DD0031CA5C /* CommandErrors.swift in Sources */,
 				EFCC7EF52386204300B6407B /* Examples.swift in Sources */,
 				EFCC7F032386204300B6407B /* SwiftFormat.swift in Sources */,
 				EF5EF27323D3E8C30070032C /* ShellError.swift in Sources */,
 				EFCC7EF32386204300B6407B /* RulesStore.swift in Sources */,
 				EFCC7F012386204300B6407B /* Formatter.swift in Sources */,
+				4DB1DA1B27D769260031CA5C /* XCSourceTextBuffer+SwiftFormat.swift in Sources */,
 				EFC9783323852B0D006ED781 /* CopyLine.swift in Sources */,
 				EFC9783D23853B8C006ED781 /* Util.swift in Sources */,
 				EFC9783523852EF1006ED781 /* DeleteLine.swift in Sources */,
+				4DB1DA1327D7678E0031CA5C /* FormattingHelpers.swift in Sources */,
 				EFCC7EEF2386204300B6407B /* EnumAssociable.swift in Sources */,
+				4DB1DA1727D768140031CA5C /* SupportedContentUTIs.swift in Sources */,
 				EF5EF26F23D3E8C30070032C /* Environment.swift in Sources */,
-				EFCC7F052386204300B6407B /* OptionsDescriptor.swift in Sources */,
 				EFCC7EEB2386204300B6407B /* OptionsStore.swift in Sources */,
 				EFCC7EF12386204300B6407B /* Inference.swift in Sources */,
 				EFC9783723853244006ED781 /* Capitalization.swift in Sources */,
@@ -483,6 +500,7 @@
 				EF5EF27423D3E8C30070032C /* ProcessRunnerError.swift in Sources */,
 				EF5EF26D23D3E8C30070032C /* Shell.swift in Sources */,
 				EFCC7EFB2386204300B6407B /* Tokenizer.swift in Sources */,
+				4DB1DA1527D767BE0031CA5C /* OptionDescriptor.swift in Sources */,
 				EFCC7F082386298500B6407B /* InsertEnter.swift in Sources */,
 				EFCC7F0B2386322900B6407B /* AddImport.swift in Sources */,
 			);
@@ -536,6 +554,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -596,6 +615,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -632,15 +652,15 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = Y3Q5R46TH5;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = F35YF899E4;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -657,15 +677,15 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = Y3Q5R46TH5;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = F35YF899E4;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -680,8 +700,8 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = Y3Q5R46TH5;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = F35YF899E4;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -693,7 +713,7 @@
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/swift",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;
@@ -711,8 +731,8 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = Y3Q5R46TH5;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = F35YF899E4;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -724,7 +744,7 @@
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/swift",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;

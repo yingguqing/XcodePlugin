@@ -1,9 +1,9 @@
 //
-//  RuleSelectionTableCellView.swift
-//  SwiftFormat for Xcode
+//  SupportedContentUTIs.swift
+//  Editor Extension
 //
-//  Created by Vincent Bernier on 28/01/18.
-//  Copyright © 2018 Nick Lockwood.
+//  Created by George Cox on 11/22/19.
+//  Copyright © 2019 Nick Lockwood. All rights reserved.
 //
 //  Distributed under the permissive MIT license
 //  Get the latest version from here:
@@ -29,31 +29,11 @@
 //  SOFTWARE.
 //
 
-import Cocoa
+import Foundation
 
-final class BinarySelectionTableCellView: NSTableCellView {
-    @IBOutlet var checkbox: NSButton!
-
-    @IBAction func toggleRuleValue(_ sender: NSButton) {
-        guard let binarySelection = objectValue as? UserSelectionBinary else {
-            return
-        }
-        binarySelection.selection = (sender.state == .on)
-    }
-
-    override var objectValue: Any? {
-        didSet {
-            guard let model = objectValue as? UserSelectionBinary else {
-                return
-            }
-            toolTip = model.description
-            checkbox.isEnabled = model.isEnabled
-            checkbox.title = model.title ?? ""
-            checkbox.state = model.selection ? .on : .off
-        }
-    }
-}
-
-extension NSUserInterfaceItemIdentifier {
-    static let binarySelectionTableCellView = NSUserInterfaceItemIdentifier(rawValue: "BinarySelectionTableCellView")
-}
+let SupportedContentUTIs = [
+    "public.swift-source",
+    "com.apple.dt.playground",
+    "com.apple.dt.playgroundpage",
+    "com.apple.dt.swiftpm-package-manifest",
+]

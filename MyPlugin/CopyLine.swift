@@ -9,39 +9,38 @@
 import Cocoa
 import XcodeKit
 
-enum LineDirection:Int {
-    case UP = 0 // 向上
-    case Down = 1 // 向下
+enum LineDirection: String {
+    case UP = "yingguqing.CopyLineUp" // 向上
+    case Down = "yingguqing.CopyLineDown" // 向下
+    
+    var row: Int {
+        switch self {
+            case .UP:
+                return -1
+            case .Down:
+                return 1
+        }
+    }
 }
 
-//MARK: 向上或向下复制代码
-class CopyLine : NSObject, XCSourceEditorCommand {
-    func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
+// MARK: 向上或向下复制代码
+class CopyLine: NSObject, XCSourceEditorCommand {
+    func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void) {
         let identifier = invocation.commandIdentifier
         guard !identifier.isEmpty else {
             completionHandler(nil)
             return
         }
-        
-        var direction:LineDirection = .UP
-        if identifier == "yingguqing.CopyLineUp" {
-            // 向上复制选中代码
-            direction = .UP
-        } else if identifier == "yingguqing.CopyLineDown" {
-            // 向下复制选中代码
-            direction = .Down
-        }
-        var insertLine = -1
-        
-        guard let range = invocation.selections.first else {
+        guard let range = invocation.selections.first, let direction = LineDirection(rawValue: identifier) else {
             completionHandler(CommandError.noSelection)
             return
         }
+        var insertLine = -1
         var stringDuel = ""
         let startLine = range.start.line
         var endLine = range.end.line
         // 当选中多行时，如果最后一行是在第0个位置，则减少一行，防止使用像上下移动代码这种功能，会把下一行也复制
-        if (startLine != endLine && range.end.column == 0) {
+        if startLine != endLine, range.end.column == 0 {
             endLine -= 1
         }
         guard endLine >= startLine else {
@@ -49,13 +48,13 @@ class CopyLine : NSObject, XCSourceEditorCommand {
             return
         }
         let length = endLine - startLine
-        if (insertLine < 0) {
-            insertLine = direction == .UP ? startLine : endLine + 1;
+        if insertLine < 0 {
+            insertLine = direction == .UP ? startLine : endLine + 1
         } else {
-            insertLine += endLine - startLine + 1;
+            insertLine += endLine - startLine + 1
         }
 
-        for i in startLine...endLine {
+        for i in startLine ... endLine {
             guard let string = invocation.buffer.lines[i] as? String else { continue }
             stringDuel.append(string)
         }
@@ -68,4 +67,3 @@ class CopyLine : NSObject, XCSourceEditorCommand {
         completionHandler(nil)
     }
 }
-

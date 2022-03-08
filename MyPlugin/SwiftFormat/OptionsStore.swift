@@ -33,16 +33,16 @@ import Foundation
 
 struct SavedOption {
     var argumentValue: String
-    let descriptor: FormatOptions.Descriptor
+    let descriptor: OptionDescriptor
 
     var isDeprecated: Bool {
         return descriptor.isDeprecated
     }
 }
 
-extension SavedOption {
-    fileprivate init(_ rep: OptionsStore.OptionRepresentation) throws {
-        guard let descriptor = FormatOptions.Descriptor.byName[rep.id] else {
+private extension SavedOption {
+    init(_ rep: OptionsStore.OptionRepresentation) throws {
+        guard let descriptor = Descriptors.byName[rep.id] else {
             throw FormatError.options("Unknown option \(rep.id)")
         }
         self.descriptor = descriptor
@@ -53,14 +53,14 @@ extension SavedOption {
     }
 }
 
-extension FormatOptions {
-    fileprivate init(_ rep: OptionsStore.OptionStoreRepresentation) throws {
+private extension FormatOptions {
+    init(_ rep: OptionsStore.OptionStoreRepresentation) throws {
         var formatOptions = FormatOptions.default
-        for d in Descriptor.formatting.reversed() {
+        for descriptor in Descriptors.all.reversed() {
             // By loading formatting options in reverse, we ensure that
             // non-deprecated/renamed values will overwrite legacy values
-            if let value = rep[d.argumentName] {
-                try d.toOptions(value, &formatOptions)
+            if let value = rep[descriptor.argumentName] {
+                try descriptor.toOptions(value, &formatOptions)
             }
         }
         self = formatOptions
@@ -95,7 +95,9 @@ struct OptionsStore {
 
     var inferOptions: Bool {
         get { return (store.object(forKey: inferOptionsKey) as? NSNumber)?.boolValue ?? true }
-        nonmutating set { store.set(NSNumber(booleanLiteral: newValue), forKey: inferOptionsKey) }
+        nonmutating set {
+            store.set(NSNumber(booleanLiteral: newValue), forKey: inferOptionsKey)
+        }
     }
 
     var options: [SavedOption] {
@@ -107,12 +109,11 @@ struct OptionsStore {
     }
 
     func save(_ options: [SavedOption]) {
-        let optRepresentations = options.map { (id: $0.descriptor.argumentName, arg: $0.argumentValue) }
-        save(optRepresentations)
+        save(options.map { (id: $0.descriptor.argumentName, arg: $0.argumentValue) })
     }
 
     func save(_ options: FormatOptions) {
-        save(FormatOptions.Descriptor.all.map {
+        save(Descriptors.all.map {
             let value = $0.fromOptions(options)
             return SavedOption(argumentValue: value, descriptor: $0)
         } as [SavedOption])
@@ -132,7 +133,9 @@ struct OptionsStore {
 
     func resetOptionsToDefaults() {
         inferOptions = true
-        let options = FormatOptions.Descriptor.formatting.map { (id: $0.argumentName, arg: $0.defaultArgument) }
+        let options = Descriptors.all.map {
+            (id: $0.argumentName, arg: $0.defaultArgument)
+        }
         clear()
         save(options)
     }
@@ -150,7 +153,7 @@ extension OptionsStore {
     }
 
     private func addNewOptionsIfNeeded() {
-        let allDescriptors = FormatOptions.Descriptor.formatting
+        let allDescriptors = Descriptors.all
         var options = load()
         var idsToRemove = Set(options.keys)
 
@@ -178,7 +181,9 @@ extension OptionsStore {
     }
 
     private func load() -> OptionStoreRepresentation {
-        guard let options = store.value(forKey: optionsKey) as? OptionStoreRepresentation else {
+        guard let options = store
+            .value(forKey: optionsKey) as? OptionStoreRepresentation
+        else {
             return OptionStoreRepresentation()
         }
         return options

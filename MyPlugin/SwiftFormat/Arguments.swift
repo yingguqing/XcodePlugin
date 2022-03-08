@@ -32,20 +32,77 @@
 import Foundation
 
 extension Options {
+    static let maxArgumentNameLength = 16
+
     init(_ args: [String: String], in directory: String) throws {
         fileOptions = try fileOptionsFor(args, in: directory)
         formatOptions = try formatOptionsFor(args)
-        rules = try rulesFor(args)
+        let lint = args.keys.contains("lint")
+        self.lint = lint
+        rules = try rulesFor(args, lint: lint)
     }
 
     mutating func addArguments(_ args: [String: String], in directory: String) throws {
         let oldArguments = argumentsFor(self)
         let newArguments = try mergeArguments(args, into: oldArguments)
         var newOptions = try Options(newArguments, in: directory)
-        if let fileInfo = self.formatOptions?.fileInfo {
+        if let fileInfo = formatOptions?.fileInfo {
             newOptions.formatOptions?.fileInfo = fileInfo
         }
         self = newOptions
+    }
+}
+
+extension String {
+    // Find best match for the string in a list of options
+    func bestMatches(in options: [String]) -> [String] {
+        let lowercaseQuery = lowercased()
+        // Sort matches by Levenshtein edit distance
+        return options
+            .compactMap { option -> (String, distance: Int, commonPrefix: Int)? in
+                let lowercaseOption = option.lowercased()
+                let distance = lowercaseOption.editDistance(from: lowercaseQuery)
+                let commonPrefix = lowercaseOption.commonPrefix(with: lowercaseQuery)
+                if commonPrefix.isEmpty, distance > lowercaseQuery.count / 2 {
+                    return nil
+                }
+                return (option, distance, commonPrefix.count)
+            }
+            .sorted {
+                if $0.distance == $1.distance {
+                    return $0.commonPrefix > $1.commonPrefix
+                }
+                return $0.distance < $1.distance
+            }
+            .map { $0.0 }
+    }
+
+    /// The Damerau-Levenshtein edit-distance between two strings
+    func editDistance(from other: String) -> Int {
+        let lhs = Array(self)
+        let rhs = Array(other)
+        var dist = [[Int]]()
+        for i in stride(from: 0, through: lhs.count, by: 1) {
+            dist.append([i])
+        }
+        for j in stride(from: 1, through: rhs.count, by: 1) {
+            dist[0].append(j)
+        }
+        for i in stride(from: 1, through: lhs.count, by: 1) {
+            for j in stride(from: 1, through: rhs.count, by: 1) {
+                if lhs[i - 1] == rhs[j - 1] {
+                    dist[i].append(dist[i - 1][j - 1])
+                } else {
+                    dist[i].append(Swift.min(dist[i - 1][j] + 1,
+                                             dist[i][j - 1] + 1,
+                                             dist[i - 1][j - 1] + 1))
+                }
+                if i > 1, j > 1, lhs[i - 1] == rhs[j - 2], lhs[i - 2] == rhs[j - 1] {
+                    dist[i][j] = Swift.min(dist[i][j], dist[i - 2][j - 2] + 1)
+                }
+            }
+        }
+        return dist[lhs.count][rhs.count]
     }
 }
 
@@ -99,8 +156,11 @@ func preprocessArguments(_ args: [String], _ names: [String]) throws -> [String:
         if arg.hasPrefix("--") {
             // Long argument names
             let key = String(arg.unicodeScalars.dropFirst(2))
-            if !names.contains(key) {
-                throw FormatError.options("Unknown option --\(key)")
+            guard names.contains(key) else {
+                guard let match = key.bestMatches(in: names).first else {
+                    throw FormatError.options("Unknown option --\(key)")
+                }
+                throw FormatError.options("Unknown option --\(key). Did you mean --\(match)?")
             }
             name = key
             namedArgs[name] = namedArgs[name] ?? ""
@@ -108,15 +168,11 @@ func preprocessArguments(_ args: [String], _ names: [String]) throws -> [String:
         } else if arg.hasPrefix("-") {
             // Short argument names
             let flag = String(arg.unicodeScalars.dropFirst())
-            let matches = names.filter { $0.hasPrefix(flag) }
-            if matches.count > 1 {
-                throw FormatError.options("Ambiguous flag -\(flag)")
-            } else if matches.isEmpty {
+            guard let match = names.first(where: { $0.hasPrefix(flag) }) else {
                 throw FormatError.options("Unknown flag -\(flag)")
-            } else {
-                name = matches[0]
-                namedArgs[name] = namedArgs[name] ?? ""
             }
+            name = match
+            namedArgs[name] = namedArgs[name] ?? ""
             continue
         }
         if name == "" {
@@ -124,17 +180,25 @@ func preprocessArguments(_ args: [String], _ names: [String]) throws -> [String:
             name = String(anonymousArgs)
             anonymousArgs += 1
         }
+        var arg = arg
+        let hasTrailingComma = arg.hasSuffix(",") && arg != ","
+        if hasTrailingComma {
+            arg = String(arg.dropLast())
+        }
         if let existing = namedArgs[name], !existing.isEmpty,
-            // TODO: find a more general way to represent merge-able options
-            ["exclude", "unexclude", "disable", "enable", "rules"].contains(name) ||
-            FormatOptions.Descriptor.all.contains(where: {
-                $0.argumentName == name && $0.isSetType
-            }) {
+           // TODO: find a more general way to represent merge-able options
+           ["exclude", "unexclude", "disable", "enable", "lintonly", "rules"].contains(name) ||
+           Descriptors.all.contains(where: {
+               $0.argumentName == name && $0.isSetType
+           })
+        {
             namedArgs[name] = existing + "," + arg
         } else {
             namedArgs[name] = arg
         }
-        name = ""
+        if !hasTrailingComma {
+            name = ""
+        }
     }
     return namedArgs
 }
@@ -150,14 +214,29 @@ func parseCommaDelimitedList(_ string: String) -> [String] {
 // Parse a comma-delimited string into an array of rules
 let allRules = Set(FormatRules.byName.keys)
 func parseRules(_ rules: String) throws -> [String] {
-    let rules = parseCommaDelimitedList(rules)
-    try rules.first(where: { !allRules.contains($0) }).map {
-        throw FormatError.options("Unknown rule '\($0)'")
+    return try parseCommaDelimitedList(rules).flatMap { proposedName -> [String] in
+        let lowercaseName = proposedName.lowercased()
+        if let name = allRules.first(where: { $0.lowercased() == lowercaseName }) {
+            return [name]
+        } else if lowercaseName == "all" {
+            return FormatRules.all.compactMap { $0.isDeprecated ? nil : $0.name }
+        }
+        if Descriptors.all.contains(where: { $0.argumentName == lowercaseName }) {
+            for rule in FormatRules.all where rule.options.contains(lowercaseName) {
+                throw FormatError.options(
+                    "'\(proposedName)' is not a formatting rule. Did you mean '\(rule.name)'?"
+                )
+            }
+            throw FormatError.options("'\(proposedName)' is not a formatting rule")
+        }
+        guard let match = proposedName.bestMatches(in: Array(allRules)).first else {
+            throw FormatError.options("Unknown rule '\(proposedName)'")
+        }
+        throw FormatError.options("Unknown rule '\(proposedName)'. Did you mean '\(match)'?")
     }
-    return rules
 }
 
-// Parse single file path
+// Parse single file path, disallowing globs or commas
 func parsePath(_ path: String, for argument: String, in directory: String) throws -> URL {
     let expandedPath = expandPath(path, in: directory)
     if !FileManager.default.fileExists(atPath: expandedPath.path) {
@@ -171,11 +250,9 @@ func parsePath(_ path: String, for argument: String, in directory: String) throw
     return expandedPath
 }
 
-// Parse one or more comma-delimited file paths
-func parsePaths(_ paths: String, for argument: String, in directory: String) throws -> [URL] {
-    return try parseCommaDelimitedList(paths).map {
-        try parsePath($0, for: argument, in: directory)
-    }
+// Parse one or more comma-delimited file paths, expanding globs as required
+func parsePaths(_ paths: String, in directory: String) throws -> [URL] {
+    return try matchGlobs(expandGlobs(paths, in: directory), in: directory)
 }
 
 // Merge two dictionaries of arguments
@@ -184,13 +261,15 @@ func mergeArguments(_ args: [String: String], into config: [String: String]) thr
     var output = args
     // Merge excluded urls
     if let exclude = output["exclude"].map(parseCommaDelimitedList),
-        var excluded = input["exclude"].map({ Set(parseCommaDelimitedList($0)) }) {
+       var excluded = input["exclude"].map({ Set(parseCommaDelimitedList($0)) })
+    {
         excluded.formUnion(exclude)
         output["exclude"] = Array(excluded).sorted().joined(separator: ",")
     }
     // Merge unexcluded urls
     if let unexclude = output["unexclude"].map(parseCommaDelimitedList),
-        var unexcluded = input["unexclude"].map({ Set(parseCommaDelimitedList($0)) }) {
+       var unexcluded = input["unexclude"].map({ Set(parseCommaDelimitedList($0)) })
+    {
         unexcluded.formUnion(unexclude)
         output["unexclude"] = Array(unexcluded).sorted().joined(separator: ",")
     }
@@ -202,6 +281,7 @@ func mergeArguments(_ args: [String: String], into config: [String: String]) thr
             input["rules"] = nil
             input["enable"] = nil
             input["disable"] = nil
+            input["lintonly"] = nil
         }
     } else {
         if let _disable = try output["disable"].map(parseRules) {
@@ -211,18 +291,30 @@ func mergeArguments(_ args: [String: String], into config: [String: String]) thr
             if let enable = try input["enable"].map(parseRules) {
                 input["enable"] = Set(enable).subtracting(_disable).sorted().joined(separator: ",")
             }
+            if let lintonly = try input["lintonly"].map(parseRules) {
+                input["lintonly"] = Set(lintonly).subtracting(_disable).sorted().joined(separator: ",")
+            }
             if let disable = try input["disable"].map(parseRules) {
                 input["disable"] = Set(disable).union(_disable).sorted().joined(separator: ",")
                 output["disable"] = nil
             }
         }
-        if let _enable = try args["enable"].map(parseRules) {
+        if let _enable = try output["enable"].map(parseRules) {
             if let enable = try input["enable"].map(parseRules) {
                 input["enable"] = Set(enable).union(_enable).sorted().joined(separator: ",")
                 output["enable"] = nil
             }
+            if let lintonly = try input["lintonly"].map(parseRules) {
+                input["lintonly"] = Set(lintonly).subtracting(_enable).sorted().joined(separator: ",")
+            }
             if let disable = try input["disable"].map(parseRules) {
                 input["disable"] = Set(disable).subtracting(_enable).sorted().joined(separator: ",")
+            }
+        }
+        if let _lintonly = try output["lintonly"].map(parseRules) {
+            if let lintonly = try input["lintonly"].map(parseRules) {
+                input["lintonly"] = Set(lintonly).union(_lintonly).sorted().joined(separator: ",")
+                output["lintonly"] = nil
             }
         }
     }
@@ -232,7 +324,7 @@ func mergeArguments(_ args: [String: String], into config: [String: String]) thr
             output[key] = inValue
             continue
         }
-        if FormatOptions.Descriptor.all.contains(where: { $0.argumentName == key && $0.isSetType }) {
+        if Descriptors.all.contains(where: { $0.argumentName == key && $0.isSetType }) {
             let inOptions = parseCommaDelimitedList(inValue)
             let outOptions = parseCommaDelimitedList(outValue)
             output[key] = Set(inOptions).union(outOptions).sorted().joined(separator: ",")
@@ -242,11 +334,11 @@ func mergeArguments(_ args: [String: String], into config: [String: String]) thr
 }
 
 // Parse a configuration file into a dictionary of arguments
-func parseConfigFile(_ data: Data) throws -> [String: String] {
+public func parseConfigFile(_ data: Data) throws -> [String: String] {
     guard let input = String(data: data, encoding: .utf8) else {
         throw FormatError.reading("Unable to read data for configuration file")
     }
-    let lines = input.components(separatedBy: .newlines)
+    let lines = try cumulate(successiveLines: input.components(separatedBy: .newlines))
     let arguments = try lines.flatMap { line -> [String] in
         // TODO: parseArguments isn't a perfect fit here - should we use a different approach?
         let line = line.replacingOccurrences(of: "\\n", with: "\n")
@@ -268,29 +360,68 @@ func parseConfigFile(_ data: Data) throws -> [String: String] {
     }
 }
 
+private func cumulate(successiveLines: [String]) throws -> [String] {
+    var cumulatedLines = [String]()
+    var iterator = successiveLines.makeIterator()
+    while let currentLine = iterator.next() {
+        var cumulatedLine = effectiveContent(of: currentLine)
+        while cumulatedLine.hasSuffix("\\") {
+            guard let nextLine = iterator.next() else {
+                throw FormatError.reading("Configuration file ends with an illegal line continuation character '\'")
+            }
+            if !nextLine.trimmingCharacters(in: .whitespaces).starts(with: "#") {
+                cumulatedLine = cumulatedLine.dropLast() + effectiveContent(of: nextLine)
+            }
+        }
+        cumulatedLines.append(String(cumulatedLine))
+    }
+    return cumulatedLines
+}
+
+private func effectiveContent(of line: String) -> String {
+    return line
+        .prefix { $0 != "#" }
+        .trimmingCharacters(in: .whitespaces)
+}
+
 // Serialize a set of options into either an arguments string or a file
 func serialize(options: Options,
+               swiftVersion: Version = .undefined,
                excludingDefaults: Bool = false,
-               separator: String = "\n") -> String {
-    var optionSets = [Options]()
+               separator: String = "\n") -> String
+{
+    var arguments = [[String: String]]()
     if let fileOptions = options.fileOptions {
-        optionSets.append(Options(fileOptions: fileOptions))
+        arguments.append(argumentsFor(
+            Options(fileOptions: fileOptions),
+            excludingDefaults: excludingDefaults
+        ))
     }
     if let formatOptions = options.formatOptions {
-        optionSets.append(Options(formatOptions: formatOptions))
+        arguments.append(argumentsFor(
+            Options(formatOptions: formatOptions),
+            excludingDefaults: excludingDefaults
+        ))
+    } else if swiftVersion != .undefined {
+        let descriptor = Descriptors.swiftVersion
+        arguments.append([descriptor.argumentName: swiftVersion.rawValue])
     }
     if let rules = options.rules {
-        optionSets.append(Options(rules: rules))
+        arguments.append(argumentsFor(
+            Options(rules: rules),
+            excludingDefaults: excludingDefaults
+        ))
     }
-    return optionSets.map {
-        let arguments = argumentsFor($0, excludingDefaults: excludingDefaults)
-        return serialize(arguments: arguments, separator: separator)
-    }.filter { !$0.isEmpty }.joined(separator: separator)
+    return arguments
+        .map { serialize(arguments: $0, separator: separator) }
+        .filter { !$0.isEmpty }
+        .joined(separator: separator)
 }
 
 // Serialize arguments
 func serialize(arguments: [String: String],
-               separator: String = "\n") -> String {
+               separator: String = "\n") -> String
+{
     return arguments.map {
         var value = $1
         if value.contains(" ") {
@@ -300,7 +431,7 @@ func serialize(arguments: [String: String],
     }.sorted().joined(separator: separator)
 }
 
-// Get command line arguments from options (excludes deprecated/renamed options)
+// Get command line arguments from options
 func argumentsFor(_ options: Options, excludingDefaults: Bool = false) -> [String: String] {
     var args = [String: String]()
     if let fileOptions = options.fileOptions {
@@ -325,21 +456,34 @@ func argumentsFor(_ options: Options, excludingDefaults: Bool = false) -> [Strin
             }
             arguments.remove("unexclude")
         }
+        do {
+            if !excludingDefaults || fileOptions.minVersion != FileOptions.default.minVersion {
+                args["minversion"] = fileOptions.minVersion.description
+            }
+            arguments.remove("minversion")
+        }
         assert(arguments.isEmpty)
     }
     if let formatOptions = options.formatOptions {
-        for descriptor in FormatOptions.Descriptor.all where !descriptor.isDeprecated {
+        for descriptor in Descriptors.all where !descriptor.isRenamed {
             let value = descriptor.fromOptions(formatOptions)
-            if !excludingDefaults || value != descriptor.fromOptions(.default) {
-                // Special case for swiftVersion
-                // TODO: find a better solution for this
-                if descriptor.argumentName == FormatOptions.Descriptor.swiftVersion.argumentName,
-                    value == Version.undefined.rawValue {
-                    continue
-                }
-                args[descriptor.argumentName] = value
+            guard value != descriptor.fromOptions(.default) ||
+                (!excludingDefaults && !descriptor.isDeprecated)
+            else {
+                continue
             }
+            // Special case for swiftVersion
+            // TODO: find a better solution for this
+            if descriptor.argumentName == Descriptors.swiftVersion.argumentName,
+               value == Version.undefined.rawValue
+            {
+                continue
+            }
+            args[descriptor.argumentName] = value
         }
+    }
+    if options.lint {
+        args["lint"] = ""
     }
     if let rules = options.rules {
         let defaultRules = allRules.subtracting(FormatRules.disabledByDefault)
@@ -360,8 +504,9 @@ func argumentsFor(_ options: Options, excludingDefaults: Bool = false) -> [Strin
 private func processOption(_ key: String,
                            in args: [String: String],
                            from: inout Set<String>,
-                           handler: (String) throws -> Void) throws {
-    precondition(optionsArguments.contains(key))
+                           handler: (String) throws -> Void) throws
+{
+    precondition(optionsArguments.contains(key), "\(key) not in optionsArguments")
     var arguments = from
     arguments.remove(key)
     from = arguments
@@ -374,21 +519,34 @@ private func processOption(_ key: String,
         guard !value.isEmpty else {
             throw FormatError.options("--\(key) option expects a value")
         }
+        if case var FormatError.options(string) = error, !string.isEmpty {
+            if !string.contains(key) {
+                string += " in --\(key)"
+            }
+            throw FormatError.options(string)
+        }
         throw FormatError.options("Unsupported --\(key) value '\(value)'")
     }
 }
 
 // Parse rule names from arguments
-func rulesFor(_ args: [String: String]) throws -> Set<String> {
+public func rulesFor(_ args: [String: String], lint: Bool) throws -> Set<String> {
     var rules = allRules
     rules = try args["rules"].map {
         try Set(parseRules($0))
     } ?? rules.subtracting(FormatRules.disabledByDefault)
+    try args["disable"].map {
+        try rules.subtract(parseRules($0))
+    }
     try args["enable"].map {
         try rules.formUnion(parseRules($0))
     }
-    try args["disable"].map {
-        try rules.subtract(parseRules($0))
+    try args["lintonly"].map { rulesString in
+        if lint {
+            try rules.formUnion(parseRules(rulesString))
+        } else {
+            try rules.subtract(parseRules(rulesString))
+        }
     }
     return rules
 }
@@ -418,18 +576,28 @@ func fileOptionsFor(_ args: [String: String], in directory: String) throws -> Fi
         containsFileOption = true
         options.unexcludedGlobs += expandGlobs($0, in: directory)
     }
+    try processOption("minversion", in: args, from: &arguments) {
+        containsFileOption = true
+        guard let minVersion = Version(rawValue: $0) else {
+            throw FormatError.options("Unsupported --minversion value '\($0)'")
+        }
+        guard minVersion <= Version(stringLiteral: swiftFormatVersion) else {
+            throw FormatError.options("Project specifies SwiftFormat --minversion of \(minVersion)")
+        }
+        options.minVersion = minVersion
+    }
     assert(arguments.isEmpty, "\(arguments.joined(separator: ","))")
     return containsFileOption ? options : nil
 }
 
 // Parse FormatOptions from arguments
 // Returns nil if the arguments dictionary does not contain any formatting arguments
-func formatOptionsFor(_ args: [String: String]) throws -> FormatOptions? {
+public func formatOptionsFor(_ args: [String: String]) throws -> FormatOptions? {
     var options = FormatOptions.default
     var arguments = Set(formattingArguments)
 
     var containsFormatOption = false
-    for option in FormatOptions.Descriptor.all {
+    for option in Descriptors.all {
         try processOption(option.argumentName, in: args, from: &arguments) {
             containsFormatOption = true
             try option.toOptions($0, &options)
@@ -442,9 +610,28 @@ func formatOptionsFor(_ args: [String: String]) throws -> FormatOptions? {
 // Get deprecation warnings from a set of arguments
 func warningsForArguments(_ args: [String: String]) -> [String] {
     var warnings = [String]()
-    for option in FormatOptions.Descriptor.all {
+    for option in Descriptors.all {
         if args[option.argumentName] != nil, let message = option.deprecationMessage {
-            warnings.append(message)
+            warnings.append("--\(option.argumentName) option is deprecated. \(message)")
+        }
+    }
+    for name in Set(rulesArguments.flatMap { (try? args[$0].map(parseRules) ?? []) ?? [] }) {
+        if let message = FormatRules.byName[name]?.deprecationMessage {
+            warnings.append("\(name) rule is deprecated. \(message)")
+        }
+    }
+    if let rules = try? rulesFor(args, lint: true) {
+        for arg in args.keys where formattingArguments.contains(arg) {
+            if !rules.contains(where: {
+                guard let rule = FormatRules.byName[$0] else {
+                    return false
+                }
+                return rule.options.contains(arg) || rule.sharedOptions.contains(arg)
+            }), let expected = FormatRules.all.first(where: {
+                $0.options.contains(arg)
+            })?.name {
+                warnings.append("--\(arg) option has no effect when \(expected) rule is disabled")
+            }
         }
     }
     return warnings
@@ -454,28 +641,35 @@ let fileArguments = [
     "symlinks",
     "exclude",
     "unexclude",
+    "minversion",
 ]
 
 let rulesArguments = [
     "disable",
     "enable",
+    "lintonly",
     "rules",
 ]
 
-let formattingArguments = FormatOptions.Descriptor.formatting.map { $0.argumentName }
-let internalArguments = FormatOptions.Descriptor.internal.map { $0.argumentName }
+let formattingArguments = Descriptors.formatting.map { $0.argumentName }
+let internalArguments = Descriptors.internal.map { $0.argumentName }
 let optionsArguments = fileArguments + rulesArguments + formattingArguments + internalArguments
 
 let commandLineArguments = [
     // Input options
+    "filelist",
+    "stdinpath",
     "config",
     "inferoptions",
+    "linerange",
     "output",
     "cache",
-    "verbose",
-    "quiet",
     "dryrun",
     "lint",
+    "lenient",
+    "verbose",
+    "quiet",
+    "report",
     // Misc
     "help",
     "version",
@@ -483,6 +677,6 @@ let commandLineArguments = [
     "ruleinfo",
 ] + optionsArguments
 
-let deprecatedArguments = FormatOptions.Descriptor.all.compactMap {
+let deprecatedArguments = Descriptors.all.compactMap {
     $0.isDeprecated ? $0.argumentName : nil
 }

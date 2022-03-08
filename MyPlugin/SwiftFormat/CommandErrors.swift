@@ -1,11 +1,11 @@
 //
-//  EnumAssociable.swift
-//  SwiftFormat
+//  CommandErrors.swift
+//  Swift Formatter
 //
-//  Created by Vincent Bernier on 13-02-18.
-//  Copyright © 2018 Nick Lockwood.
+//  Created by Tony Arnold on 6/10/16.
+//  Copyright 2016 Nick Lockwood
 //
-//  Distributed under the permissive MIT license
+//  Distributed under the permissive MIY license
 //  Get the latest version from here:
 //
 //  https://github.com/nicklockwood/SwiftFormat
@@ -31,37 +31,36 @@
 
 import Foundation
 
-protocol EnumAssociable {}
+enum FormatCommandError: Error, LocalizedError, CustomNSError {
+    case notSwiftLanguage
+    case noSelection
+    case invalidSelection
+    case lintWarnings([Formatter.Change])
 
-extension EnumAssociable {
-    private var _associatedValue: Any? {
-        let mirror = Mirror(reflecting: self)
-        precondition(mirror.displayStyle == Mirror.DisplayStyle.enum, "Can only be apply to an Enum")
-        let optionalValue = mirror.children.first?.value
-        if let value = optionalValue {
-            let description = "\(value)"
-            precondition(!description.contains("->") && !description.contains("(Function)"),
-                         "Doesn't work when associated value is a closure")
+    var localizedDescription: String {
+        switch self {
+        case .notSwiftLanguage:
+            return "Error: not a Swift source file."
+        case .noSelection:
+            return "Error: no text selected."
+        case .invalidSelection:
+            return "Error: invalid selection."
+        case let .lintWarnings(changes):
+            let change = changes.first!
+            let rule = change.rule
+            let message = "Warning: \(rule.name) violation on line \(change.line). \(rule.help)"
+            switch changes.count - 1 {
+            case 0:
+                return message
+            case 1:
+                return "\(message) (+ 1 other warning)"
+            case let n:
+                return "\(message) (+ \(n) other warnings)"
+            }
         }
-        return optionalValue
     }
 
-    func associatedValue<T: _Optional>() -> T {
-        guard let value = _associatedValue else {
-            return T._none
-        }
-        return value as! T
+    var errorUserInfo: [String: Any] {
+        return [NSLocalizedDescriptionKey: localizedDescription]
     }
-
-    func associatedValue<T>() -> T {
-        return _associatedValue as! T
-    }
-}
-
-protocol _Optional {
-    static var _none: Self { get }
-}
-
-extension Optional: _Optional {
-    static var _none: Optional { return none }
 }

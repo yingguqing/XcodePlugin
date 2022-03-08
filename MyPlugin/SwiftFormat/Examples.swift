@@ -10,7 +10,7 @@ import Foundation
 
 extension FormatRule {
     var examples: String? {
-        return name.flatMap { examplesByRuleName[$0] }
+        return examplesByRuleName[name]
     }
 }
 
@@ -118,6 +118,19 @@ private struct Examples {
         bar,
         baz,
       ]
+    ```
+    """
+
+    let blankLinesBetweenImports = """
+    ```diff
+      import A
+    -
+      import B
+      import C
+    -
+    -
+      @testable import D
+      import E
     ```
     """
 
@@ -284,6 +297,22 @@ private struct Examples {
     ```
     """
 
+    let wrapConditionalBodies = """
+    ```diff
+    - guard let foo = bar else { return baz }
+    + guard let foo = bar else {
+    +     return baz
+    + }
+    ```
+
+    ```diff
+    - if foo { return bar }
+    + if foo {
+    +    return bar
+    + }
+    ```
+    """
+
     let hoistPatternLet = """
     ```diff
     - (let foo, let bar) = baz()
@@ -361,6 +390,15 @@ private struct Examples {
     `--enable isEmpty` option.
     """
 
+    let initCoderUnavailable = """
+    ```diff
+    + @available(*, unavailable)
+      required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+      }
+    ```
+    """
+
     let numberFormatting = """
     ```diff
     - let color = 0xFF77A5
@@ -370,18 +408,6 @@ private struct Examples {
     ```diff
     - let big = 123456.123
     + let big = 123_456.123
-    ```
-    """
-
-    let ranges = """
-    ```diff
-    - for i in 0..<5 {}
-    + for i in 0 ..< 5 {}
-    ```
-
-    ```diff
-    - if (0...5).contains(i) {}
-    + if (0 ... 5).contains(i) {}
     ```
     """
 
@@ -498,7 +524,7 @@ private struct Examples {
 
     ```diff
     - @IBAction @objc func goBack() {}
-    + @IBOutlet func goBack() {}
+    + @IBAction func goBack() {}
     ```
 
     ```diff
@@ -778,15 +804,38 @@ private struct Examples {
     ```
     """
 
-    let specifiers = """
+    let redundantType = """
+    ```diff
+    // inferred
+    - let view: UIView = UIView()
+    + let view = UIView()
+
+    // explicit
+    - let view: UIView = UIView()
+    + let view: UIView = .init()
+
+    // infer-locals-only
+      class Foo {
+    -     let view: UIView = UIView()
+    +     let view: UIView = .init()
+
+          func method() {
+    -         let view: UIView = UIView()
+    +         let view = UIView()
+          }
+      }
+    ```
+    """
+
+    let modifierOrder = """
     ```diff
     - lazy public weak private(set) var foo: UIView?
     + public private(set) lazy weak var foo: UIView?
     ```
 
     ```diff
-    - override public final func foo()
-    + public final override func foo()
+    - final public override func foo()
+    + override public final func foo()
     ```
 
     ```diff
@@ -802,7 +851,7 @@ private struct Examples {
     ```
 
     **NOTE:** assignment to un-escaped `self` is only supported in Swift 4.2 and
-    above, so the `strongifiedSelf` rule is disabled unless the swift version is
+    above, so the `strongifiedSelf` rule is disabled unless the Swift version is
     set to 4.2 or above.
     """
 
@@ -905,6 +954,34 @@ private struct Examples {
     ```
     """
 
+    let wrapEnumCases = """
+    ```diff
+      enum Foo {
+    -   case bar, baz
+      }
+
+      enum Foo {
+    +   case bar
+    +   case baz
+      }
+    ```
+    """
+
+    let wrapSwitchCases = """
+    ```diff
+      switch foo {
+    -   case .bar, .baz:
+          break
+      }
+
+      switch foo {
+    +   case .foo,
+    +        .bar:
+          break
+      }
+    ```
+    """
+
     let void = """
     ```diff
     - let foo: () -> ()
@@ -925,24 +1002,56 @@ private struct Examples {
     - func quux() -> (Void)
     + func quux() -> Void
     ```
+
+    ```diff
+    - callback = { _ in Void() }
+    + callback = { _ in () }
+    ```
     """
 
     let wrapArguments = """
+    **NOTE:** For backwards compatibility with previous versions, if no value is
+    provided for `--wrapparameters`, the value for `--wraparguments` will be used.
+
+    `--wraparguments before-first`
+
     ```diff
-    - func foo(bar: Int,
-    -          baz: String) {
+    - foo(bar: Int,
+    -     baz: String)
+
+    + foo(
+    +   bar: Int,
+    +   baz: String
+    + )
+    ```
+
+    ```diff
+    - class Foo<Bar,
+    -           Baz>
+
+    + class Foo<
+    +   Bar,
+    +   Baz
+    + >
+    ```
+
+    `--wrapparameters after-first`
+
+    ```diff
+    - func foo(
+    -   bar: Int,
+    -   baz: String
+    - ) {
         ...
       }
 
-    + func foo(
-    +   bar: Int,
-    +   baz: String
-    + ) {
+    + func foo(bar: Int,
+    +          baz: String) {
         ...
       }
     ```
 
-    Or for `--wrapcollections before-first`:
+    `--wrapcollections before-first`:
 
     ```diff
     - let foo = [bar,
@@ -957,6 +1066,62 @@ private struct Examples {
     ```
     """
 
+    let wrapMultilineStatementBraces = """
+    ```diff
+      if foo,
+    -   bar {
+        // ...
+      }
+
+      if foo,
+    +   bar
+    + {
+        // ...
+      }
+    ```
+
+    ```diff
+      guard foo,
+    -   bar else {
+        // ...
+      }
+
+      guard foo,
+    +   bar else
+    + {
+        // ...
+      }
+    ```
+
+    ```diff
+      func foo(
+        bar: Int,
+    -   baz: Int) {
+        // ...
+      }
+
+      func foo(
+        bar: Int,
+    +   baz: Int)
+    + {
+        // ...
+      }
+    ```
+
+    ```diff
+      class Foo: NSObject,
+    -   BarProtocol {
+        // ...
+      }
+
+      class Foo: NSObject,
+    +   BarProtocol
+    + {
+        // ...
+      }
+    ```
+    """
+
     let leadingDelimiters = """
     ```diff
     - guard let foo = maybeFoo // first
@@ -964,6 +1129,257 @@ private struct Examples {
 
     + guard let foo = maybeFoo, // first
     +      let bar = maybeBar else { ... }
+    ```
+    """
+
+    let wrapAttributes = """
+    `--funcattributes prev-line`
+
+    ```diff
+    - @objc func foo() {}
+
+    + @objc
+    + func foo() { }
+    ```
+
+    `--funcattributes same-line`
+
+    ```diff
+    - @objc
+    - func foo() { }
+
+    + @objc func foo() {}
+    ```
+
+    `--typeattributes prev-line`
+
+    ```diff
+    - @objc class Foo {}
+
+    + @objc
+    + class Foo { }
+    ```
+
+    `--typeattributes same-line`
+
+    ```diff
+    - @objc
+    - enum Foo { }
+
+    + @objc enum Foo {}
+    ```
+    """
+
+    let preferKeyPath = """
+    ```diff
+    - let barArray = fooArray.map { $0.bar }
+    + let barArray = fooArray.map(\\.bar)
+
+    - let barArray = fooArray.compactMap { $0.optionalBar }
+    + let barArray = fooArray.compactMap(\\.optionalBar)
+    ```
+    """
+
+    let organizeDeclarations = """
+    ```diff
+      public class Foo {
+    -     public func c() -> String {}
+    -
+    -     public let a: Int = 1
+    -     private let g: Int = 2
+    -     let e: Int = 2
+    -     public let b: Int = 3
+    -
+    -     public func d() {}
+    -     func f() {}
+    -     init() {}
+    -     deinit() {}
+     }
+
+      public class Foo {
+    +
+    +     // MARK: Lifecycle
+    +
+    +     init() {}
+    +     deinit() {}
+    +
+    +     // MARK: Public
+    +
+    +     public let a: Int = 1
+    +     public let b: Int = 3
+    +
+    +     public func c() -> String {}
+    +     public func d() {}
+    +
+    +     // MARK: Internal
+    +
+    +     let e: Int = 2
+    +
+    +     func f() {}
+    +
+    +     // MARK: Private
+    +
+    +     private let g: Int = 2
+    +
+     }
+    ```
+    """
+
+    let extensionAccessControl = """
+    `--extensionacl on-extension` (default)
+
+    ```diff
+    - extension Foo {
+    -     public func bar() {}
+    -     public func baz() {}
+      }
+
+    + public extension Foo {
+    +     func bar() {}
+    +     func baz() {}
+      }
+    ```
+
+    `--extensionacl on-declarations`
+
+    ```diff
+    - public extension Foo {
+    -     func bar() {}
+    -     func baz() {}
+    -     internal func quux() {}
+      }
+
+    + extension Foo {
+    +     public func bar() {}
+    +     public func baz() {}
+    +     func quux() {}
+      }
+    ```
+    """
+
+    let markTypes = """
+    ```diff
+    + // MARK: - FooViewController
+    +
+     final class FooViewController: UIViewController { }
+
+    + // MARK: UICollectionViewDelegate
+    +
+     extension FooViewController: UICollectionViewDelegate { }
+
+    + // MARK: - String + FooProtocol
+    +
+     extension String: FooProtocol { }
+    ```
+    """
+
+    let assertionFailures = """
+    ```diff
+    - assert(false)
+    + assertionFailure()
+    ```
+
+    ```diff
+    - assert(false, "message", 2, 1)
+    + assertionFailure("message", 2, 1)
+    ```
+
+    ```diff
+    - precondition(false, "message", 2, 1)
+    + preconditionFailure("message", 2, 1)
+    ```
+    """
+
+    let acronyms = """
+    ```diff
+    - let destinationUrl: URL
+    - let urlRouter: UrlRouter
+    - let screenId: String
+    - let entityUuid: UUID
+
+    + let destinationURL: URL
+    + let urlRouter: URLRouter
+    + let screenID: String
+    + let entityUUID: UUID
+    ```
+    """
+
+    let blockComments = """
+    ```diff
+    - /*
+    -  * foo
+    -  * bar
+    -  */
+
+    + // foo
+    + // bar
+    ```
+
+    ```diff
+    - /**
+    -  * foo
+    -  * bar
+    -  */
+
+    + /// foo
+    + /// bar
+    ```
+    """
+
+    let redundantClosure = """
+    ```diff
+    - let foo = { Foo() }()
+    + let foo = Foo()
+    ```
+
+    ```diff
+    - lazy var bar = {
+    -     Bar(baaz: baaz,
+    -         quux: quux)
+    - }()
+    + lazy var bar = Bar(baaz: baaz,
+    +                    quux: quux)
+    ```
+    """
+
+    let sortDeclarations = """
+    ```diff
+      // swiftformat:sort
+      enum FeatureFlags {
+    -     case upsellB
+    -     case fooFeature
+    -     case barFeature
+    -     case upsellA(
+    -         fooConfiguration: Foo,
+    -         barConfiguration: Bar)
+    +     case barFeature
+    +     case fooFeature
+    +     case upsellA
+    +         fooConfiguration: Foo,
+    +         barConfiguration: Bar)
+    +     case upsellB
+      }
+
+      enum FeatureFlags {
+          // swiftformat:sort:begin
+    -     case upsellB
+    -     case fooFeature
+    -     case barFeature
+    -     case upsellA(
+    -         fooConfiguration: Foo,
+    -         barConfiguration: Bar)
+    +     case barFeature
+    +     case fooFeature
+    +     case upsellA
+    +         fooConfiguration: Foo,
+    +         barConfiguration: Bar)
+    +     case upsellB
+          // swiftformat:sort:end
+
+          var anUnsortedProperty: Foo {
+              Foo()
+          }
+      }
     ```
     """
 }

@@ -25,33 +25,52 @@ class FormatCode : NSObject, XCSourceEditorCommand {
     }
     
     private func formatSwift(_ invocation: XCSourceEditorCommandInvocation) throws {
-        // Grab the selected source to format
-        let sourceToFormat = invocation.buffer.completeBuffer
-        let tokens = tokenize(sourceToFormat)
+        guard SupportedContentUTIs.contains(invocation.buffer.contentUTI) else {
+            throw FormatCommandError.notSwiftLanguage
+        }
 
-        let store = OptionsStore()
-        var formatOptions = store.inferOptions ? inferFormatOptions(from: tokens) : store.formatOptions
-        formatOptions.indent = indentationString(for: invocation.buffer)
+        // Grab the file source to format
+        let sourceToFormat = invocation.buffer.completeBuffer
+        let input = tokenize(sourceToFormat)
+
+        // Get rules
         let rules = FormatRules.named(RulesStore().rules.compactMap { $0.isEnabled ? $0.name : nil })
-        let output = try format(tokens, rules: rules, options: formatOptions)
-        if output == tokens {
+
+        // Get options
+        let store = OptionsStore()
+        var formatOptions = store.inferOptions ? inferFormatOptions(from: input) : store.formatOptions
+        formatOptions.indent = invocation.buffer.indentationString
+        formatOptions.tabWidth = invocation.buffer.tabWidth
+        formatOptions.swiftVersion = store.formatOptions.swiftVersion
+        if formatOptions.requiresFileInfo {
+            formatOptions.fileHeader = .ignore
+        }
+
+        let output: [Token]
+        do {
+            output = try format(input, rules: rules, options: formatOptions)
+        } catch {
+            throw error
+        }
+        if output == input {
             // No changes needed
             return
         }
-        
+
         // Remove all selections to avoid a crash when changing the contents of the buffer.
+        let selections = invocation.buffer.selections.compactMap { $0 as? XCSourceTextRange }
         invocation.buffer.selections.removeAllObjects()
-        
+
         // Update buffer
         invocation.buffer.completeBuffer = sourceCode(for: output)
-        
-        // For the time being, set the selection back to the last character of the buffer
-        guard let lastLine = invocation.buffer.lines.lastObject as? String else {
-            throw CommandError.invalidSelection
+
+        // Restore selections
+        for selection in selections {
+            invocation.buffer.selections.add(XCSourceTextRange(
+                start: invocation.buffer.newPosition(for: selection.start, in: output),
+                end: invocation.buffer.newPosition(for: selection.end, in: output)
+            ))
         }
-        let position = XCSourceTextPosition(line: invocation.buffer.lines.count - 1, column: lastLine.count)
-        let updatedSelectionRange = XCSourceTextRange(start: position, end: position)
-        invocation.buffer.selections.add(updatedSelectionRange)
     }
     
     //MARK: 格式化OC代码

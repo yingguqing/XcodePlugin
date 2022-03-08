@@ -32,7 +32,7 @@
 import Foundation
 
 extension UserDefaults {
-    static let groupDomain = "com.yingguqing.xcode.plugin"
+    static let groupDomain = "com.charcoaldesign.SwiftFormat"
 
     func clearAll(in domainName: String) {
         persistentDomain(forName: domainName)?.forEach {
@@ -47,6 +47,10 @@ struct Rule {
 }
 
 extension Rule: Comparable {
+    var isDeprecated: Bool {
+        return FormatRules.byName[name]?.isDeprecated == true
+    }
+
     static func < (lhs: Rule, rhs: Rule) -> Bool {
         if lhs.name == rhs.name {
             return lhs.isEnabled
@@ -54,21 +58,13 @@ extension Rule: Comparable {
 
         return lhs.name < rhs.name
     }
-
-    static func == (lhs: Rule, rhs: Rule) -> Bool {
-        return
-            lhs.name == rhs.name &&
-            lhs.isEnabled == rhs.isEnabled
-    }
 }
 
-extension Rule {
-    fileprivate init(_ ruleRep: (String, Bool)) {
+private extension Rule {
+    init(_ ruleRep: (String, Bool)) {
         self.init(name: ruleRep.0, isEnabled: ruleRep.1)
     }
 }
-
-// MARK: dddd
 
 struct RulesStore {
     private typealias RuleName = String
@@ -90,7 +86,9 @@ struct RulesStore {
     }
 
     var rules: [Rule] {
-        return load().map { Rule($0) }
+        return load()
+            .map { Rule($0) }
+            .filter { !$0.isDeprecated }
     }
 
     func save(_ rule: Rule) {
