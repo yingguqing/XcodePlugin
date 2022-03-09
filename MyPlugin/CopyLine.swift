@@ -9,18 +9,9 @@
 import Cocoa
 import XcodeKit
 
-enum LineDirection: String {
-    case UP = "yingguqing.CopyLineUp" // 向上
-    case Down = "yingguqing.CopyLineDown" // 向下
-    
-    var row: Int {
-        switch self {
-            case .UP:
-                return -1
-            case .Down:
-                return 1
-        }
-    }
+enum LineDirection:Int {
+    case UP = 0 // 向上
+    case Down = 1 // 向下
 }
 
 // MARK: 向上或向下复制代码
@@ -31,11 +22,20 @@ class CopyLine: NSObject, XCSourceEditorCommand {
             completionHandler(nil)
             return
         }
-        guard let range = invocation.selections.first, let direction = LineDirection(rawValue: identifier) else {
+        var direction:LineDirection = .UP
+        if identifier == "yingguqing.CopyLineUp" {
+            // 向上复制选中代码
+            direction = .UP
+        } else if identifier == "yingguqing.CopyLineDown" {
+            // 向下复制选中代码
+            direction = .Down
+        }
+        var insertLine = -1
+        
+        guard let range = invocation.selections.first else {
             completionHandler(CommandError.noSelection)
             return
         }
-        var insertLine = -1
         var stringDuel = ""
         let startLine = range.start.line
         var endLine = range.end.line

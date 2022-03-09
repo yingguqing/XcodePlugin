@@ -34,7 +34,6 @@
 		EFC9782623852A17006ED781 /* SourceEditorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9782523852A17006ED781 /* SourceEditorExtension.swift */; };
 		EFC9782D23852A17006ED781 /* XCodePlugin.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = EFC9782023852A17006ED781 /* XCodePlugin.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EFC9783323852B0D006ED781 /* CopyLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9783223852B0D006ED781 /* CopyLine.swift */; };
-		EFC9783523852EF1006ED781 /* DeleteLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9783423852EF1006ED781 /* DeleteLine.swift */; };
 		EFC9783723853244006ED781 /* Capitalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9783623853244006ED781 /* Capitalization.swift */; };
 		EFC978392385342C006ED781 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC978382385342C006ED781 /* String.swift */; };
 		EFC9783B23853806006ED781 /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9783A23853806006ED781 /* CommandLine.swift */; };
@@ -143,7 +142,6 @@
 		EFC9782923852A17006ED781 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EFC9782A23852A17006ED781 /* MyPlugin.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MyPlugin.entitlements; sourceTree = "<group>"; };
 		EFC9783223852B0D006ED781 /* CopyLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyLine.swift; sourceTree = "<group>"; };
-		EFC9783423852EF1006ED781 /* DeleteLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteLine.swift; sourceTree = "<group>"; };
 		EFC9783623853244006ED781 /* Capitalization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capitalization.swift; sourceTree = "<group>"; };
 		EFC978382385342C006ED781 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		EFC9783A23853806006ED781 /* CommandLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLine.swift; sourceTree = "<group>"; };
@@ -244,7 +242,6 @@
 				EFC9783C23853B8C006ED781 /* Util.swift */,
 				EFC978382385342C006ED781 /* String.swift */,
 				EFC9783223852B0D006ED781 /* CopyLine.swift */,
-				EFC9783423852EF1006ED781 /* DeleteLine.swift */,
 				EFC9783623853244006ED781 /* Capitalization.swift */,
 				EFC9783A23853806006ED781 /* CommandLine.swift */,
 				EFC9784F238541C3006ED781 /* FormatCode.swift */,
@@ -486,7 +483,6 @@
 				4DB1DA1B27D769260031CA5C /* XCSourceTextBuffer+SwiftFormat.swift in Sources */,
 				EFC9783323852B0D006ED781 /* CopyLine.swift in Sources */,
 				EFC9783D23853B8C006ED781 /* Util.swift in Sources */,
-				EFC9783523852EF1006ED781 /* DeleteLine.swift in Sources */,
 				4DB1DA1327D7678E0031CA5C /* FormattingHelpers.swift in Sources */,
 				EFCC7EEF2386204300B6407B /* EnumAssociable.swift in Sources */,
 				4DB1DA1727D768140031CA5C /* SupportedContentUTIs.swift in Sources */,
@@ -652,7 +648,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 130;
 				DEVELOPMENT_TEAM = F35YF899E4;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
@@ -660,7 +656,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -677,7 +673,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 130;
 				DEVELOPMENT_TEAM = F35YF899E4;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
@@ -685,7 +681,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
