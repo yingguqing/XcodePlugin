@@ -12,11 +12,11 @@
                 <application id="hnw-xV-0zn" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
                         <items>
-                            <menuItem title="SwiftFormat for Xcode" id="1Xt-HY-uBw">
+                            <menuItem title="XcodePlugin" id="1Xt-HY-uBw">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="SwiftFormat for Xcode" systemMenu="apple" id="uQy-DD-JDr">
+                                <menu key="submenu" title="XcodePlugin" systemMenu="apple" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About SwiftFormat for Xcode" id="5kV-Vb-QxS">
+                                        <menuItem title="About XcodePlugin" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
@@ -30,7 +30,7 @@
                                             <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                                        <menuItem title="Hide SwiftFormat for Xcode" keyEquivalent="h" id="Olw-nP-bQN">
+                                        <menuItem title="Hide XcodePlugin" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
                                                 <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
                                             </connections>
@@ -48,7 +48,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Quit SwiftFormat for Xcode" keyEquivalent="q" id="4sb-4s-VLi">
+                                        <menuItem title="Quit XcodePlugin" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
                                             </connections>
@@ -342,7 +342,7 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                                     <items>
-                                        <menuItem title="SwiftFormat for Xcode Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                                        <menuItem title="XcodePlugin Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                             <connections>
                                                 <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
                                             </connections>
@@ -365,7 +365,7 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController showSeguePresentationStyle="single" id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="SwiftFormat" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" animationBehavior="default" id="IQv-IB-iLA">
+                    <window key="window" title="Xcode插件" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <rect key="contentRect" x="196" y="240" width="385" height="494"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
@@ -418,19 +418,19 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="nbi-V0-Yhx">
-                                <rect key="frame" x="0.0" y="599" width="498" height="5"/>
+                                <rect key="frame" x="0.0" y="603" width="498" height="5"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="60n-IV-nQQ"/>
                                 </constraints>
                             </box>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="33" horizontalPageScroll="10" verticalLineScroll="33" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="Uqs-UE-NGi">
-                                <rect key="frame" x="0.0" y="0.0" width="498" height="563"/>
+                                <rect key="frame" x="0.0" y="0.0" width="498" height="567"/>
                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="ipD-ZJ-LHs">
-                                    <rect key="frame" x="0.0" y="0.0" width="498" height="563"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="498" height="567"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="30" rowSizeStyle="automatic" usesAutomaticRowHeights="YES" viewBased="YES" id="kgM-yn-gmw">
-                                            <rect key="frame" x="0.0" y="0.0" width="498" height="563"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="498" height="567"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="3" height="3"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -574,7 +574,7 @@
                                 </scroller>
                             </scrollView>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hAp-QY-YoH">
-                                <rect key="frame" x="6" y="600" width="190" height="42"/>
+                                <rect key="frame" x="6" y="604" width="190" height="42"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="fRy-5T-mGs"/>
                                 </constraints>
@@ -584,7 +584,7 @@
                                 </buttonCell>
                             </button>
                             <popUpButton horizontalHuggingPriority="500" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1oR-O3-T0n">
-                                <rect key="frame" x="416" y="607" width="78" height="25"/>
+                                <rect key="frame" x="416" y="611" width="78" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="O7Z-yB-e0K" id="JeR-ob-g3w">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
@@ -598,7 +598,7 @@
                                 </popUpButtonCell>
                             </popUpButton>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Dxq-Qs-8c9">
-                                <rect key="frame" x="335" y="613" width="82" height="16"/>
+                                <rect key="frame" x="335" y="617" width="82" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Swift version" id="KsH-Kb-2ow">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -606,7 +606,7 @@
                                 </textFieldCell>
                             </textField>
                             <searchField wantsLayer="YES" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wc9-0u-Pp5">
-                                <rect key="frame" x="8" y="571" width="482" height="22"/>
+                                <rect key="frame" x="8" y="575" width="482" height="22"/>
                                 <searchFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" borderStyle="bezel" usesSingleLineMode="YES" bezelStyle="round" id="5Y1-0Q-gE7">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -655,11 +655,11 @@
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <viewController title="快捷键" showSeguePresentationStyle="single" id="XfG-lQ-9wD" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="phg-oS-QGL">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="688"/>
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="640"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CZR-qh-4rK">
-                                <rect key="frame" x="18" y="652" width="414" height="16"/>
+                                <rect key="frame" x="18" y="604" width="414" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Xcode插件是什么?" id="Jye-eL-EAS">
                                     <font key="font" metaFont="systemBold"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -667,7 +667,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="gVi-Ow-BF1">
-                                <rect key="frame" x="18" y="612" width="414" height="32"/>
+                                <rect key="frame" x="18" y="564" width="414" height="32"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Xcode插件是Xcoe的一个扩展插件，能为开发提供一些特定的功能，如格式化代码，删除所选行等。" id="Dgb-ee-FoF">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -675,7 +675,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="cEx-YX-ujl">
-                                <rect key="frame" x="18" y="580" width="414" height="16"/>
+                                <rect key="frame" x="18" y="532" width="414" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="怎么安装?" id="csf-1y-Qf7">
                                     <font key="font" metaFont="systemBold"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -683,7 +683,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="Yl0-6s-2af">
-                                <rect key="frame" x="18" y="492" width="414" height="80"/>
+                                <rect key="frame" x="18" y="444" width="414" height="80"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="2aq-kN-Stu">
                                     <font key="font" metaFont="system"/>
                                     <string key="title">1. 打开系统设置
@@ -696,7 +696,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Mlm-55-Gn4">
-                                <rect key="frame" x="18" y="460" width="414" height="16"/>
+                                <rect key="frame" x="18" y="412" width="414" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="在Xcode里使用本插件" id="Bqz-w6-WkJ">
                                     <font key="font" metaFont="systemBold"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -704,7 +704,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="dNG-aI-Yci">
-                                <rect key="frame" x="18" y="420" width="414" height="32"/>
+                                <rect key="frame" x="18" y="372" width="414" height="32"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="使用Xcode打开代码文件 — 点击 &quot;Editor&quot; , 在&quot;Xcode插件&quot;里可以看到插件提供的功能" allowsEditingTextAttributes="YES" id="ctb-sf-Ndd">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -712,7 +712,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="AQR-mh-PCV">
-                                <rect key="frame" x="18" y="392" width="414" height="16"/>
+                                <rect key="frame" x="18" y="344" width="414" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••向上/向下 复制" id="f0Q-ZF-A9D">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -720,7 +720,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="17Y-R7-EZB">
-                                <rect key="frame" x="18" y="372" width="414" height="16"/>
+                                <rect key="frame" x="18" y="324" width="414" height="16"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="  将选中行的代码复制到选中行的上面/下面" id="i6H-TZ-zhM">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -728,7 +728,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2mL-qq-vfc">
-                                <rect key="frame" x="18" y="344" width="83" height="16"/>
+                                <rect key="frame" x="18" y="296" width="83" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••//注释代码" id="E6q-XU-ZGf">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -736,7 +736,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="kT9-aF-Tvz">
-                                <rect key="frame" x="18" y="324" width="414" height="16"/>
+                                <rect key="frame" x="18" y="276" width="414" height="16"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="使用//注释代码，系统的注释都是在最开始" id="yes-JB-Tx3">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -744,7 +744,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="P6m-QP-S8F">
-                                <rect key="frame" x="18" y="296" width="83" height="16"/>
+                                <rect key="frame" x="18" y="248" width="83" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••格式化代码" id="feB-J3-b09">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -752,7 +752,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ghg-5m-d0R">
-                                <rect key="frame" x="18" y="248" width="117" height="16"/>
+                                <rect key="frame" x="18" y="200" width="117" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••上/下一行回车" id="aPN-88-JO7">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -760,7 +760,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="Moj-na-LuP">
-                                <rect key="frame" x="18" y="228" width="414" height="16"/>
+                                <rect key="frame" x="18" y="180" width="414" height="16"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="快捷添加一个回车，不用光标处在尾部" id="eGI-X6-vwy">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -768,7 +768,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="Ym8-6Y-Hyw">
-                                <rect key="frame" x="18" y="276" width="414" height="16"/>
+                                <rect key="frame" x="18" y="228" width="414" height="16"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="格式化当前代码，会自动识别OC和Swift" id="Jn2-k0-Toh">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -776,7 +776,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ctk-IA-fF9">
-                                <rect key="frame" x="18" y="200" width="117" height="16"/>
+                                <rect key="frame" x="18" y="152" width="117" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••导入头文件" id="mXf-rC-iiN">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -784,7 +784,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="ehm-lm-LiG">
-                                <rect key="frame" x="18" y="164" width="414" height="32"/>
+                                <rect key="frame" x="18" y="116" width="414" height="32"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="可以在代码任意地方快捷导入头文件，如果有选中文本，自动将选中文件作为头文件名" id="tv9-Ar-NaJ">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -792,7 +792,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Y1G-cy-Ziy">
-                                <rect key="frame" x="18" y="136" width="117" height="16"/>
+                                <rect key="frame" x="18" y="88" width="117" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••先中内容大/小写" id="5eX-ri-fQS">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -800,7 +800,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="nT6-r9-Pmm">
-                                <rect key="frame" x="18" y="116" width="414" height="16"/>
+                                <rect key="frame" x="18" y="68" width="414" height="16"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="将选中的内容进行大/小写转换" id="GPk-u2-pke">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -808,7 +808,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dTZ-gj-dh1">
-                                <rect key="frame" x="18" y="88" width="117" height="16"/>
+                                <rect key="frame" x="18" y="40" width="117" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••/**/注释" id="QjP-dz-Nbh">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -816,7 +816,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="QQs-s2-h8Q">
-                                <rect key="frame" x="18" y="68" width="414" height="16"/>
+                                <rect key="frame" x="18" y="20" width="414" height="16"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="自动添加/删除选中代码里的/**/，删除时，/**/必须是开始和结束" id="lgP-ch-cLS">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -888,7 +888,7 @@
                     </view>
                 </viewController>
             </objects>
-            <point key="canvasLocation" x="532" y="1573.5"/>
+            <point key="canvasLocation" x="532" y="1549"/>
         </scene>
     </scenes>
 </document>
