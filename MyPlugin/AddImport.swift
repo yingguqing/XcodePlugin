@@ -9,21 +9,19 @@
 import Cocoa
 import XcodeKit
 
-//MARK: 导入头文件
-class AddImport : NSObject, XCSourceEditorCommand {
-    
-    func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
+// MARK: 导入头文件
+class AddImport: NSObject, XCSourceEditorCommand {
+    func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void) {
         do {
             try invocation.addImport()
             completionHandler(nil)
-        } catch let error {
+        } catch {
             completionHandler(error)
         }
     }
 }
 
-fileprivate struct AddImportOperationConstants {
-    
+private enum AddImportOperationConstants {
     /// Import matchers
     static let objcImport = "#\\s*(import|include).*[\",<].*[\",>]"
     static let objcModuleImport = "@(import).*."
@@ -42,8 +40,7 @@ fileprivate struct AddImportOperationConstants {
     static let objcClassForwardDeclarationRegex = try! NSRegularExpression(pattern: AddImportOperationConstants.objcClassForwardDeclaration, options: [])
 }
 
-fileprivate extension XCSourceEditorCommandInvocation {
-    
+private extension XCSourceEditorCommandInvocation {
     func addImport() throws {
         guard let selection = self.selections.first else { throw CommandError.noSelection }
         let selectionLine = selection.start.line
@@ -51,12 +48,12 @@ fileprivate extension XCSourceEditorCommandInvocation {
         if !isValid(importString: importString) {
             var start = 0
             var selectString = "<#header#>"
-            if (selection.start.line == selection.end.line && selection.start.column != selection.end.column) {
+            if selection.start.line == selection.end.line, selection.start.column != selection.end.column {
                 // 有选中内容
                 let string = self.lines[selectionLine]
-                selectString = string[selection.start.column..<selection.end.column]
+                selectString = string[selection.start.column ..< selection.end.column]
             }
-            if self.buffer.isSwiftSource {
+            if language == .Swift {
                 self.buffer.lines.insert("import \(selectString)", at: selectionLine)
                 start = 7
             } else {
@@ -80,8 +77,8 @@ fileprivate extension XCSourceEditorCommandInvocation {
                 doubleImportAlert.messageText = AddImportOperationConstants.doubleImportWarningString
                 doubleImportAlert.addButton(withTitle: AddImportOperationConstants.cancelRemoveImportButtonString)
                 // We're creating a "fake" view so that the text doesn't wrap on two lines
-                let fakeRect: NSRect = NSRect.init(x: 0, y: 0, width: 307, height: 0)
-                let fakeView = NSView.init(frame: fakeRect)
+                let fakeRect: NSRect = .init(x: 0, y: 0, width: 307, height: 0)
+                let fakeView = NSView(frame: fakeRect)
                 doubleImportAlert.accessoryView = fakeView
                 NSSound.beep()
                 let frontmostApplication = NSWorkspace.shared.frontmostApplication
@@ -89,7 +86,7 @@ fileprivate extension XCSourceEditorCommandInvocation {
                 appWindow.makeKeyAndOrderFront(appWindow)
                 NSApp.activate(ignoringOtherApps: true)
                 let response = doubleImportAlert.runModal()
-                if (response == NSApplication.ModalResponse.alertFirstButtonReturn) {
+                if response == NSApplication.ModalResponse.alertFirstButtonReturn {
                     let currentPosition = XCSourceTextPosition(line: selectionLine, column: 0)
                     let updatedSelection = XCSourceTextRange(start: currentPosition, end: currentPosition)
                     self.buffer.lines.removeObject(at: lineToRemove)
@@ -104,7 +101,7 @@ fileprivate extension XCSourceEditorCommandInvocation {
         self.buffer.lines.removeObject(at: selectionLine)
         self.buffer.lines.insert(importString, at: line)
         
-        //add a new selection. Bug fix for #7
+        // add a new selection. Bug fix for #7
         let currentPosition = XCSourceTextPosition(line: selectionLine, column: 0)
         let updatedSelection = XCSourceTextRange(start: currentPosition, end: currentPosition)
         self.buffer.selections.setArray([updatedSelection])
@@ -112,13 +109,12 @@ fileprivate extension XCSourceEditorCommandInvocation {
     
     func isValid(importString: String) -> Bool {
         var numberOfMatches = 0
-        let matchingOptions : NSRegularExpression.MatchingOptions = []
+        let matchingOptions: NSRegularExpression.MatchingOptions = []
         let range = NSMakeRange(0, importString.count)
         
-        if buffer.isSwiftSource {
+        if language == .Swift {
             numberOfMatches = AddImportOperationConstants.swiftModuleImportRegex.numberOfMatches(in: importString, options: matchingOptions, range: range)
-        }
-        else {
+        } else {
             numberOfMatches = AddImportOperationConstants.importRegex.numberOfMatches(in: importString, options: matchingOptions, range: range)
             numberOfMatches = numberOfMatches > 0 ? numberOfMatches : AddImportOperationConstants.moduleImportRegex.numberOfMatches(in: importString, options: matchingOptions, range: range)
             numberOfMatches = numberOfMatches > 0 ? numberOfMatches : AddImportOperationConstants.objcClassForwardDeclarationRegex.numberOfMatches(in: importString, options: matchingOptions, range: range)
@@ -131,7 +127,7 @@ fileprivate extension XCSourceEditorCommandInvocation {
         var lineNumber = NSNotFound
         let lines = buffer.lines as NSArray as! [String]
         
-        //Find the line that is first after all the imports
+        // Find the line that is first after all the imports
         for (index, line) in lines.enumerated() {
             if index == ignoringLine {
                 continue
@@ -146,7 +142,7 @@ fileprivate extension XCSourceEditorCommandInvocation {
             return lineNumber + 1
         }
         
-        //if a line is not found, find first free line after comments
+        // if a line is not found, find first free line after comments
         for (index, line) in lines.enumerated() {
             if index == ignoringLine {
                 continue
@@ -162,9 +158,7 @@ fileprivate extension XCSourceEditorCommandInvocation {
     }
 }
 
-
-fileprivate extension XCSourceTextBuffer {
-
+private extension XCSourceTextBuffer {
     /// Checks if the import string isn't already contained in the import list
     ///
     /// - Parameters:
@@ -172,18 +166,15 @@ fileprivate extension XCSourceTextBuffer {
     ///   - atLine: The line where the import should be done. This is to check from lines 0 to atLine
     /// - Returns: true if the statement isn't already included, false if it is
     func canIncludeImportString(_ importString: String, atLine: Int) -> Bool {
-        
         let importBufferArray = self.lines.subarray(with: NSMakeRange(0, atLine)) as NSArray as! [String]
         
         return importBufferArray.contains(importString) == false
     }
 }
 
-fileprivate extension String {
-    
+private extension String {
     func isWhitespaceOrNewline() -> Bool {
         let string = self.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         return string.count == 0
-        
     }
 }

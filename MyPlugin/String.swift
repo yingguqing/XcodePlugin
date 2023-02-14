@@ -52,6 +52,7 @@ extension String {
     //MARK: 获取前面的空格
     var frontSpace:String {
         guard !self.isEmpty else { return "" }
+        
         var newString = self
         var result = ""
         while newString.count > 0 {
@@ -60,6 +61,9 @@ extension String {
             result.append(" ")
         }
         return result
+        
+        //let regex = Regex(#"^\s+"#)
+        //return regex.matches(in: self).first?.string ?? ""
     }
     
     func appending(pathComponent: String) -> String {

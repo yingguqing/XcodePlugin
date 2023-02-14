@@ -9,6 +9,17 @@
 import Cocoa
 import XcodeKit
 
+private extension Language {
+    var header:String {
+        switch self {
+            case .UnKnow, .Swift, .ObjectC:
+                return "//"
+            case .Ruby:
+                return "#"
+        }
+    }
+}
+
 //MARK: 使用// 注释代码
 class CommandLine : NSObject, XCSourceEditorCommand {
     
@@ -18,6 +29,8 @@ class CommandLine : NSObject, XCSourceEditorCommand {
     
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
         let selections = invocation.selections
+        // 根据文本语言来添加注释头
+        let header = invocation.language.header
         guard !selections.isEmpty else {
             completionHandler(CommandError.noSelection)
             return
@@ -33,12 +46,12 @@ class CommandLine : NSObject, XCSourceEditorCommand {
                 let line = string.deleteFirstSpace
                 
                 // 去掉了顶头的所有空格
-                if !line.hasPrefix("//") {
+                if !line.hasPrefix(header) {
                     type = .Add
                     break
                 }
             }
-
+            
             for lineIndex in startLine...endLine {
                 let line = invocation.lines[lineIndex]
                 guard !line.deleteFirstSpace.isEmpty else { continue }
@@ -52,16 +65,23 @@ class CommandLine : NSObject, XCSourceEditorCommand {
                             break
                         }
                     }
-                    stringNew.insert(contentsOf: "//", at: index)
-                    range.start = XCSourceTextPosition(line: range.start.line, column: range.start.column + 2)
-                    range.end = XCSourceTextPosition(line: range.start.line, column: range.start.column + 2)
-                } else {
+                    stringNew.insert(contentsOf: header, at: index)
+                } else if let range = stringNew.range(of: header) {
                     //删除注释
-                    if let range = stringNew.range(of: "//") {
-                        stringNew.replaceSubrange(range, with: "")
-                    }
+                    stringNew.replaceSubrange(range, with: "")
+                } else {
+                    continue
                 }
                 invocation.buffer.lines.replaceObject(at: lineIndex, with: stringNew)
+                if startLine == endLine {
+                    if type == .Add {
+                        range.start = XCSourceTextPosition(line: range.start.line, column: range.start.column + 2)
+                        range.end = XCSourceTextPosition(line: range.start.line, column: range.start.column + 2)
+                    } else {
+                        range.start = XCSourceTextPosition(line: range.start.line, column: range.start.column - 2)
+                        range.end = XCSourceTextPosition(line: range.start.line, column: range.start.column - 2)
+                    }
+                }
             }
         }
         completionHandler(nil)

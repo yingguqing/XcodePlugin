@@ -12,7 +12,7 @@ import XcodeKit
 class FormatCode : NSObject, XCSourceEditorCommand {
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
         do {
-            if invocation.buffer.isSwiftSource {
+            if invocation.language == .Swift {
                 try formatSwift(invocation)
             } else {
                 try formatOC(invocation)
@@ -170,80 +170,3 @@ class FormatCode : NSObject, XCSourceEditorCommand {
     }
 }
 
-fileprivate extension String {
-
-    //MARK: 调用uncrustify格式化OC代码
-    func format() throws -> [String] {
-        var result = [String]()
-        
-        var formatString = ""
-        if let commandPath = Bundle.main.path(forResource: "uncrustify", ofType: nil), let cfgPath = Bundle.main.path(forResource: "uncrustify.cfg", ofType: nil) {
-            let semaphore = DispatchSemaphore(value: 0)
-            let command = ["-c=\(cfgPath)", "-l=OC", "-q"]
-            let process = Process()
-            process.launchPath = commandPath
-            process.arguments = command
-
-            let selector = Selector(("setStartsNewProcessGroup:"))
-            if process.responds(to: selector) {
-                process.perform(selector, with: false as NSNumber)
-            }
-
-            if let data = self.data(using: .utf8) {
-                let inputPipe = Pipe()
-                process.standardInput = inputPipe
-                let stdinHandle = inputPipe.fileHandleForWriting
-                stdinHandle.write(data)
-                stdinHandle.closeFile()
-            }
-            let queue = DispatchQueue(label: "io.tuist.shell", qos: .default, attributes: [], autoreleaseFrequency: .inherit)
-            // Because FileHandle's readabilityHandler might be called from a
-            // different queue from the calling queue, avoid a data race by
-            // protecting reads and writes to outputData and errorData on
-            // a single dispatch queue.
-            let outputPipe = Pipe()
-            var error = ""
-            process.standardOutput = outputPipe
-            outputPipe.fileHandleForReading.readabilityHandler = { handler in
-                queue.async {
-                    let data = handler.availableData
-                    if data.count > 0, let string = String(data: data, encoding: .utf8) {
-                        formatString.append(string)
-                    }
-                }
-            }
-
-            let errorPipe = Pipe()
-            process.standardError = errorPipe
-            errorPipe.fileHandleForReading.readabilityHandler = { handler in
-                queue.async {
-                    let data = handler.availableData
-                    if data.count > 0, let string = String(data: data, encoding: .utf8) {
-                        error.append(string)
-                    }
-                }
-            }
-
-            process.terminationHandler = { _ in
-                queue.async {
-                    (process.standardOutput! as! Pipe).fileHandleForReading.readabilityHandler = nil
-                    (process.standardError! as! Pipe).fileHandleForReading.readabilityHandler = nil
-                }
-            }
-            process.launch()
-            process.waitUntilExit()
-            queue.sync {
-                if process.terminationStatus != 0 {
-                    print("失败：\(process.terminationReason)--\(error)")
-                }
-                semaphore.signal()
-            }
-            semaphore.wait()
-        }
-        
-        formatString.enumerateLines { (line, _) in
-            result.append(line)
-        }
-        return result
-    }
-}

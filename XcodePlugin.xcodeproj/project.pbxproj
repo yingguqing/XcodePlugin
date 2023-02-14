@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4D3B8E97299B899A001C7A88 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3B8E96299B899A001C7A88 /* Regex.swift */; };
 		4DB1DA1327D7678E0031CA5C /* FormattingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */; };
 		4DB1DA1527D767BE0031CA5C /* OptionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */; };
 		4DB1DA1727D768140031CA5C /* SupportedContentUTIs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */; };
@@ -32,7 +33,7 @@
 		EFC97814238529F1006ED781 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EFC97812238529F1006ED781 /* Main.storyboard */; };
 		EFC9782323852A17006ED781 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EFC9782223852A17006ED781 /* Cocoa.framework */; };
 		EFC9782623852A17006ED781 /* SourceEditorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9782523852A17006ED781 /* SourceEditorExtension.swift */; };
-		EFC9782D23852A17006ED781 /* XCodePlugin.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = EFC9782023852A17006ED781 /* XCodePlugin.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EFC9782D23852A17006ED781 /* XCodePlugin.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EFC9782023852A17006ED781 /* XCodePlugin.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EFC9783323852B0D006ED781 /* CopyLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9783223852B0D006ED781 /* CopyLine.swift */; };
 		EFC9783723853244006ED781 /* Capitalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC9783623853244006ED781 /* Capitalization.swift */; };
 		EFC978392385342C006ED781 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC978382385342C006ED781 /* String.swift */; };
@@ -100,20 +101,21 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EFC9783123852A17006ED781 /* Embed App Extensions */ = {
+		EFC9783123852A17006ED781 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				EFC9782D23852A17006ED781 /* XCodePlugin.appex in Embed App Extensions */,
+				EFC9782D23852A17006ED781 /* XCodePlugin.appex in Embed Foundation Extensions */,
 			);
-			name = "Embed App Extensions";
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4D3B8E96299B899A001C7A88 /* Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
 		4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormattingHelpers.swift; sourceTree = "<group>"; };
 		4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionDescriptor.swift; sourceTree = "<group>"; };
 		4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SupportedContentUTIs.swift; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 				EFCC7EDB2386204300B6407B /* SwiftFormat */,
 				EFC9783E238541A4006ED781 /* Shell */,
 				EFC9782523852A17006ED781 /* SourceEditorExtension.swift */,
+				4D3B8E96299B899A001C7A88 /* Regex.swift */,
 				EFC9783C23853B8C006ED781 /* Util.swift */,
 				EFC978382385342C006ED781 /* String.swift */,
 				EFC9783223852B0D006ED781 /* CopyLine.swift */,
@@ -339,7 +342,7 @@
 				EFC97805238529EE006ED781 /* Sources */,
 				EFC97806238529EE006ED781 /* Frameworks */,
 				EFC97807238529EE006ED781 /* Resources */,
-				EFC9783123852A17006ED781 /* Embed App Extensions */,
+				EFC9783123852A17006ED781 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -376,7 +379,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1320;
+				LastUpgradeCheck = 1410;
 				ORGANIZATIONNAME = "影孤清";
 				TargetAttributes = {
 					EFC97808238529EE006ED781 = {
@@ -475,6 +478,7 @@
 				EFCC7EF72386204300B6407B /* Globs.swift in Sources */,
 				EF5EF27023D3E8C30070032C /* PathKit.swift in Sources */,
 				4DB1DA1927D768DD0031CA5C /* CommandErrors.swift in Sources */,
+				4D3B8E97299B899A001C7A88 /* Regex.swift in Sources */,
 				EFCC7EF52386204300B6407B /* Examples.swift in Sources */,
 				EFCC7F032386204300B6407B /* SwiftFormat.swift in Sources */,
 				EF5EF27323D3E8C30070032C /* ShellError.swift in Sources */,
@@ -558,6 +562,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -619,6 +624,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -649,13 +655,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 130;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = F35YF899E4;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
@@ -674,13 +682,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 130;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = F35YF899E4;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
@@ -697,8 +707,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 3;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = F35YF899E4;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -709,6 +720,7 @@
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/swift",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
@@ -728,8 +740,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 3;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = F35YF899E4;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -740,6 +753,7 @@
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/swift",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
