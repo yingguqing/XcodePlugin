@@ -16,6 +16,7 @@
 		4DB1DA1C27D7694C0031CA5C /* OptionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */; };
 		4DB1DA1E27D76FC50031CA5C /* RulesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE02386204300B6407B /* RulesStore.swift */; };
 		4DB1DA1F27D770AA0031CA5C /* FormattingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */; };
+		4DD260C62A57B5B6005E9456 /* SwiftFormatMyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD260C42A57B470005E9456 /* SwiftFormatMyRules.swift */; };
 		8465639626784D42007BD521 /* XcodeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; };
 		8465639726784D42007BD521 /* XcodeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		BE7B0C072415DE8200D16F65 /* ToColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE7B0C062415DE8200D16F65 /* ToColor.swift */; };
@@ -121,6 +122,7 @@
 		4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SupportedContentUTIs.swift; sourceTree = "<group>"; };
 		4DB1DA1827D768DD0031CA5C /* CommandErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandErrors.swift; sourceTree = "<group>"; };
 		4DB1DA1A27D769260031CA5C /* XCSourceTextBuffer+SwiftFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCSourceTextBuffer+SwiftFormat.swift"; sourceTree = "<group>"; };
+		4DD260C42A57B470005E9456 /* SwiftFormatMyRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftFormatMyRules.swift; sourceTree = "<group>"; };
 		84A30FED255153580082233F /* XcodeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XcodeKit.framework; path = Library/Frameworks/XcodeKit.framework; sourceTree = DEVELOPER_DIR; };
 		BE7B0C062415DE8200D16F65 /* ToColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToColor.swift; sourceTree = "<group>"; };
 		EF5EF26523D3E8C30070032C /* Shell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
@@ -244,6 +246,7 @@
 				4D3B8E96299B899A001C7A88 /* Regex.swift */,
 				EFC9783C23853B8C006ED781 /* Util.swift */,
 				EFC978382385342C006ED781 /* String.swift */,
+				4DD260C42A57B470005E9456 /* SwiftFormatMyRules.swift */,
 				EFC9783223852B0D006ED781 /* CopyLine.swift */,
 				EFC9783623853244006ED781 /* Capitalization.swift */,
 				EFC9783A23853806006ED781 /* CommandLine.swift */,
@@ -446,6 +449,7 @@
 				EFCC7EEE2386204300B6407B /* EnumAssociable.swift in Sources */,
 				EFCC7F1A23867FA700B6407B /* RulesViewController.swift in Sources */,
 				EFCC7EEC2386204300B6407B /* Options.swift in Sources */,
+				4DD260C62A57B5B6005E9456 /* SwiftFormatMyRules.swift in Sources */,
 				4DB1DA1F27D770AA0031CA5C /* FormattingHelpers.swift in Sources */,
 				EFCC7EF02386204300B6407B /* Inference.swift in Sources */,
 				EFCC7EFC2386204300B6407B /* ParsingHelpers.swift in Sources */,
@@ -663,7 +667,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
@@ -690,7 +694,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
