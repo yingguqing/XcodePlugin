@@ -32,7 +32,7 @@
 import Foundation
 
 /// The current SwiftFormat version
-let swiftFormatVersion = "0.49.5"
+let swiftFormatVersion = "0.53.0"
 public let version = swiftFormatVersion
 
 /// The standard SwiftFormat config file name
@@ -44,7 +44,7 @@ public let swiftVersionFile = ".swift-version"
 /// Supported Swift versions
 public let swiftVersions = [
     "3.x", "4.0", "4.1", "4.2",
-    "5.0", "5.1", "5.2", "5.3", "5.4", "5.5",
+    "5.0", "5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9", "5.10",
 ]
 
 /// An enumeration of the types of error that may be thrown by SwiftFormat
@@ -65,11 +65,11 @@ public enum FormatError: Error, CustomStringConvertible, LocalizedError, CustomN
     }
 
     public var localizedDescription: String {
-        return "Error: \(description)."
+        "Error: \(description)."
     }
 
     public var errorUserInfo: [String: Any] {
-        return [NSLocalizedDescriptionKey: localizedDescription]
+        [NSLocalizedDescriptionKey: localizedDescription]
     }
 }
 
@@ -118,13 +118,13 @@ public func enumerateFiles(withInputURL inputURL: URL,
 
     let queue = concurrent ? DispatchQueue.global(qos: .userInitiated) : completionQueue
 
-    func resolveInputURL(_ inputURL: URL, options: Options) -> (URL, ResourceValues, Options)? {
+    func resolveInputURL(_ inputURL: URL, options: Options) -> (URL, URLResourceValues, Options)? {
         let fileOptions = options.fileOptions ?? .default
         let inputURL = inputURL.standardizedFileURL
         if options.shouldSkipFile(inputURL) {
             if let handler = skipped {
                 do {
-                    onComplete(try handler(inputURL, inputURL, options))
+                    try onComplete(handler(inputURL, inputURL, options))
                 } catch {
                     onComplete { throw error }
                 }
@@ -142,7 +142,7 @@ public func enumerateFiles(withInputURL inputURL: URL,
                         return resolveInputURL(resolvedURL, options: options)
                     } else {
                         if let handler = skipped {
-                            onComplete(try handler(inputURL, inputURL, options))
+                            try onComplete(handler(inputURL, inputURL, options))
                         }
                         return nil
                     }
@@ -154,7 +154,7 @@ public func enumerateFiles(withInputURL inputURL: URL,
                     return resolveInputURL(resolvedURL, options: options)
                 } else {
                     if let handler = skipped {
-                        onComplete(try handler(inputURL, inputURL, options))
+                        try onComplete(handler(inputURL, inputURL, options))
                     }
                     return nil
                 }
@@ -186,7 +186,7 @@ public func enumerateFiles(withInputURL inputURL: URL,
                 var options = options
                 options.formatOptions?.fileInfo = fileInfo
                 do {
-                    onComplete(try handler(inputURL, outputURL ?? inputURL, options))
+                    try onComplete(handler(inputURL, outputURL ?? inputURL, options))
                 } catch {
                     onComplete { throw error }
                 }
@@ -254,7 +254,7 @@ public func enumerateFiles(withInputURL inputURL: URL,
     return errors
 }
 
-// Process configuration in all directories in specified path.
+/// Process configuration in all directories in specified path.
 func gatherOptions(_ options: inout Options, for inputURL: URL, with logger: Logger?) throws {
     var directory = URL(fileURLWithPath: inputURL.pathComponents[0]).standardized
     for part in inputURL.pathComponents.dropFirst().dropLast() {
@@ -266,7 +266,7 @@ func gatherOptions(_ options: inout Options, for inputURL: URL, with logger: Log
     }
 }
 
-// Process configuration files in specified directory.
+/// Process configuration files in specified directory.
 private var configCache = [URL: [String: String]]()
 private let configQueue = DispatchQueue(label: "swiftformat.config", qos: .userInteractive)
 private func processDirectory(_ inputURL: URL, with options: inout Options, logger: Logger?) throws {
@@ -278,15 +278,24 @@ private func processDirectory(_ inputURL: URL, with options: inout Options, logg
     let manager = FileManager.default
     let configFile = inputURL.appendingPathComponent(swiftFormatConfigurationFile)
     if manager.fileExists(atPath: configFile.path) {
-        logger?("Reading config file at \(configFile.path)")
-        let data = try Data(contentsOf: configFile)
-        args = try parseConfigFile(data)
+        if let configURL = options.configURL {
+            if configURL.standardizedFileURL != configFile.standardizedFileURL {
+                logger?("Ignoring config file at \(configFile.path)")
+            }
+        } else {
+            logger?("Reading config file at \(configFile.path)")
+            let data = try Data(contentsOf: configFile)
+            args = try parseConfigFile(data)
+        }
     }
     let versionFile = inputURL.appendingPathComponent(swiftVersionFile)
     if manager.fileExists(atPath: versionFile.path) {
         let versionString = try String(contentsOf: versionFile, encoding: .utf8)
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        if Version(rawValue: versionString) != nil {
+        if args["swiftversion"] != nil {
+            logger?("Ignoring swift-version file at \(versionFile.path)")
+        } else if Version(rawValue: versionString) != nil {
+            logger?("Reading swift-version file at \(versionFile.path) (version \(versionString))")
             args["swiftversion"] = versionString
         } else {
             // Don't treat as error, per: https://github.com/nicklockwood/SwiftFormat/issues/639
@@ -298,7 +307,7 @@ private func processDirectory(_ inputURL: URL, with options: inout Options, logg
         configCache[inputURL] = args
     }
     assert(options.formatOptions != nil)
-    try options.addArguments(args, in: inputURL.path)
+    try options.addArguments(args, in: inputURL.standardizedFileURL.path)
 }
 
 /// Line and column offset in source
@@ -312,7 +321,7 @@ public struct SourceOffset: Equatable, CustomStringConvertible {
     }
 
     public var description: String {
-        return "\(line):\(column)"
+        "\(line):\(column)"
     }
 }
 
@@ -357,7 +366,7 @@ public func tokenIndex(for offset: SourceOffset, in tokens: [Token], tabWidth: I
 /// Deprecated
 @available(*, deprecated, message: "Use tokenIndex(for:) instead")
 public func tokenIndexForOffset(_ offset: SourceOffset, in tokens: [Token], tabWidth: Int) -> Int {
-    return tokenIndex(for: offset, in: tokens, tabWidth: tabWidth)
+    tokenIndex(for: offset, in: tokens, tabWidth: tabWidth)
 }
 
 /// Get token index range for line range
@@ -424,7 +433,7 @@ public func parsingError(for tokens: [Token], options: FormatOptions) -> FormatE
 
 /// Convert a token array back into a string
 public func sourceCode(for tokens: [Token]?) -> String {
-    return (tokens ?? []).map { $0.string }.joined()
+    (tokens ?? []).map { $0.string }.joined()
 }
 
 /// Apply specified rules to a token array and optionally capture list of changes
@@ -434,12 +443,12 @@ public func applyRules(_ rules: [FormatRule],
                        trackChanges: Bool,
                        range: Range<Int>?) throws -> (tokens: [Token], changes: [Formatter.Change])
 {
-    return try applyRules(rules,
-                          to: originalTokens,
-                          with: options,
-                          trackChanges: trackChanges,
-                          range: range,
-                          callback: nil)
+    try applyRules(rules,
+                   to: originalTokens,
+                   with: options,
+                   trackChanges: trackChanges,
+                   range: range,
+                   callback: nil)
 }
 
 private func applyRules(
@@ -495,22 +504,24 @@ private func applyRules(
     }
 
     // Split tokens into lines
-    func lines(in tokens: [Token]) -> [Int: ArraySlice<Token>?] {
+    func getLines(in tokens: [Token], includingLinebreaks: Bool) -> [Int: ArraySlice<Token>?] {
         var lines: [Int: ArraySlice<Token>?] = [:]
-        var start = 0
+        var start = 0, nextLine = 1
         for (i, token) in tokens.enumerated() {
             if case let .linebreak(_, line) = token {
-                lines[line] = tokens[start ..< i]
+                lines[line] = tokens[start ..< i + (includingLinebreaks ? 1 : 0)]
+                nextLine = line + 1
                 start = i + 1
             }
         }
+        lines[nextLine] = tokens[start...]
         return lines
     }
 
     // Recursively apply rules until no changes are detected
     let group = DispatchGroup()
     let queue = DispatchQueue(label: "swiftformat.formatting", qos: .userInteractive)
-    let timeout = 1 + TimeInterval(tokens.count) / 100
+    let timeout = options.timeout + TimeInterval(tokens.count) / 100
     var changes = [Formatter.Change]()
     for _ in 0 ..< maxIterations {
         let formatter = Formatter(tokens, options: options,
@@ -540,11 +551,11 @@ private func applyRules(
                 return $0.line < $1.line
             })
             // Get lines
-            let oldLines = lines(in: originalTokens)
-            let newLines = lines(in: tokens)
+            let oldLines = getLines(in: originalTokens, includingLinebreaks: true)
+            let newLines = getLines(in: tokens, includingLinebreaks: true)
             // Filter out duplicates and lines that haven't changed
             var last: Formatter.Change?
-            return (tokens, changes.filter { change in
+            changes = changes.filter { change in
                 if last == change {
                     return false
                 }
@@ -553,12 +564,26 @@ private func applyRules(
                     return false
                 }
                 return true
-            })
+            }
+            return (tokens, changes)
         }
         tokens = formatter.tokens
         rules.removeAll(where: { $0.runOnceOnly }) // Prevents infinite recursion
     }
-    throw FormatError.writing("Failed to terminate")
+    let formatter = Formatter(tokens, options: options, trackChanges: true, range: range)
+    rules.sorted().forEach { $0.apply(with: formatter) }
+    let rulesApplied = Set(formatter.changes.map { $0.rule.name }).sorted()
+    if rulesApplied.isEmpty {
+        throw FormatError.writing("Failed to terminate")
+    }
+    let names = rulesApplied.count > 1 ?
+        "\(rulesApplied.dropLast().joined(separator: ", ")) and \(rulesApplied.last!) rules" :
+        "\(rulesApplied[0]) rule"
+    let changeLines = Set(formatter.changes.map { "\($0.line)" }).sorted()
+    let lines = changeLines.count > 1 ?
+        "lines \(changeLines.dropLast().joined(separator: ", ")) and \(changeLines.last!)" :
+        "line \(changeLines[0])"
+    throw FormatError.writing("The \(names) failed to terminate at \(lines)")
 }
 
 /// Format a pre-parsed token array
@@ -567,7 +592,7 @@ public func format(
     _ tokens: [Token], rules: [FormatRule] = FormatRules.default,
     options: FormatOptions = .default, range: Range<Int>? = nil
 ) throws -> [Token] {
-    return try applyRules(rules, to: tokens, with: options, trackChanges: false, range: range).tokens
+    try applyRules(rules, to: tokens, with: options, trackChanges: false, range: range).tokens
 }
 
 /// Format code with specified rules and options
@@ -577,7 +602,7 @@ public func format(
 ) throws -> String {
     let tokens = tokenize(source)
     let range = lineRange.map { tokenRange(forLineRange: $0, in: tokens) }
-    return sourceCode(for: try format(tokens, rules: rules, options: options, range: range))
+    return try sourceCode(for: format(tokens, rules: rules, options: options, range: range))
 }
 
 /// Lint a pre-parsed token array
@@ -586,7 +611,7 @@ public func lint(
     _ tokens: [Token], rules: [FormatRule] = FormatRules.default,
     options: FormatOptions = .default, range: Range<Int>? = nil
 ) throws -> [Formatter.Change] {
-    return try applyRules(rules, to: tokens, with: options, trackChanges: true, range: range).changes
+    try applyRules(rules, to: tokens, with: options, trackChanges: true, range: range).changes
 }
 
 /// Lint code with specified rules and options
@@ -602,63 +627,26 @@ public func lint(
 // MARK: Path utilities
 
 public func expandPath(_ path: String, in directory: String) -> URL {
-    if path.hasPrefix("/") {
-        return URL(fileURLWithPath: path).standardized
+    let nsPath: NSString = (path as NSString).expandingTildeInPath as NSString
+    if nsPath.isAbsolutePath {
+        return URL(fileURLWithPath: nsPath as String).standardized
     }
-    if path.hasPrefix("~") {
-        return URL(fileURLWithPath: NSString(string: path).expandingTildeInPath).standardized
-    }
-    return URL(fileURLWithPath: directory).appendingPathComponent(path).standardized
+    return URL(fileURLWithPath: directory, isDirectory: true).appendingPathComponent(path).standardized
 }
 
-struct ResourceValues {
-    let isRegularFile: Bool?
-    let isDirectory: Bool?
-    let isAliasFile: Bool?
-    let isSymbolicLink: Bool?
-    let creationDate: Date?
-    let path: String?
-}
-
-func getResourceValues(for url: URL, keys: [URLResourceKey]) throws -> ResourceValues {
-    let manager = FileManager.default
-    #if os(macOS)
-        if let resourceValues = try? url.resourceValues(forKeys: Set(keys)) {
-            return ResourceValues(
-                isRegularFile: resourceValues.isRegularFile,
-                isDirectory: resourceValues.isDirectory,
-                isAliasFile: resourceValues.isAliasFile,
-                isSymbolicLink: resourceValues.isSymbolicLink,
-                creationDate: resourceValues.creationDate,
-                path: resourceValues.path
-            )
-        }
-        if manager.fileExists(atPath: url.path) {
-            throw FormatError.reading("Failed to read attributes for \(url.path)")
-        }
-    #else
-        var isDirectory: ObjCBool = false
-        if manager.fileExists(atPath: url.path, isDirectory: &isDirectory) {
-            guard let attributes = try? manager.attributesOfItem(atPath: url.path) else {
-                throw FormatError.reading("Failed to read attributes for \(url.path)")
-            }
-            let isSymbolicLink = url.resolvingSymlinksInPath() != url
-            return ResourceValues(
-                isRegularFile: !isDirectory.boolValue && !isSymbolicLink,
-                isDirectory: isDirectory.boolValue,
-                isAliasFile: false,
-                isSymbolicLink: isSymbolicLink,
-                creationDate: attributes[.creationDate] as? Date,
-                path: url.path
-            )
-        }
-    #endif
+func getResourceValues(for url: URL, keys: [URLResourceKey]) throws -> URLResourceValues {
+    if let resourceValues = try? url.resourceValues(forKeys: Set(keys)) {
+        return resourceValues
+    }
+    if FileManager.default.fileExists(atPath: url.path) {
+        throw FormatError.reading("Failed to read attributes for \(url.path)")
+    }
     throw FormatError.options("File not found at \(url.path)")
 }
 
 // MARK: Documentation utilities
 
-// Strip markdown code-formatting
+/// Strip markdown code-formatting
 func stripMarkdown(_ input: String) -> String {
     var result = ""
     var startCount = 0

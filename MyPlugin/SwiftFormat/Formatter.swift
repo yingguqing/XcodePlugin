@@ -2,7 +2,7 @@
 //  Formatter.swift
 //  SwiftFormat
 //
-//  Version 0.49.5
+//  Version 0.53.0
 //
 //  Created by Nick Lockwood on 12/08/2016.
 //  Copyright 2016 Nick Lockwood
@@ -47,19 +47,24 @@ public class Formatter: NSObject {
     private var tempOptions: FormatOptions?
     private var wasNextDirective = false
 
-    // Formatting range
+    /// Formatting range
     public var range: Range<Int>?
 
-    // Current rule, used for handling comment directives
+    /// Current rule, used for handling comment directives
     var currentRule: FormatRule? {
         didSet {
             disabledCount = 0
             disabledNext = 0
             ruleDisabled = false
+            wasNextDirective = false
+            if let options = tempOptions {
+                self.options = options
+                tempOptions = nil
+            }
         }
     }
 
-    // Is current rule enabled
+    /// Is current rule enabled
     var isEnabled: Bool {
         if ruleDisabled || disabledCount + disabledNext > 0 ||
             range?.contains(enumerationIndex) == false
@@ -69,14 +74,17 @@ public class Formatter: NSObject {
         return true
     }
 
-    // Process a comment token (which may contain directives)
+    /// Directives that can be used in comments, e.g. `// swiftformat:disable rule`
+    let directives = ["disable", "enable", "options", "sort"]
+
+    /// Process a comment token (which may contain directives)
     func processCommentBody(_ comment: String, at index: Int) {
         var prefix = "swiftformat:"
         guard let range = comment.range(of: prefix) else {
             return
         }
         let comment = String(comment[range.upperBound...])
-        guard let directive = ["disable", "enable", "options", "sort"].first(where: {
+        guard let directive = directives.first(where: {
             comment.hasPrefix($0)
         }) else {
             let parts = comment.components(separatedBy: ":")
@@ -139,12 +147,10 @@ public class Formatter: NSObject {
         if wasNextDirective {
             wasNextDirective = false
         } else {
+            disabledNext = 0
             if let options = tempOptions {
                 self.options = options
                 tempOptions = nil
-            }
-            if disabledNext != 0 {
-                disabledNext = 0
             }
         }
     }
@@ -174,11 +180,11 @@ public class Formatter: NSObject {
         public let filePath: String?
 
         public var help: String {
-            return stripMarkdown(rule.help).replacingOccurrences(of: "\n", with: " ")
+            stripMarkdown(rule.help).replacingOccurrences(of: "\n", with: " ")
         }
 
         public var description: String {
-            return "\(filePath ?? ""):\(line):1: warning: (\(rule.name)) \(help)"
+            "\(filePath ?? ""):\(line):1: warning: (\(rule.name)) \(help)"
         }
     }
 
@@ -189,10 +195,10 @@ public class Formatter: NSObject {
     private let trackChanges: Bool
 
     private func trackChange(at index: Int) {
-        guard trackChanges, let rule = currentRule else { return }
+        guard trackChanges else { return }
         changes.append(Change(
             line: originalLine(at: index),
-            rule: rule,
+            rule: currentRule ?? .none,
             filePath: options.fileInfo.filePath
         ))
     }
@@ -220,7 +226,7 @@ public extension Formatter {
 
     /// Returns the token at the specified index, or nil if index is invalid
     func token(at index: Int) -> Token? {
-        return tokens.indices.contains(index) ? tokens[index] : nil
+        tokens.indices.contains(index) ? tokens[index] : nil
     }
 
     /// Replaces the token at the specified index with one or more new tokens
@@ -264,7 +270,7 @@ public extension Formatter {
     /// Replaces the tokens in the specified range with new tokens
     @discardableResult
     func replaceTokens(in range: Range<Int>, with tokens: [Token]) -> Int {
-        return replaceTokens(in: range, with: ArraySlice(tokens))
+        replaceTokens(in: range, with: ArraySlice(tokens))
     }
 
     /// Replaces the tokens in the specified range with a new token
@@ -285,19 +291,19 @@ public extension Formatter {
     /// Replaces the tokens in the specified range with new tokens
     @discardableResult
     func replaceTokens(in range: ClosedRange<Int>, with tokens: ArraySlice<Token>) -> Int {
-        return replaceTokens(in: range.lowerBound ..< range.upperBound + 1, with: tokens)
+        replaceTokens(in: range.lowerBound ..< range.upperBound + 1, with: tokens)
     }
 
     /// Replaces the tokens in the specified closed range with new tokens
     @discardableResult
     func replaceTokens(in range: ClosedRange<Int>, with tokens: [Token]) -> Int {
-        return replaceTokens(in: range.lowerBound ..< range.upperBound + 1, with: tokens)
+        replaceTokens(in: range.lowerBound ..< range.upperBound + 1, with: tokens)
     }
 
     /// Replaces the tokens in the specified closed range with a new token
     @discardableResult
     func replaceTokens(in range: ClosedRange<Int>, with token: Token) -> Int {
-        return replaceTokens(in: range.lowerBound ..< range.upperBound + 1, with: token)
+        replaceTokens(in: range.lowerBound ..< range.upperBound + 1, with: token)
     }
 
     /// Removes the token at the specified index
@@ -320,6 +326,19 @@ public extension Formatter {
     /// Removes the tokens in the specified closed range
     func removeTokens(in range: ClosedRange<Int>) {
         removeTokens(in: range.lowerBound ..< range.upperBound + 1)
+    }
+
+    /// Removes the tokens in the specified set of ranges, that must not overlay
+    func removeTokens(in rangesToRemove: [ClosedRange<Int>]) {
+        // We remove the ranges in reverse order, so that removing
+        // one range doesn't invalidate the existings of the other ranges
+        let rangeRemovalOrder = rangesToRemove
+            .sorted(by: { $0.startIndex < $1.startIndex })
+            .reversed()
+
+        for rangeToRemove in rangeRemovalOrder {
+            removeTokens(in: rangeToRemove)
+        }
     }
 
     /// Removes the last token
@@ -423,9 +442,7 @@ public extension Formatter {
                 if case .linebreak = token, scopeStack.isEmpty, matches(token) {
                     return i
                 }
-            } else if token == .endOfScope("case") || token == .endOfScope("default"),
-                      scopeStack.last == .startOfScope("#if")
-            {
+            } else if token.isSwitchCaseOrDefault, scopeStack.last == .startOfScope("#if") {
                 continue
             } else if scopeStack.isEmpty, matches(token) {
                 return i
@@ -446,37 +463,37 @@ public extension Formatter {
 
     /// Returns the index of the next matching token in the specified range
     func index(of token: Token, in range: CountableRange<Int>) -> Int? {
-        return index(in: range, where: { $0 == token })
+        index(in: range, where: { $0 == token })
     }
 
     /// Returns the index of the next matching token at the current scope
     func index(of token: Token, after index: Int) -> Int? {
-        return self.index(after: index, where: { $0 == token })
+        self.index(after: index, where: { $0 == token })
     }
 
     /// Returns the index of the next token in the specified range of the specified type
     func index(of type: TokenType, in range: CountableRange<Int>, if matches: (Token) -> Bool = { _ in true }) -> Int? {
-        return index(in: range, where: { $0.is(type) }).flatMap { matches(tokens[$0]) ? $0 : nil }
+        index(in: range, where: { $0.is(type) }).flatMap { matches(tokens[$0]) ? $0 : nil }
     }
 
     /// Returns the index of the next token at the current scope of the specified type
     func index(of type: TokenType, after index: Int, if matches: (Token) -> Bool = { _ in true }) -> Int? {
-        return self.index(after: index, where: { $0.is(type) }).flatMap { matches(tokens[$0]) ? $0 : nil }
+        self.index(after: index, where: { $0.is(type) }).flatMap { matches(tokens[$0]) ? $0 : nil }
     }
 
     /// Returns the next token at the current scope that matches the block
     func nextToken(after index: Int, where matches: (Token) -> Bool = { _ in true }) -> Token? {
-        return self.index(after: index, where: matches).map { tokens[$0] }
+        self.index(after: index, where: matches).map { tokens[$0] }
     }
 
     /// Returns the next token at the current scope of the specified type
     func next(_ type: TokenType, after index: Int, if matches: (Token) -> Bool = { _ in true }) -> Token? {
-        return self.index(of: type, after: index, if: matches).map { tokens[$0] }
+        self.index(of: type, after: index, if: matches).map { tokens[$0] }
     }
 
     /// Returns the next token in the specified range of the specified type
     func next(_ type: TokenType, in range: CountableRange<Int>, if matches: (Token) -> Bool = { _ in true }) -> Token? {
-        return index(of: type, in: range, if: matches).map { tokens[$0] }
+        index(of: type, in: range, if: matches).map { tokens[$0] }
     }
 
     /// Returns the index of the last token in the specified range that matches the block
@@ -517,37 +534,37 @@ public extension Formatter {
 
     /// Returns the index of the last matching token in the specified range
     func lastIndex(of token: Token, in range: CountableRange<Int>) -> Int? {
-        return lastIndex(in: range, where: { $0 == token })
+        lastIndex(in: range, where: { $0 == token })
     }
 
     /// Returns the index of the previous matching token at the current scope
     func index(of token: Token, before index: Int) -> Int? {
-        return self.index(before: index, where: { $0 == token })
+        self.index(before: index, where: { $0 == token })
     }
 
     /// Returns the index of the last token in the specified range of the specified type
     func lastIndex(of type: TokenType, in range: CountableRange<Int>, if matches: (Token) -> Bool = { _ in true }) -> Int? {
-        return lastIndex(in: range, where: { $0.is(type) }).flatMap { matches(tokens[$0]) ? $0 : nil }
+        lastIndex(in: range, where: { $0.is(type) }).flatMap { matches(tokens[$0]) ? $0 : nil }
     }
 
     /// Returns the index of the previous token at the current scope of the specified type
     func index(of type: TokenType, before index: Int, if matches: (Token) -> Bool = { _ in true }) -> Int? {
-        return self.index(before: index, where: { $0.is(type) }).flatMap { matches(tokens[$0]) ? $0 : nil }
+        self.index(before: index, where: { $0.is(type) }).flatMap { matches(tokens[$0]) ? $0 : nil }
     }
 
     /// Returns the previous token at the current scope that matches the block
     func lastToken(before index: Int, where matches: (Token) -> Bool) -> Token? {
-        return self.index(before: index, where: matches).map { tokens[$0] }
+        self.index(before: index, where: matches).map { tokens[$0] }
     }
 
     /// Returns the previous token at the current scope of the specified type
     func last(_ type: TokenType, before index: Int, if matches: (Token) -> Bool = { _ in true }) -> Token? {
-        return self.index(of: type, before: index, if: matches).map { tokens[$0] }
+        self.index(of: type, before: index, if: matches).map { tokens[$0] }
     }
 
     /// Returns the previous token in the specified range of the specified type
     func last(_ type: TokenType, in range: CountableRange<Int>, if matches: (Token) -> Bool = { _ in true }) -> Token? {
-        return lastIndex(of: type, in: range, if: matches).map { tokens[$0] }
+        lastIndex(of: type, in: range, if: matches).map { tokens[$0] }
     }
 
     /// Inserts a linebreak at the specified index
@@ -573,10 +590,10 @@ public extension Formatter {
         return 0 // Inserted 0 tokens
     }
 
-    // As above, but only if formatting is enabled
+    /// As above, but only if formatting is enabled
     @discardableResult
     internal func insertSpaceIfEnabled(_ space: String, at index: Int) -> Int {
-        return isEnabled ? insertSpace(space, at: index) : 0
+        isEnabled ? insertSpace(space, at: index) : 0
     }
 
     /// Returns the original line number at the specified index
@@ -614,16 +631,3 @@ extension String {
         return result
     }
 }
-
-// `Swift.Character.isUppercase` isn't available until Swift 5.0+ / Xcode 10.2+
-#if !swift(>=5.0)
-    extension Character {
-        var isUppercase: Bool {
-            return String(self).uppercased() == String(self)
-        }
-
-        var isWhitespace: Bool {
-            return String(self).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        }
-    }
-#endif

@@ -8,6 +8,7 @@
 
 import Cocoa
 import XcodeKit
+
 // MARK: 格式化代码
 class FormatCode : NSObject, XCSourceEditorCommand {
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {

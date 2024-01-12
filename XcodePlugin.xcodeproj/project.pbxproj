@@ -3,10 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4D0CAD7F2B50ED5000671DD4 /* Singularize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */; };
+		4D0CAD802B50ED5000671DD4 /* Singularize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */; };
 		4D3B8E97299B899A001C7A88 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3B8E96299B899A001C7A88 /* Regex.swift */; };
 		4DB1DA1327D7678E0031CA5C /* FormattingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */; };
 		4DB1DA1527D767BE0031CA5C /* OptionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */; };
@@ -116,6 +118,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Singularize.swift; sourceTree = "<group>"; };
 		4D3B8E96299B899A001C7A88 /* Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
 		4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormattingHelpers.swift; sourceTree = "<group>"; };
 		4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionDescriptor.swift; sourceTree = "<group>"; };
@@ -302,6 +305,7 @@
 				EFCC7EDD2386204300B6407B /* Options.swift */,
 				EFCC7EDC2386204300B6407B /* OptionsStore.swift */,
 				EFCC7EE52386204300B6407B /* ParsingHelpers.swift */,
+				4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */,
 				EFCC7EE62386204300B6407B /* Rules.swift */,
 				EFCC7EE02386204300B6407B /* RulesStore.swift */,
 				4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */,
@@ -381,8 +385,9 @@
 		EFC97801238529EE006ED781 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1410;
+				LastUpgradeCheck = 1500;
 				ORGANIZATIONNAME = "影孤清";
 				TargetAttributes = {
 					EFC97808238529EE006ED781 = {
@@ -448,6 +453,7 @@
 				EFCC7EFE2386204300B6407B /* Rules.swift in Sources */,
 				EFCC7EEE2386204300B6407B /* EnumAssociable.swift in Sources */,
 				EFCC7F1A23867FA700B6407B /* RulesViewController.swift in Sources */,
+				4D0CAD7F2B50ED5000671DD4 /* Singularize.swift in Sources */,
 				EFCC7EEC2386204300B6407B /* Options.swift in Sources */,
 				4DD260C62A57B5B6005E9456 /* SwiftFormatMyRules.swift in Sources */,
 				4DB1DA1F27D770AA0031CA5C /* FormattingHelpers.swift in Sources */,
@@ -472,6 +478,7 @@
 				EFCC7EFD2386204300B6407B /* ParsingHelpers.swift in Sources */,
 				EFCC7EF92386204300B6407B /* Arguments.swift in Sources */,
 				EFC97850238541C3006ED781 /* FormatCode.swift in Sources */,
+				4D0CAD802B50ED5000671DD4 /* Singularize.swift in Sources */,
 				EF5EF27123D3E8C30070032C /* ProcessRunner.swift in Sources */,
 				BE7B0C072415DE8200D16F65 /* ToColor.swift in Sources */,
 				EFC978392385342C006ED781 /* String.swift in Sources */,
@@ -536,6 +543,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -570,6 +578,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -598,6 +607,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -632,6 +642,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -658,7 +669,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 130;
+				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = F35YF899E4;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -668,7 +679,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -685,7 +696,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 130;
+				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = F35YF899E4;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -695,7 +706,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -731,7 +742,6 @@
 				PRODUCT_NAME = XCodePlugin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
-				STRIP_STYLE = all;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -764,7 +774,6 @@
 				PRODUCT_NAME = XCodePlugin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
-				STRIP_STYLE = all;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

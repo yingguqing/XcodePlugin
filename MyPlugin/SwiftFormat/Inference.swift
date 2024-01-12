@@ -534,7 +534,7 @@ private struct Inference {
         func removeUsed<T>(from argNames: inout [String], with associatedData: inout [T], in range: CountableRange<Int>) {
             for i in range {
                 let token = formatter.tokens[i]
-                if case .identifier = token, let index = argNames.index(of: token.unescaped()),
+                if case .identifier = token, let index = argNames.firstIndex(of: token.unescaped()),
                    formatter.last(.nonSpaceOrCommentOrLinebreak, before: i)?.isOperator(".") == false,
                    formatter.next(.nonSpaceOrCommentOrLinebreak, after: i) != .delimiter(":") ||
                    formatter.currentScope(at: i) == .startOfScope("[")
@@ -598,7 +598,6 @@ private struct Inference {
                     return true
                 case .keyword("throws"),
                      .keyword("rethrows"),
-                     .keyword("async"),
                      .keyword("where"),
                      .keyword("is"):
                     return false // Keep looking
@@ -639,7 +638,7 @@ private struct Inference {
                          isTypeRoot: Bool,
                          isInit: Bool)
         {
-            let selfRequired = formatter.options.selfRequired
+            var selfRequired: Set<String> { formatter.options.selfRequired }
             let currentScope = formatter.currentScope(at: index)
             let isWhereClause = index > 0 && formatter.tokens[index - 1] == .keyword("where")
             assert(isWhereClause || currentScope.map { token -> Bool in
@@ -1177,7 +1176,6 @@ private struct Inference {
                     return true
                 case .keyword("throws"),
                      .keyword("rethrows"),
-                     .keyword("async"),
                      .keyword("where"),
                      .keyword("is"):
                     return false // Keep looking
@@ -1368,10 +1366,10 @@ private extension Formatter {
             case .binary, .octal:
                 digits = String(number[prefix.endIndex...])
             case .hex:
-                let endIndex = number.index { [".", "p", "P"].contains($0) } ?? number.endIndex
+                let endIndex = number.firstIndex { [".", "p", "P"].contains($0) } ?? number.endIndex
                 digits = String(number[prefix.endIndex ..< endIndex])
             case .decimal:
-                let endIndex = number.index { [".", "e", "E"].contains($0) } ?? number.endIndex
+                let endIndex = number.firstIndex { [".", "e", "E"].contains($0) } ?? number.endIndex
                 digits = String(number[..<endIndex])
             }
             // Get the group for this number

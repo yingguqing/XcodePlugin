@@ -10,13 +10,13 @@ import Foundation
 
 extension FormatRule {
     var examples: String? {
-        return examplesByRuleName[name]
+        examplesByRuleName[name]
     }
 }
 
 extension _FormatRules {
     var examplesByName: [String: String] {
-        return examplesByRuleName
+        examplesByRuleName
     }
 }
 
@@ -131,6 +131,18 @@ private struct Examples {
     -
       @testable import D
       import E
+    ```
+    """
+
+    let blankLineAfterImports = """
+    ```diff
+      import A
+      import B
+      @testable import D
+    +
+      class Foo {
+        // foo
+      }
     ```
     """
 
@@ -313,6 +325,22 @@ private struct Examples {
     ```
     """
 
+    let wrapLoopBodies = """
+    ```diff
+    - for foo in array { print(foo) }
+    + for foo in array {
+    +     print(foo)
+    + }
+    ```
+
+    ```diff
+    - while let foo = bar.next() { print(foo) }
+    + while let foo = bar.next() {
+    +     print(foo)
+    + }
+    ```
+    """
+
     let hoistPatternLet = """
     ```diff
     - (let foo, let bar) = baz()
@@ -327,6 +355,30 @@ private struct Examples {
     + if case let .foo(bar, baz) = quux {
         // inner foo
       }
+    ```
+    """
+
+    let hoistAwait = """
+    ```diff
+    - greet(await forename, await surname)
+    + await greet(forename, surname)
+    ```
+
+    ```diff
+    - let foo = String(try await getFoo())
+    + let foo = await String(try getFoo())
+    ```
+    """
+
+    let hoistTry = """
+    ```diff
+    - foo(try bar(), try baz())
+    + try foo(bar(), baz())
+    ```
+
+    ```diff
+    - let foo = String(try await getFoo())
+    + let foo = try String(await getFoo())
     ```
     """
 
@@ -585,6 +637,23 @@ private struct Examples {
     ```diff
     - array.filter { return $0.foo == bar }
     + array.filter { $0.foo == bar }
+
+      // Swift 5.1+ (SE-0255)
+      var foo: String {
+    -     return "foo"
+    +     "foo"
+      }
+
+      // Swift 5.9+ (SE-0380)
+      func foo(_ condition: Bool) -> String {
+          if condition {
+    -         return "foo"
+    +         "foo"
+          } else {
+    -         return "bar"
+    +         "bar"
+          }
+      }
     ```
     """
 
@@ -668,7 +737,7 @@ private struct Examples {
     ```
     """
 
-    let sortedImports = """
+    let sortImports = """
     ```diff
     - import Foo
     - import Bar
@@ -823,6 +892,23 @@ private struct Examples {
     -         let view: UIView = UIView()
     +         let view = UIView()
           }
+      }
+
+    // Swift 5.9+, inferred (SE-0380)
+    - let foo: Foo = if condition {
+    + let foo = if condition {
+          Foo("foo")
+      } else {
+          Foo("bar")
+      }
+
+    // Swift 5.9+, explicit (SE-0380)
+      let foo: Foo = if condition {
+    -     Foo("foo")
+    +     .init("foo")
+      } else {
+    -     Foo("bar")
+    +     .init("foo")
       }
     ```
     """
@@ -1046,7 +1132,8 @@ private struct Examples {
       }
 
     + func foo(bar: Int,
-    +          baz: String) {
+    +          baz: String)
+    + {
         ...
       }
     ```
@@ -1354,7 +1441,7 @@ private struct Examples {
     -         barConfiguration: Bar)
     +     case barFeature
     +     case fooFeature
-    +     case upsellA
+    +     case upsellA(
     +         fooConfiguration: Foo,
     +         barConfiguration: Bar)
     +     case upsellB
@@ -1370,7 +1457,7 @@ private struct Examples {
     -         barConfiguration: Bar)
     +     case barFeature
     +     case fooFeature
-    +     case upsellA
+    +     case upsellA(
     +         fooConfiguration: Foo,
     +         barConfiguration: Bar)
     +     case upsellB
@@ -1382,4 +1469,222 @@ private struct Examples {
       }
     ```
     """
+
+    let redundantOptionalBinding = """
+    ```diff
+    - if let foo = foo {
+    + if let foo {
+          print(foo)
+      }
+
+    - guard let self = self else {
+    + guard let self else {
+          return
+      }
+    ```
+    """
+
+    let opaqueGenericParameters = """
+    ```diff
+    - func handle<T: Fooable>(_ value: T) {
+    + func handle(_ value: some Fooable) {
+          print(value)
+      }
+
+    - func handle<T>(_ value: T) where T: Fooable, T: Barable {
+    + func handle(_ value: some Fooable & Barable) {
+          print(value)
+      }
+
+    - func handle<T: Collection>(_ value: T) where T.Element == Foo {
+    + func handle(_ value: some Collection<Foo>) {
+          print(value)
+      }
+
+    // With `--someany enabled` (the default)
+    - func handle<T>(_ value: T) {
+    + func handle(_ value: some Any) {
+          print(value)
+      }
+    ```
+    """
+
+    let genericExtensions = """
+    ```diff
+    - extension Array where Element == Foo {}
+    - extension Optional where Wrapped == Foo {}
+    - extension Dictionary where Key == Foo, Value == Bar {}
+    - extension Collection where Element == Foo {}
+    + extension Array<Foo> {}
+    + extension Optional<Foo> {}
+    + extension Dictionary<Key, Value> {}
+    + extension Collection<Foo> {}
+
+    // With `typeSugar` also enabled:
+    - extension Array where Element == Foo {}
+    - extension Optional where Wrapped == Foo {}
+    - extension Dictionary where Key == Foo, Value == Bar {}
+    + extension [Foo] {}
+    + extension Foo? {}
+    + extension [Key: Value] {}
+
+    // Also supports user-defined types!
+    - extension LinkedList where Element == Foo {}
+    - extension Reducer where
+    -     State == FooState,
+    -     Action == FooAction,
+    -     Environment == FooEnvironment {}
+    + extension LinkedList<Foo> {}
+    + extension Reducer<FooState, FooAction, FooEnvironment> {}
+    ```
+    """
+
+    let docComments = """
+    ```diff
+    - // A placeholder type used to demonstrate syntax rules
+    + /// A placeholder type used to demonstrate syntax rules
+      class Foo {
+    -     // This function doesn't really do anything
+    +     /// This function doesn't really do anything
+          func bar() {
+    -         /// TODO: implement Foo.bar() algorithm
+    +         // TODO: implement Foo.bar() algorithm
+          }
+      }
+    ```
+    """
+
+    let fileHeader = """
+    You can use the following tokens in the text:
+
+    Token | Description
+    --- | ---
+    `{file}` | File name
+    `{year}` | Current year
+    `{created}` | File creation date
+    `{created.year}` | File creation year
+
+    **Example**:
+
+    `--header \\n {file}\\n\\n Copyright © {created.year} CompanyName.\\n`
+
+    ```diff
+    - // SomeFile.swift
+
+    + //
+    + //  SomeFile.swift
+    + //  Copyright © 2023 CompanyName.
+    + //
+    ```
+    """
+
+    let conditionalAssignment = """
+    ```diff
+    - let foo: String
+    - if condition {
+    + let foo = if condition {
+    -     foo = "foo"
+    +     "foo"
+      } else {
+    -     bar = "bar"
+    +     "bar"
+      }
+    ```
+
+    ```diff
+    - let foo: String
+    - switch condition {
+    + let foo = switch condition {
+      case true:
+    -     foo = "foo"
+    +     "foo"
+      case false:
+    -     foo = "bar"
+    +     "bar"
+      }
+    ```
+    """
+
+    let sortTypealiases = """
+    ```diff
+    - typealias Placeholders = Foo & Bar & Baaz & Quux
+    + typealias Placeholders = Baaz & Bar & Foo & Quux
+
+      typealias Dependencies
+    -     = FooProviding
+    +     = BaazProviding
+          & BarProviding
+    -     & BaazProviding
+    +     & FooProviding
+          & QuuxProviding
+    ```
+    """
+
+    let redundantInternal = """
+    ```diff
+    - internal class Foo {
+    + class Foo {
+    -     internal let bar: String
+    +     let bar: String
+
+    -     internal func baaz() {}
+    +     func baaz() {}
+
+    -     internal init() {
+    +     init() {
+              bar = "bar"
+          }
+      }
+    ```
+    """
+
+    let preferForLoop = """
+    ```diff
+      let strings = ["foo", "bar", "baaz"]
+    - strings.forEach { placeholder in
+    + for placeholder in strings {
+          print(placeholder)
+      }
+
+      // Supports anonymous closures
+    - strings.forEach {
+    + for string in strings {
+    -     print($0)
+    +     print(string)
+      }
+
+    - foo.item().bar[2].baazValues(option: true).forEach {
+    + for baazValue in foo.item().bar[2].baazValues(option: true) {
+    -     print($0)
+    +     print(baazValue)
+      }
+
+      // Doesn't affect long multiline functional chains
+      placeholderStrings
+          .filter { $0.style == .fooBar }
+          .map { $0.uppercased() }
+          .forEach { print($0) }
+    ```
+    """
+
+    let noExplicitOwnership = """
+    ```diff
+    - borrowing func foo(_ bar: consuming Bar) { ... }
+    + func foo(_ bar: Bar) { ... }
+    ```
+    """
+
+    let wrapMultilineConditionalAssignment = #"""
+    - let planetLocation = if let star = planet.star {
+    -     "The \(star.name) system"
+    - } else {
+    -     "Rogue planet"
+    - }
+    + let planetLocation =
+    +     if let star = planet.star {
+    +         "The \(star.name) system"
+    +     } else {
+    +         "Rogue planet"
+    +     }
+    """#
 }

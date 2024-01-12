@@ -77,6 +77,12 @@ public enum WrapMode: String, CaseIterable {
     }
 }
 
+/// Wrap enum cases
+public enum WrapEnumCases: String, CaseIterable {
+    case always
+    case withValues = "with-values"
+}
+
 /// Argument type for stripping
 public enum ArgumentStrippingMode: String, CaseIterable {
     case unnamedOnly = "unnamed-only"
@@ -84,7 +90,7 @@ public enum ArgumentStrippingMode: String, CaseIterable {
     case all = "always"
 }
 
-// Wrap mode for @ attributes
+/// Wrap mode for @ attributes
 public enum AttributeMode: String, CaseIterable {
     case prevLine = "prev-line"
     case sameLine = "same-line"
@@ -108,6 +114,16 @@ public enum ExtensionACLPlacement: String, CaseIterable {
 public enum WrapReturnType: String, CaseIterable {
     case ifMultiline = "if-multiline"
     case preserve
+}
+
+/// Wrapping behavior for effects (`async`, `throws`)
+public enum WrapEffects: String, CaseIterable {
+    case preserve
+    /// `async` and `throws` are wrapped to the line after the closing paren
+    /// if the function spans multiple lines
+    case ifMultiline = "if-multiline"
+    /// `async` and `throws` are never wrapped, and are always included on the same line as the closing paren
+    case never
 }
 
 /// Annotation which should be kept when removing a redundant type
@@ -169,7 +185,7 @@ public struct Version: RawRepresentable, Comparable, ExpressibleByStringLiteral,
     }
 
     public static func < (lhs: Version, rhs: Version) -> Bool {
-        return lhs.rawValue.compare(
+        lhs.rawValue.compare(
             rhs.rawValue,
             options: .numeric,
             locale: Locale(identifier: "en_US")
@@ -177,7 +193,7 @@ public struct Version: RawRepresentable, Comparable, ExpressibleByStringLiteral,
     }
 
     public var description: String {
-        return rawValue
+        rawValue
     }
 }
 
@@ -231,7 +247,7 @@ public struct FileInfo: Equatable, CustomStringConvertible {
     var creationDate: Date?
 
     var fileName: String? {
-        return filePath.map { URL(fileURLWithPath: $0).lastPathComponent }
+        filePath.map { URL(fileURLWithPath: $0).lastPathComponent }
     }
 
     public init(filePath: String? = nil, creationDate: Date? = nil) {
@@ -240,7 +256,7 @@ public struct FileInfo: Equatable, CustomStringConvertible {
     }
 
     public var description: String {
-        return "\(fileName ?? "");\(creationDate.map { "\($0)" } ?? "")"
+        "\(fileName ?? "");\(creationDate.map { "\($0)" } ?? "")"
     }
 }
 
@@ -282,7 +298,7 @@ public enum Grouping: Equatable, RawRepresentable, CustomStringConvertible {
     }
 
     public var description: String {
-        return rawValue
+        rawValue
     }
 }
 
@@ -326,6 +342,12 @@ public enum MarkMode: String, CaseIterable {
     case ifNotEmpty = "if-not-empty"
 }
 
+/// Whether to convert types to enum
+public enum EnumNamespacesMode: String, CaseIterable {
+    case always
+    case structsOnly = "structs-only"
+}
+
 /// Configuration options for formatting. These aren't actually used by the
 /// Formatter class itself, but it makes them available to the format rules.
 public struct FormatOptions: CustomStringConvertible {
@@ -348,6 +370,7 @@ public struct FormatOptions: CustomStringConvertible {
     public var wrapParameters: WrapMode
     public var wrapCollections: WrapMode
     public var wrapTypealiases: WrapMode
+    public var wrapEnumCases: WrapEnumCases
     public var closingParenOnSameLine: Bool
     public var wrapReturnType: WrapReturnType
     public var wrapConditions: WrapMode
@@ -366,6 +389,8 @@ public struct FormatOptions: CustomStringConvertible {
     public var guardElsePosition: ElsePosition
     public var explicitSelf: SelfMode
     public var selfRequired: Set<String>
+    public var throwCapturing: Set<String>
+    public var asyncCapturing: Set<String>
     public var experimentalRules: Bool
     public var importGrouping: ImportGrouping
     public var trailingClosures: Set<String>
@@ -403,17 +428,26 @@ public struct FormatOptions: CustomStringConvertible {
     public var acronyms: Set<String>
     public var indentStrings: Bool
     public var closureVoidReturn: ClosureVoidReturn
+    public var enumNamespaces: EnumNamespacesMode
+    public var removeStartOrEndBlankLinesFromTypes: Bool
+    public var genericTypes: String
+    public var useSomeAny: Bool
+    public var wrapEffects: WrapEffects
+    public var preserveAnonymousForEach: Bool
+    public var preserveSingleLineForEach: Bool
 
-    // Deprecated
+    /// Deprecated
     public var indentComments: Bool
 
-    // Doesn't really belong here, but hard to put elsewhere
+    /// Doesn't really belong here, but hard to put elsewhere
     public var fragment: Bool
     public var ignoreConflictMarkers: Bool
     public var swiftVersion: Version
     public var fileInfo: FileInfo
+    public var timeout: TimeInterval
 
-    // Enabled rules
+    /// Enabled rules - this is a hack used to allow rules to vary their behavior
+    /// based on other rules being enabled. Do not rely on it in other contexts
     var enabledRules: Set<String> = []
 
     public static let `default` = FormatOptions()
@@ -438,6 +472,7 @@ public struct FormatOptions: CustomStringConvertible {
                 wrapParameters: WrapMode = .default,
                 wrapCollections: WrapMode = .preserve,
                 wrapTypealiases: WrapMode = .preserve,
+                wrapEnumCases: WrapEnumCases = .always,
                 closingParenOnSameLine: Bool = false,
                 wrapReturnType: WrapReturnType = .preserve,
                 wrapConditions: WrapMode = .preserve,
@@ -456,6 +491,8 @@ public struct FormatOptions: CustomStringConvertible {
                 guardElsePosition: ElsePosition = .auto,
                 explicitSelf: SelfMode = .remove,
                 selfRequired: Set<String> = [],
+                throwCapturing: Set<String> = [],
+                asyncCapturing: Set<String> = [],
                 experimentalRules: Bool = false,
                 importGrouping: ImportGrouping = .alpha,
                 trailingClosures: Set<String> = [],
@@ -468,7 +505,7 @@ public struct FormatOptions: CustomStringConvertible {
                 noSpaceOperators: Set<String> = [],
                 noWrapOperators: Set<String> = [],
                 modifierOrder: [String] = [],
-                shortOptionals: OptionalsMode = .always,
+                shortOptionals: OptionalsMode = .exceptProperties,
                 funcAttributes: AttributeMode = .preserve,
                 typeAttributes: AttributeMode = .preserve,
                 varAttributes: AttributeMode = .preserve,
@@ -493,11 +530,19 @@ public struct FormatOptions: CustomStringConvertible {
                 acronyms: Set<String> = ["ID", "URL", "UUID"],
                 indentStrings: Bool = false,
                 closureVoidReturn: ClosureVoidReturn = .remove,
+                enumNamespaces: EnumNamespacesMode = .always,
+                removeStartOrEndBlankLinesFromTypes: Bool = true,
+                genericTypes: String = "",
+                useSomeAny: Bool = true,
+                wrapEffects: WrapEffects = .preserve,
+                preserveAnonymousForEach: Bool = false,
+                preserveSingleLineForEach: Bool = true,
                 // Doesn't really belong here, but hard to put elsewhere
                 fragment: Bool = false,
                 ignoreConflictMarkers: Bool = false,
                 swiftVersion: Version = .undefined,
-                fileInfo: FileInfo = FileInfo())
+                fileInfo: FileInfo = FileInfo(),
+                timeout: TimeInterval = 1)
     {
         self.lineAfterMarks = lineAfterMarks
         self.indent = indent
@@ -519,6 +564,7 @@ public struct FormatOptions: CustomStringConvertible {
         self.wrapParameters = wrapParameters
         self.wrapCollections = wrapCollections
         self.wrapTypealiases = wrapTypealiases
+        self.wrapEnumCases = wrapEnumCases
         self.closingParenOnSameLine = closingParenOnSameLine
         self.wrapReturnType = wrapReturnType
         self.wrapConditions = wrapConditions
@@ -537,6 +583,8 @@ public struct FormatOptions: CustomStringConvertible {
         self.guardElsePosition = guardElsePosition
         self.explicitSelf = explicitSelf
         self.selfRequired = selfRequired
+        self.throwCapturing = throwCapturing
+        self.asyncCapturing = asyncCapturing
         self.experimentalRules = experimentalRules
         self.importGrouping = importGrouping
         self.trailingClosures = trailingClosures
@@ -574,15 +622,23 @@ public struct FormatOptions: CustomStringConvertible {
         self.acronyms = acronyms
         self.indentStrings = indentStrings
         self.closureVoidReturn = closureVoidReturn
+        self.enumNamespaces = enumNamespaces
+        self.removeStartOrEndBlankLinesFromTypes = removeStartOrEndBlankLinesFromTypes
+        self.genericTypes = genericTypes
+        self.useSomeAny = useSomeAny
+        self.wrapEffects = wrapEffects
+        self.preserveAnonymousForEach = preserveAnonymousForEach
+        self.preserveSingleLineForEach = preserveSingleLineForEach
         // Doesn't really belong here, but hard to put elsewhere
         self.fragment = fragment
         self.ignoreConflictMarkers = ignoreConflictMarkers
         self.swiftVersion = swiftVersion
         self.fileInfo = fileInfo
+        self.timeout = timeout
     }
 
     public var useTabs: Bool {
-        return indent.first == "\t"
+        indent.first == "\t"
     }
 
     public var requiresFileInfo: Bool {
@@ -593,8 +649,9 @@ public struct FormatOptions: CustomStringConvertible {
     public var allOptions: [String: Any] {
         let pairs = Mirror(reflecting: self).children.map { ($0!, $1) }
         var options = Dictionary(pairs, uniquingKeysWith: { $1 })
-        options["fileInfo"] = nil // Special case
-        options["enabledRules"] = nil // Special case
+        for key in ["fileInfo", "enabledRules", "timeout"] { // Special cases
+            options[key] = nil
+        }
         return options
     }
 
@@ -652,27 +709,31 @@ public struct Options {
     public var fileOptions: FileOptions?
     public var formatOptions: FormatOptions?
     public var rules: Set<String>?
+    public var configURL: URL?
     public var lint: Bool
 
     public static let `default` = Options(
         fileOptions: .default,
         formatOptions: .default,
         rules: Set(FormatRules.byName.keys).subtracting(FormatRules.disabledByDefault),
+        configURL: nil,
         lint: false
     )
 
     public init(fileOptions: FileOptions? = nil,
                 formatOptions: FormatOptions? = nil,
                 rules: Set<String>? = nil,
+                configURL: URL? = nil,
                 lint: Bool = false)
     {
         self.fileOptions = fileOptions
         self.formatOptions = formatOptions
         self.rules = rules
+        self.configURL = configURL
         self.lint = lint
     }
 
     public func shouldSkipFile(_ inputURL: URL) -> Bool {
-        return fileOptions?.shouldSkipFile(inputURL) ?? false
+        fileOptions?.shouldSkipFile(inputURL) ?? false
     }
 }

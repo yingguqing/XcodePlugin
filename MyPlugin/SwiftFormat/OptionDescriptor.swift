@@ -33,7 +33,7 @@ import Foundation
 
 class OptionDescriptor {
     enum ArgumentType: EnumAssociable {
-        // index 0 is official value, others are acceptable
+        /// index 0 is official value, others are acceptable
         case binary(true: [String], false: [String])
         case `enum`([String])
         case text
@@ -46,23 +46,23 @@ class OptionDescriptor {
     fileprivate(set) var propertyName = "" // internal property; ok to change this
     let displayName: String
     let help: String
-    let deprecationMessage: String?
+    fileprivate(set) var deprecationMessage: String?
     let toOptions: (String, inout FormatOptions) throws -> Void
     let fromOptions: (FormatOptions) -> String
     private(set) var type: ArgumentType
 
     var isDeprecated: Bool {
-        return deprecationMessage != nil
+        deprecationMessage != nil
     }
 
     var isRenamed: Bool {
-        return isDeprecated && Descriptors.all.contains(where: {
+        isDeprecated && Descriptors.all.contains(where: {
             $0.propertyName == propertyName && $0.argumentName != argumentName
         })
     }
 
     var defaultArgument: String {
-        return fromOptions(FormatOptions.default)
+        fromOptions(FormatOptions.default)
     }
 
     func validateArgument(_ arg: String) -> Bool {
@@ -72,6 +72,7 @@ class OptionDescriptor {
 
     fileprivate func renamed(to newPropertyName: String) -> OptionDescriptor {
         propertyName = newPropertyName
+        deprecationMessage = "Use --\(newPropertyName) instead."
         return self
     }
 
@@ -91,6 +92,7 @@ class OptionDescriptor {
          falseValues: [String])
     {
         assert(argumentName.count <= Options.maxArgumentNameLength)
+        assert(argumentName == argumentName.lowercased())
         self.argumentName = argumentName
         self.displayName = displayName
         self.help = help
@@ -140,7 +142,7 @@ class OptionDescriptor {
                      help: String,
                      deprecationMessage: String? = nil,
                      keyPath: WritableKeyPath<FormatOptions, String>,
-                     options: DictionaryLiteral<String, String>)
+                     options: KeyValuePairs<String, String>)
     {
         let map: [String: String] = Dictionary(options.map { ($0, $1) }, uniquingKeysWith: { $1 })
         let keys = Array(map.keys).sorted()
@@ -207,6 +209,7 @@ class OptionDescriptor {
         }
     }
 
+    @_disfavoredOverload
     convenience init<T: RawRepresentable>(
         argumentName: String,
         displayName: String,
@@ -318,11 +321,11 @@ private let _formattingDescriptors: [OptionDescriptor] = {
 
 extension _Descriptors {
     var formatting: [OptionDescriptor] {
-        return _formattingDescriptors
+        _formattingDescriptors
     }
 
     var `internal`: [OptionDescriptor] {
-        return [
+        [
             experimentalRules,
             fragment,
             ignoreConflictMarkers,
@@ -331,11 +334,11 @@ extension _Descriptors {
     }
 
     /// An Array of all descriptors
-    var all: [OptionDescriptor] { return _allDescriptors }
+    var all: [OptionDescriptor] { _allDescriptors }
 
     /// A Dictionary of descriptors by name
     var byName: [String: OptionDescriptor] {
-        return _descriptorsByName
+        _descriptorsByName
     }
 }
 
@@ -389,7 +392,7 @@ struct _Descriptors {
     let useVoid = OptionDescriptor(
         argumentName: "voidtype",
         displayName: "Void Type",
-        help: "How Void types are represented: \"void\" (default) or \"tuple\"",
+        help: "How void types are represented: \"void\" (default) or \"tuple\"",
         keyPath: \.useVoid,
         trueValues: ["void"],
         falseValues: ["tuple", "tuples", "()"]
@@ -445,6 +448,12 @@ struct _Descriptors {
         help: "Wrap all arguments: \"before-first\", \"after-first\", \"preserve\"",
         keyPath: \.wrapArguments
     )
+    let wrapEnumCases = OptionDescriptor(
+        argumentName: "wrapenumcases",
+        displayName: "Wrap Enum Cases",
+        help: "Wrap enum cases: \"always\" (default) or \"with-values\"",
+        keyPath: \.wrapEnumCases
+    )
     let wrapParameters = OptionDescriptor(
         argumentName: "wrapparameters",
         displayName: "Wrap Parameters",
@@ -468,6 +477,12 @@ struct _Descriptors {
         displayName: "Wrap Return Type",
         help: "Wrap return type: \"if-multiline\", \"preserve\" (default)",
         keyPath: \.wrapReturnType
+    )
+    let wrapEffects = OptionDescriptor(
+        argumentName: "wrapeffects",
+        displayName: "Wrap Function Effects (throws, async)",
+        help: "Wrap effects: \"if-multiline\", \"never\", \"preserve\"",
+        keyPath: \.wrapEffects
     )
     let wrapConditions = OptionDescriptor(
         argumentName: "wrapconditions",
@@ -584,6 +599,18 @@ struct _Descriptors {
         displayName: "Self Required",
         help: "Comma-delimited list of functions with @autoclosure arguments",
         keyPath: \FormatOptions.selfRequired
+    )
+    let throwCapturing = OptionDescriptor(
+        argumentName: "throwcapturing",
+        displayName: "Throw Capturing",
+        help: "List of functions with throwing @autoclosure arguments",
+        keyPath: \FormatOptions.throwCapturing
+    )
+    let asyncCapturing = OptionDescriptor(
+        argumentName: "asynccapturing",
+        displayName: "Async Capturing",
+        help: "List of functions with async @autoclosure arguments",
+        keyPath: \FormatOptions.asyncCapturing
     )
     let importGrouping = OptionDescriptor(
         argumentName: "importgrouping",
@@ -709,7 +736,7 @@ struct _Descriptors {
     let shortOptionals = OptionDescriptor(
         argumentName: "shortoptionals",
         displayName: "Short Optional Syntax",
-        help: "Use ? for Optionals \"always\" (default) or \"except-properties\"",
+        help: "Use ? for optionals \"always\" or \"except-properties\" (default)",
         keyPath: \.shortOptionals
     )
     let markTypes = OptionDescriptor(
@@ -857,7 +884,7 @@ struct _Descriptors {
     let indentStrings = OptionDescriptor(
         argumentName: "indentstrings",
         displayName: "Indent Strings",
-        help: "Indent Multiline Strings: \"false\" (default) or \"true\"",
+        help: "Indent multiline strings: \"false\" (default) or \"true\"",
         keyPath: \.indentStrings,
         trueValues: ["true", "enabled"],
         falseValues: ["false", "disabled"]
@@ -867,6 +894,52 @@ struct _Descriptors {
         displayName: "Closure Void Return",
         help: "Closure void returns: \"remove\" (default) or \"preserve\"",
         keyPath: \.closureVoidReturn
+    )
+    let enumNamespaces = OptionDescriptor(
+        argumentName: "enumnamespaces",
+        displayName: "Convert namespaces types to enum",
+        help: "Change type to enum: \"always\" (default) or \"structs-only\"",
+        keyPath: \.enumNamespaces
+    )
+    let removeStartOrEndBlankLinesFromTypes = OptionDescriptor(
+        argumentName: "typeblanklines",
+        displayName: "Remove blank lines from types",
+        help: "\"remove\" (default) or \"preserve\" blank lines from types",
+        keyPath: \.removeStartOrEndBlankLinesFromTypes,
+        trueValues: ["remove"],
+        falseValues: ["preserve"]
+    )
+    let genericTypes = OptionDescriptor(
+        argumentName: "generictypes",
+        displayName: "Additional generic types",
+        help: "Semicolon-delimited list of generic types and type parameters",
+        keyPath: \.genericTypes,
+        fromArgument: { $0 },
+        toArgument: { $0 }
+    )
+    let useSomeAny = OptionDescriptor(
+        argumentName: "someany",
+        displayName: "Use `some Any`",
+        help: "Use `some Any` types: \"true\" (default) or \"false\"",
+        keyPath: \.useSomeAny,
+        trueValues: ["true", "enabled"],
+        falseValues: ["false", "disabled"]
+    )
+    let preserveAnonymousForEach = OptionDescriptor(
+        argumentName: "anonymousforeach",
+        displayName: "Anonymous forEach closures",
+        help: "Convert anonymous forEach: \"convert\" (default) or \"ignore\".",
+        keyPath: \.preserveAnonymousForEach,
+        trueValues: ["ignore", "preserve"],
+        falseValues: ["convert"]
+    )
+    let preserveSingleLineForEach = OptionDescriptor(
+        argumentName: "onelineforeach",
+        displayName: "Single-line forEach closures",
+        help: "Convert one-line forEach: \"convert\" or \"ignore\" (default).",
+        keyPath: \.preserveSingleLineForEach,
+        trueValues: ["ignore", "preserve"],
+        falseValues: ["convert"]
     )
 
     // MARK: - Internal
@@ -939,7 +1012,6 @@ struct _Descriptors {
         argumentName: "empty",
         displayName: "Empty",
         help: "deprecated",
-        deprecationMessage: "Use --voidtype instead.",
         keyPath: \.useVoid,
         trueValues: ["void"],
         falseValues: ["tuple", "tuples"]
@@ -949,7 +1021,6 @@ struct _Descriptors {
         argumentName: "hexliterals",
         displayName: "hexliterals",
         help: "deprecated",
-        deprecationMessage: "Use --hexliteralcase instead.",
         keyPath: \.uppercaseHex,
         trueValues: ["uppercase", "upper"],
         falseValues: ["lowercase", "lower"]
@@ -959,7 +1030,6 @@ struct _Descriptors {
         argumentName: "wrapelements",
         displayName: "Wrap Elements",
         help: "deprecated",
-        deprecationMessage: "Use --wrapcollections instead.",
         keyPath: \.wrapCollections
     ).renamed(to: "wrapCollections")
 
@@ -967,7 +1037,6 @@ struct _Descriptors {
         argumentName: "specifierorder",
         displayName: "Specifier Order",
         help: "deprecated",
-        deprecationMessage: "Use --modifierorder instead.",
         keyPath: \FormatOptions.modifierOrder,
         validate: {
             guard _FormatRules.mapModifiers($0) != nil else {
