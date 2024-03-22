@@ -88,36 +88,6 @@ final class RulesViewController: NSViewController {
         formatOptions.swiftVersion = version
         optionStore.save(formatOptions)
     }
-
-    /// 导出配置
-    @IBAction func exportAllRules(_ sender: NSButton) {
-        let openDialog = NSOpenPanel()
-        openDialog.canChooseFiles = false
-        openDialog.canChooseDirectories = true
-        openDialog.allowsMultipleSelection = false
-        openDialog.allowsOtherFileTypes = false
-        guard openDialog.runModal() == .OK, let path = openDialog.urls.first else { return }
-        let outPath = path.path.appending(pathComponent: "rules.json")
-        let rules = ruleStore.rules.map({ ($0.name, $0.isEnabled) })
-        let dic = Dictionary(uniqueKeysWithValues: rules)
-        if let data = try? JSONSerialization.data(withJSONObject: dic, options: [.sortedKeys, .prettyPrinted]) {
-            try? data.write(to: URL(fileURLWithPath: outPath))
-        }
-    }
-    
-    /// 导入配置
-    @IBAction func importAllRules(_ sender: NSButton) {
-        let openDialog = NSOpenPanel()
-        openDialog.canChooseFiles = true
-        openDialog.canChooseDirectories = false
-        openDialog.allowsMultipleSelection = false
-        openDialog.allowsOtherFileTypes = false
-        openDialog.allowedContentTypes = [UTType(tag: "json", tagClass: .filenameExtension, conformingTo: .compositeContent)!]
-        guard openDialog.runModal() == .OK, let path = openDialog.urls.first, let rules = Rule.userRules(path: path.path) else { return }
-        ruleStore.restore(rules)
-        viewModels = buildRules()
-        tableView?.reloadData()
-    }
     
     private func updateSelectedVersion() {
         let currentVersion = optionStore.formatOptions.swiftVersion
