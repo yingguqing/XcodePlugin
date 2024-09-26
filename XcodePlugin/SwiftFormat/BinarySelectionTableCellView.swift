@@ -46,9 +46,12 @@ final class BinarySelectionTableCellView: NSTableCellView {
             guard let model = objectValue as? UserSelectionBinary else {
                 return
             }
-            toolTip = model.description
+            // 显示中文说明
+            checkbox.title = model.description  ?? ""
+            toolTip = model.title
+            //toolTip = model.description
+            //checkbox.title = model.title ?? ""
             checkbox.isEnabled = model.isEnabled
-            checkbox.title = model.title ?? ""
             checkbox.state = model.selection ? .on : .off
         }
     }

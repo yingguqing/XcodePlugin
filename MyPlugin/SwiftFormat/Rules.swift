@@ -212,7 +212,7 @@ public struct _FormatRules {
     /// * There is space between a closing paren and following opening brace
     /// * There is no space between a closing paren and following opening square bracket
     public let spaceAroundParens = FormatRule(
-        help: "Add or remove space around parentheses."
+        help: "添加或删除括号周围的空格。"
     ) { formatter in
         func spaceAfter(_ keyword: String, index: Int) -> Bool {
             switch keyword {
@@ -297,7 +297,7 @@ public struct _FormatRules {
 
     /// Remove space immediately inside parens
     public let spaceInsideParens = FormatRule(
-        help: "Remove space inside parentheses."
+        help: "删除括号内的空格。"
     ) { formatter in
         formatter.forEach(.startOfScope("(")) { i, _ in
             if formatter.token(at: i + 1)?.isSpace == true,
@@ -323,7 +323,7 @@ public struct _FormatRules {
     /// * There is space between a closing bracket and following identifier
     /// * There is space between a closing bracket and following opening brace
     public let spaceAroundBrackets = FormatRule(
-        help: "Add or remove space around square brackets."
+        help: "添加或删除方括号周围的空格。"
     ) { formatter in
         formatter.forEach(.startOfScope("[")) { i, _ in
             guard let prevToken = formatter.token(at: i - 1) else {
@@ -368,7 +368,7 @@ public struct _FormatRules {
 
     /// Remove space immediately inside square brackets
     public let spaceInsideBrackets = FormatRule(
-        help: "Remove space inside square brackets."
+        help: "删除方括号内的空格。"
     ) { formatter in
         formatter.forEach(.startOfScope("[")) { i, _ in
             if formatter.token(at: i + 1)?.isSpace == true,
@@ -389,7 +389,7 @@ public struct _FormatRules {
     /// Ensure that there is space between an opening brace and the preceding
     /// identifier, and between a closing brace and the following identifier.
     public let spaceAroundBraces = FormatRule(
-        help: "Add or remove space around curly braces."
+        help: "添加或删除花括号周围的空格。"
     ) { formatter in
         formatter.forEach(.startOfScope("{")) { i, _ in
             if let prevToken = formatter.token(at: i - 1) {
@@ -416,7 +416,7 @@ public struct _FormatRules {
 
     /// Ensure that there is space immediately inside braces
     public let spaceInsideBraces = FormatRule(
-        help: "Add space inside curly braces."
+        help: "在大括号内添加空格。"
     ) { formatter in
         formatter.forEach(.startOfScope("{")) { i, _ in
             if let nextToken = formatter.token(at: i + 1) {
@@ -440,7 +440,7 @@ public struct _FormatRules {
 
     /// Ensure there is no space between an opening chevron and the preceding identifier
     public let spaceAroundGenerics = FormatRule(
-        help: "Remove space around angle brackets."
+        help: "删除尖括号周围的空格。"
     ) { formatter in
         formatter.forEach(.startOfScope("<")) { i, _ in
             if formatter.token(at: i - 1)?.isSpace == true,
@@ -453,7 +453,7 @@ public struct _FormatRules {
 
     /// Remove space immediately inside chevrons
     public let spaceInsideGenerics = FormatRule(
-        help: "Remove space inside angle brackets."
+        help: "删除尖括号内的空格。"
     ) { formatter in
         formatter.forEach(.startOfScope("<")) { i, _ in
             if formatter.token(at: i + 1)?.isSpace == true {
@@ -476,7 +476,7 @@ public struct _FormatRules {
     ///   single space, unless it appears at the end of a line, and is not
     ///   preceded by a space, unless it appears at the beginning of a line.
     public let spaceAroundOperators = FormatRule(
-        help: "Add or remove space around operators or delimiters.",
+        help: "添加或删除运算符或分隔符周围的空格。",
         options: ["operatorfunc", "nospaceoperators", "ranges"]
     ) { formatter in
         formatter.forEachToken { i, token in
@@ -598,7 +598,7 @@ public struct _FormatRules {
 
     /// Add space around comments, except at the start or end of a line
     public let spaceAroundComments = FormatRule(
-        help: "Add space before and/or after comments."
+        help: "在注释之前和/或之后添加空格。"
     ) { formatter in
         formatter.forEach(.startOfScope("//")) { i, _ in
             if let prevToken = formatter.token(at: i - 1), !prevToken.isSpaceOrLinebreak {
@@ -634,7 +634,7 @@ public struct _FormatRules {
     /// Add space inside comments, taking care not to mangle headerdoc or
     /// carefully preformatted comments, such as star boxes, etc.
     public let spaceInsideComments = FormatRule(
-        help: "Add leading and/or trailing space inside comments."
+        help: "在注释中添加前导和/或尾随空格。"
     ) { formatter in
         formatter.forEach(.startOfScope("//")) { i, _ in
             guard case let .commentBody(string)? = formatter.token(at: i + 1),
@@ -678,7 +678,7 @@ public struct _FormatRules {
 
     /// Removes explicit type declarations from initialization declarations
     public let redundantType = FormatRule(
-        help: "Remove redundant type from variable declarations.",
+        help: "从变量声明中删除冗余类型。",
         options: ["redundanttype"]
     ) { formatter in
         formatter.forEach(.operator("=", .infix)) { i, _ in
@@ -844,7 +844,7 @@ public struct _FormatRules {
     /// the start of a line or inside a comment or string, as these have no semantic
     /// meaning and lead to noise in commits.
     public let consecutiveSpaces = FormatRule(
-        help: "Replace consecutive spaces with a single space."
+        help: "将连续空格替换为单个空格。"
     ) { formatter in
         formatter.forEach(.space) { i, token in
             switch token {
@@ -880,8 +880,9 @@ public struct _FormatRules {
     /// Converts types used for hosting only static members into enums to avoid instantiation.
     public let enumNamespaces = FormatRule(
         help: """
-        Convert types used for hosting only static members into enums (an empty enum is
-        the canonical way to create a namespace in Swift as it can't be instantiated).
+        将仅用于托管静态成员的类型转换为枚举
+        （空枚举在 Swift 中创建命名空间的规范方法，
+        因为它无法实例化）。
         """,
         options: ["enumnamespaces"]
     ) { formatter in
@@ -991,7 +992,7 @@ public struct _FormatRules {
     /// Remove trailing space from the end of lines, as it has no semantic
     /// meaning and leads to noise in commits.
     public let trailingSpace = FormatRule(
-        help: "Remove trailing space at end of a line.",
+        help: "删除行尾的尾随空格。",
         orderAfter: ["wrap", "wrapArguments"],
         options: ["trimwhitespace"]
     ) { formatter in
@@ -1006,7 +1007,7 @@ public struct _FormatRules {
 
     /// Collapse all consecutive blank lines into a single blank line
     public let consecutiveBlankLines = FormatRule(
-        help: "Replace consecutive blank lines with a single blank line."
+        help: "将连续的空行替换为单个空行。"
     ) { formatter in
         formatter.forEach(.linebreak) { i, _ in
             guard let prevIndex = formatter.index(of: .nonSpace, before: i, if: { $0.isLinebreak }) else {
@@ -1027,7 +1028,7 @@ public struct _FormatRules {
 
     /// Remove blank lines immediately after an opening brace, bracket, paren or chevron
     public let blankLinesAtStartOfScope = FormatRule(
-        help: "Remove leading blank line at the start of a scope.",
+        help: "移除作用域开头的空行。",
         orderAfter: ["organizeDeclarations"],
         options: ["typeblanklines"]
     ) { formatter in
@@ -1070,7 +1071,7 @@ public struct _FormatRules {
     /// Remove blank lines immediately before a closing brace, bracket, paren or chevron
     /// unless it's followed by more code on the same line (e.g. } else { )
     public let blankLinesAtEndOfScope = FormatRule(
-        help: "Remove trailing blank line at the end of a scope.",
+        help: "移除作用域结尾的空行。",
         orderAfter: ["organizeDeclarations"],
         sharedOptions: ["typeblanklines"]
     ) { formatter in
@@ -1121,9 +1122,7 @@ public struct _FormatRules {
 
     /// Remove blank lines between import statements
     public let blankLinesBetweenImports = FormatRule(
-        help: """
-        Remove blank lines between import statements.
-        """,
+        help: "删除导入语句之间的空行。",
         disabledByDefault: true,
         sharedOptions: ["linebreaks"]
     ) { formatter in
@@ -1143,7 +1142,7 @@ public struct _FormatRules {
     /// Remove blank lines between chained functions but keep the linebreaks
     public let blankLinesBetweenChainedFunctions = FormatRule(
         help: """
-        Remove blank lines between chained functions but keep the linebreaks.
+        删除链接函数之间的空行，但保留换行符。
         """
     ) { formatter in
         formatter.forEach(.operator(".", .infix)) { i, _ in
@@ -1160,7 +1159,7 @@ public struct _FormatRules {
     /// Insert blank line after import statements
     public let blankLineAfterImports = FormatRule(
         help: """
-        Insert blank line after import statements.
+        在 import 语句后插入空行。
         """,
         sharedOptions: ["linebreaks"]
     ) { formatter in
@@ -1194,8 +1193,7 @@ public struct _FormatRules {
     /// Adds a blank line immediately after a closing brace, unless followed by another closing brace
     public let blankLinesBetweenScopes = FormatRule(
         help: """
-        Insert blank line before class, struct, enum, extension, protocol or function
-        declarations.
+        在类、结构、枚举、扩展、协议或函数声明之前插入空行。
         """,
         sharedOptions: ["linebreaks"]
     ) { formatter in
@@ -1291,7 +1289,7 @@ public struct _FormatRules {
 
     /// Adds a blank line around MARK: comments
     public let blankLinesAroundMark = FormatRule(
-        help: "Insert blank line before and after `MARK:` comments.",
+        help: "在“MARK:”注释之前和之后插入空行。",
         options: ["lineaftermarks"],
         sharedOptions: ["linebreaks"]
     ) { formatter in
@@ -1319,7 +1317,7 @@ public struct _FormatRules {
     /// Always end file with a linebreak, to avoid incompatibility with certain unix tools:
     /// http://stackoverflow.com/questions/2287967/why-is-it-recommended-to-have-empty-line-in-the-end-of-file
     public let linebreakAtEndOfFile = FormatRule(
-        help: "Add empty blank line at end of file.",
+        help: "在文件末尾添加空行。",
         sharedOptions: ["linebreaks"]
     ) { formatter in
         guard !formatter.options.fragment else { return }
@@ -1343,7 +1341,7 @@ public struct _FormatRules {
     /// The type (tab or space) and level (2 spaces, 4 spaces, etc.) of the
     /// indenting can be configured with the `options` parameter of the formatter.
     public let indent = FormatRule(
-        help: "Indent code in accordance with the scope level.",
+        help: "根据范围级别缩进代码。",
         orderAfter: ["trailingSpace", "wrap", "wrapArguments"],
         options: ["indent", "tabwidth", "smarttabs", "indentcase", "ifdef", "xcodeindentation", "indentstrings"],
         sharedOptions: ["trimwhitespace", "allman", "wrapconditions", "wrapternary"]
@@ -2127,8 +2125,8 @@ public struct _FormatRules {
     /// Add @available(*, unavailable) to init?(coder aDecoder: NSCoder)
     public let initCoderUnavailable = FormatRule(
         help: """
-        Add `@available(*, unavailable)` attribute to required `init(coder:)` when
-        it hasn't been implemented.
+        当尚未实现时，将“@available(*, unavailable)”属性
+        添加到所需的“init(coder:)”中。
         """,
         options: [],
         sharedOptions: ["linebreaks"]
@@ -2168,7 +2166,7 @@ public struct _FormatRules {
 
     /// Implement brace-wrapping rules
     public let braces = FormatRule(
-        help: "Wrap braces in accordance with selected style (K&R or Allman).",
+        help: "根据选择的样式（K&R 或 Allman）包裹大括号。",
         options: ["allman"],
         sharedOptions: ["linebreaks", "maxwidth", "indent", "tabwidth", "assetliterals"]
     ) { formatter in
@@ -2248,8 +2246,7 @@ public struct _FormatRules {
     /// Also applies to `catch` after `try` and `while` after `repeat`.
     public let elseOnSameLine = FormatRule(
         help: """
-        Place `else`, `catch` or `while` keyword in accordance with current style (same or
-        next line).
+        根据当前样式放置 `else`、`catch` 或 `while` 关键字（同一行或下一行）。
         """,
         orderAfter: ["wrapMultilineStatementBraces"],
         options: ["elseposition", "guardelse"],
@@ -2351,7 +2348,7 @@ public struct _FormatRules {
     }
 
     public let wrapConditionalBodies = FormatRule(
-        help: "Wrap the bodies of inline conditional statements onto a new line.",
+        help: "将内联条件语句的主体换行显示。",
         disabledByDefault: true,
         sharedOptions: ["linebreaks", "indent"]
     ) { formatter in
@@ -2364,7 +2361,7 @@ public struct _FormatRules {
     }
 
     public let wrapLoopBodies = FormatRule(
-        help: "Wrap the bodies of inline loop statements onto a new line.",
+        help: "将内联循环语句的主体换行显示。",
         orderAfter: ["preferForLoop"],
         sharedOptions: ["linebreaks", "indent"]
     ) { formatter in
@@ -2384,7 +2381,7 @@ public struct _FormatRules {
     /// Ensure that the last item in a multi-line array literal is followed by a comma.
     /// This is useful for preventing noise in commits when items are added to end of array.
     public let trailingCommas = FormatRule(
-        help: "Add or remove trailing comma from the last item in a collection literal.",
+        help: "添加或删除集合文字中最后一项的尾随逗号。",
         options: ["commas"]
     ) { formatter in
         formatter.forEach(.endOfScope("]")) { i, _ in
@@ -2427,7 +2424,7 @@ public struct _FormatRules {
 
     /// Ensure that TODO, MARK and FIXME comments are followed by a : as required
     public let todos = FormatRule(
-        help: "Use correct formatting for `TODO:`, `MARK:` or `FIXME:` comments."
+        help: "对“TODO:”、“MARK:”或“FIXME:”注释使用正确的格式。"
     ) { formatter in
         formatter.forEachToken { i, token in
             guard case var .commentBody(string) = token else {
@@ -2485,7 +2482,7 @@ public struct _FormatRules {
 
     /// Remove semicolons, except where doing so would change the meaning of the code
     public let semicolons = FormatRule(
-        help: "Remove semicolons.",
+        help: "删除分号。",
         options: ["semicolons"],
         sharedOptions: ["linebreaks"]
     ) { formatter in
@@ -2526,7 +2523,7 @@ public struct _FormatRules {
 
     /// Standardise linebreak characters as whatever is specified in the options (\n by default)
     public let linebreaks = FormatRule(
-        help: "Use specified linebreak character for all linebreaks (CR, LF or CRLF).",
+        help: "对所有换行符使用特定的换行符（CR、LF 或 CRLF）。",
         options: ["linebreaks"]
     ) { formatter in
         formatter.forEach(.linebreak) { i, _ in
@@ -2536,7 +2533,7 @@ public struct _FormatRules {
 
     /// Deprecated
     public let specifiers = FormatRule(
-        help: "Use consistent ordering for member modifiers.",
+        help: "对成员修饰符使用一致的顺序。",
         deprecationMessage: "Use modifierOrder instead.",
         options: ["modifierorder"]
     ) { formatter in
@@ -2546,7 +2543,7 @@ public struct _FormatRules {
 
     /// Standardise the order of property modifiers
     public let modifierOrder = FormatRule(
-        help: "Use consistent ordering for member modifiers.",
+        help: "对成员修饰符使用一致的顺序。",
         options: ["modifierorder"]
     ) { formatter in
         formatter.forEach(.keyword) { i, token in
@@ -2609,7 +2606,7 @@ public struct _FormatRules {
 
     /// Convert closure arguments to trailing closure syntax where possible
     public let trailingClosures = FormatRule(
-        help: "Use trailing closure syntax where applicable.",
+        help: "在适用的情况下使用尾随闭包语法。",
         options: ["trailingclosures", "nevertrailing"]
     ) { formatter in
         let useTrailing = Set([
@@ -2666,7 +2663,7 @@ public struct _FormatRules {
 
     /// Remove redundant parens around the arguments for loops, if statements, closures, etc.
     public let redundantParens = FormatRule(
-        help: "Remove redundant parentheses."
+        help: "删除多余的括号。"
     ) { formatter in
         func nestedParens(in range: ClosedRange<Int>) -> ClosedRange<Int>? {
             guard let startIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, after: range.lowerBound, if: {
@@ -2880,7 +2877,7 @@ public struct _FormatRules {
 
     /// Remove redundant `get {}` clause inside read-only computed property
     public let redundantGet = FormatRule(
-        help: "Remove unneeded `get` clause inside computed properties."
+        help: "删除计算属性中不需要的“get”子句。"
     ) { formatter in
         formatter.forEach(.identifier("get")) { i, _ in
             if formatter.isAccessorKeyword(at: i, checkKeyword: false),
@@ -2903,7 +2900,7 @@ public struct _FormatRules {
 
     /// Remove redundant `= nil` initialization for Optional properties
     public let redundantNilInit = FormatRule(
-        help: "Remove redundant `nil` default value (Optional vars are nil by default)."
+        help: "删除多余的“nil”默认值（可选变量默认为零）。"
     ) { formatter in
         func search(from index: Int) {
             if let optionalIndex = formatter.index(of: .unwrapOperator, after: index) {
@@ -2957,7 +2954,7 @@ public struct _FormatRules {
 
     /// Remove redundant let/var for unnamed variables
     public let redundantLet = FormatRule(
-        help: "Remove redundant `let`/`var` from ignored variables."
+        help: "从被忽略的变量中删除多余的 `let`/`var`。"
     ) { formatter in
         formatter.forEach(.identifier("_")) { i, _ in
             guard formatter.next(.nonSpaceOrCommentOrLinebreak, after: i) != .delimiter(":"),
@@ -2988,7 +2985,7 @@ public struct _FormatRules {
 
     /// Remove redundant pattern in case statements
     public let redundantPattern = FormatRule(
-        help: "Remove redundant pattern matching parameter syntax."
+        help: "删除冗余模式匹配参数语法。"
     ) { formatter in
         func redundantBindings(in range: Range<Int>) -> Bool {
             var isEmpty = true
@@ -3049,7 +3046,7 @@ public struct _FormatRules {
 
     /// Remove redundant raw string values for case statements
     public let redundantRawValues = FormatRule(
-        help: "Remove redundant raw string values for enum cases."
+        help: "删除枚举情况下的冗余原始字符串值。"
     ) { formatter in
         formatter.forEach(.keyword("enum")) { i, _ in
             guard let nameIndex = formatter.index(
@@ -3088,7 +3085,7 @@ public struct _FormatRules {
 
     /// Remove redundant void return values for function and closure declarations
     public let redundantVoidReturnType = FormatRule(
-        help: "Remove explicit `Void` return type.",
+        help: "删除显式的“Void”返回类型。",
         options: ["closurevoid"]
     ) { formatter in
         formatter.forEach(.operator("->", .infix)) { i, _ in
@@ -3123,7 +3120,7 @@ public struct _FormatRules {
 
     /// Remove redundant return keyword
     public let redundantReturn = FormatRule(
-        help: "Remove unneeded `return` keyword."
+        help: "删除不需要的“return”关键字。"
     ) { formatter in
         // indices of returns that are safe to remove
         var returnIndices = [Int]()
@@ -3322,7 +3319,7 @@ public struct _FormatRules {
 
     /// Remove redundant backticks around non-keywords, or in places where keywords don't need escaping
     public let redundantBackticks = FormatRule(
-        help: "Remove redundant backticks around identifiers."
+        help: "删除标识符周围多余的反引号。"
     ) { formatter in
         formatter.forEach(.identifier) { i, token in
             guard token.string.first == "`", !formatter.backticksRequired(at: i) else {
@@ -3334,14 +3331,14 @@ public struct _FormatRules {
 
     /// Remove redundant Self keyword
     public let redundantStaticSelf = FormatRule(
-        help: "Remove explicit `Self` where applicable."
+        help: "在适用的情况下删除显式的“Self”。"
     ) { formatter in
         formatter.addOrRemoveSelf(static: true)
     }
 
     /// Insert or remove redundant self keyword
     public let redundantSelf = FormatRule(
-        help: "Insert/remove explicit `self` where applicable.",
+        help: "在适用的情况下插入/删除显式的“self”。",
         options: ["self", "selfrequired"]
     ) { formatter in
         _ = formatter.options.selfRequired
@@ -3351,7 +3348,7 @@ public struct _FormatRules {
 
     /// Replace unused arguments with an underscore
     public let unusedArguments = FormatRule(
-        help: "Mark unused function arguments with `_`.",
+        help: "用“_”标记未使用的函数参数。",
         options: ["stripunusedargs"]
     ) { formatter in
         guard !formatter.options.fragment else { return }
@@ -3639,7 +3636,7 @@ public struct _FormatRules {
     }
 
     public let hoistTry = FormatRule(
-        help: "Move inline `try` keyword(s) to start of expression.",
+        help: "将内联“try”关键字移动到表达式的开头。",
         options: ["throwcapturing"]
     ) { formatter in
         let names = formatter.options.throwCapturing.union(["expect"])
@@ -3657,7 +3654,7 @@ public struct _FormatRules {
 
     /// Reposition `await` keyword outside of the current scope.
     public let hoistAwait = FormatRule(
-        help: "Move inline `await` keyword(s) to start of expression.",
+        help: "将内联“await”关键字移动到表达式的开头。",
         options: ["asynccapturing"]
     ) { formatter in
         guard formatter.options.swiftVersion >= "5.5" else { return }
@@ -3673,7 +3670,7 @@ public struct _FormatRules {
 
     /// Move `let` and `var` inside patterns to the beginning
     public let hoistPatternLet = FormatRule(
-        help: "Reposition `let` or `var` bindings within pattern.",
+        help: "在模式中重新定位“let”或“var”绑定。",
         options: ["patternlet"]
     ) { formatter in
         func indicesOf(_ keyword: String, in range: CountableRange<Int>) -> [Int]? {
@@ -3828,7 +3825,7 @@ public struct _FormatRules {
     }
 
     public let wrap = FormatRule(
-        help: "Wrap lines that exceed the specified maximum width.",
+        help: "对超过指定最大宽度的行进行换行。",
         options: ["maxwidth", "nowrapoperators", "assetliterals", "wrapternary"],
         sharedOptions: ["wraparguments", "wrapparameters", "wrapcollections", "closingparen", "indent",
                         "trimwhitespace", "linebreaks", "tabwidth", "maxwidth", "smarttabs", "wrapreturntype", "wrapconditions", "wraptypealiases", "wrapternary", "wrapeffects"]
@@ -3885,7 +3882,7 @@ public struct _FormatRules {
 
     /// Normalize argument wrapping style
     public let wrapArguments = FormatRule(
-        help: "Align wrapped function arguments or collection elements.",
+        help: "对齐包装的函数参数或集合元素。",
         orderAfter: ["wrap"],
         options: ["wraparguments", "wrapparameters", "wrapcollections", "closingparen",
                   "wrapreturntype", "wrapconditions", "wraptypealiases", "wrapeffects"],
@@ -3897,7 +3894,7 @@ public struct _FormatRules {
     }
 
     public let wrapMultilineStatementBraces = FormatRule(
-        help: "Wrap the opening brace of multiline statements.",
+        help: "将多行语句的左大括号括起来。",
         orderAfter: ["braces", "indent", "wrapArguments"],
         sharedOptions: ["linebreaks"]
     ) { formatter in
@@ -3922,7 +3919,7 @@ public struct _FormatRules {
 
     /// Formats enum cases declaration into one case per line
     public let wrapEnumCases = FormatRule(
-        help: "Rewrite comma-delimited enum cases to one case per line.",
+        help: "将逗号分隔的枚举值改为每行一个。",
         disabledByDefault: true,
         options: ["wrapenumcases"],
         sharedOptions: ["linebreaks"]
@@ -3976,7 +3973,7 @@ public struct _FormatRules {
 
     /// Wrap single-line comments that exceed given `FormatOptions.maxWidth` setting.
     public let wrapSingleLineComments = FormatRule(
-        help: "Wrap single line `//` comments that exceed the specified `--maxwidth`.",
+        help: "将超出指定的“-maxwidth”的单行“//”注释换行。",
         sharedOptions: ["maxwidth", "indent", "tabwidth", "assetliterals", "linebreaks"]
     ) { formatter in
         let delimiterLength = "//".count
@@ -4030,7 +4027,7 @@ public struct _FormatRules {
 
     /// Writes one switch case per line
     public let wrapSwitchCases = FormatRule(
-        help: "Wrap comma-delimited switch cases onto multiple lines.",
+        help: "将逗号分隔的 switch case 换行到多行。",
         disabledByDefault: true,
         sharedOptions: ["linebreaks", "tabwidth", "indent", "smarttabs"]
     ) { formatter in
@@ -4055,7 +4052,7 @@ public struct _FormatRules {
 
     /// Normalize the use of void in closure arguments and return values
     public let void = FormatRule(
-        help: "Use `Void` for type declarations and `()` for values.",
+        help: "使用“Void”作为类型声明，使用“()”作为值。",
         options: ["voidtype"]
     ) { formatter in
         func isArgumentToken(at index: Int) -> Bool {
@@ -4179,10 +4176,9 @@ public struct _FormatRules {
     /// Standardize formatting of numeric literals
     public let numberFormatting = FormatRule(
         help: """
-        Use consistent grouping for numeric literals. Groups will be separated by `_`
-        delimiters to improve readability. For each numeric type you can specify a group
-        size (the number of digits in each group) and a threshold (the minimum number of
-        digits in a number before grouping is applied).
+        对数字文字使用一致的分组。组将由“_”分隔符分隔以提高可读性。
+        对于每种数字类型，您可以指定组大小（每组中的位数）
+        和阈值（应用分组之前数字中的最小位数）。
         """,
         options: ["decimalgrouping", "binarygrouping", "octalgrouping", "hexgrouping",
                   "fractiongrouping", "exponentgrouping", "hexliteralcase", "exponentcase"]
@@ -4272,7 +4268,7 @@ public struct _FormatRules {
 
     /// Strip header comments from the file
     public let fileHeader = FormatRule(
-        help: "Use specified source file header template for all files.",
+        help: "对所有文件使用指定的源文件头模板。",
         runOnceOnly: true,
         options: ["header"],
         sharedOptions: ["linebreaks"]
@@ -4343,7 +4339,7 @@ public struct _FormatRules {
 
     /// Ensure file name reference in header matches actual file name
     public let headerFileName = FormatRule(
-        help: "Ensure file name in header comment matches the actual file name.",
+        help: "确保标题注释中的文件名与实际文件名匹配。",
         runOnceOnly: true,
         orderAfter: ["fileHeader"]
     ) { formatter in
@@ -4366,7 +4362,7 @@ public struct _FormatRules {
 
     /// Strip redundant `.init` from type instantiations
     public let redundantInit = FormatRule(
-        help: "Remove explicit `init` if not required."
+        help: "如果不需要，请删除显式的“init”。"
     ) { formatter in
         formatter.forEach(.identifier("init")) { i, _ in
             guard let dotIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, before: i, if: {
@@ -4407,7 +4403,7 @@ public struct _FormatRules {
 
     /// Deprecated
     public let sortedSwitchCases = FormatRule(
-        help: "Sort switch cases alphabetically.",
+        help: "按字母顺序对case进行排序。",
         deprecationMessage: "Use sortSwitchCases instead."
     ) { formatter in
         FormatRules.sortSwitchCases.apply(with: formatter)
@@ -4415,7 +4411,7 @@ public struct _FormatRules {
 
     /// Sorts switch cases alphabetically
     public let sortSwitchCases = FormatRule(
-        help: "Sort switch cases alphabetically.",
+        help: "按字母顺序对case进行排序。",
         disabledByDefault: true
     ) { formatter in
         formatter.parseSwitchCaseRanges()
@@ -4496,7 +4492,7 @@ public struct _FormatRules {
 
     /// Deprecated
     public let sortedImports = FormatRule(
-        help: "Sort import statements alphabetically.",
+        help: "按字母顺序对import进行排序。",
         deprecationMessage: "Use sortImports instead.",
         options: ["importgrouping"],
         sharedOptions: ["linebreaks"]
@@ -4508,7 +4504,7 @@ public struct _FormatRules {
 
     /// Sort import statements
     public let sortImports = FormatRule(
-        help: "Sort import statements alphabetically.",
+        help: "按字母顺序对import进行排序。",
         options: ["importgrouping"],
         sharedOptions: ["linebreaks"]
     ) { formatter in
@@ -4551,7 +4547,7 @@ public struct _FormatRules {
 
     /// Remove duplicate import statements
     public let duplicateImports = FormatRule(
-        help: "Remove duplicate import statements."
+        help: "删除重复的导入语句。"
     ) { formatter in
         for var importRanges in formatter.parseImports().reversed() {
             for i in importRanges.indices.reversed() {
@@ -4575,7 +4571,7 @@ public struct _FormatRules {
 
     /// Strip unnecessary `weak` from @IBOutlet properties (except delegates and datasources)
     public let strongOutlets = FormatRule(
-        help: "Remove `weak` modifier from `@IBOutlet` properties."
+        help: "从‘@IBOutlet‘中移除weak"
     ) { formatter in
         formatter.forEach(.keyword("@IBOutlet")) { i, _ in
             guard let varIndex = formatter.index(of: .keyword("var"), after: i),
@@ -4599,7 +4595,7 @@ public struct _FormatRules {
 
     /// Remove white-space between empty braces
     public let emptyBraces = FormatRule(
-        help: "Remove whitespace inside empty braces.",
+        help: "删除空大括号内的空格。",
         options: ["emptybraces"],
         sharedOptions: ["linebreaks"]
     ) { formatter in
@@ -4629,7 +4625,7 @@ public struct _FormatRules {
 
     /// Replace the `&&` operator with `,` where applicable
     public let andOperator = FormatRule(
-        help: "Prefer comma over `&&` in `if`, `guard` or `while` conditions."
+        help: "在“if”、“guard”或“while”条件中，优先使用逗号而不是“&&”。"
     ) { formatter in
         formatter.forEachToken { i, token in
             switch token {
@@ -4703,7 +4699,7 @@ public struct _FormatRules {
 
     /// Replace count == 0 with isEmpty
     public let isEmpty = FormatRule(
-        help: "Prefer `isEmpty` over comparing `count` against zero.",
+        help: "优先使用“is Empty”而不是将“count”与零进行比较。",
         disabledByDefault: true
     ) { formatter in
         formatter.forEach(.identifier("count")) { i, _ in
@@ -4787,7 +4783,7 @@ public struct _FormatRules {
 
     /// Remove redundant `let error` from `catch` statements
     public let redundantLetError = FormatRule(
-        help: "Remove redundant `let error` from `catch` clause."
+        help: "从 `catch` 子句中删除多余的 `let error`。"
     ) { formatter in
         formatter.forEach(.keyword("catch")) { i, _ in
             if let letIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, after: i, if: {
@@ -4804,7 +4800,7 @@ public struct _FormatRules {
 
     /// Prefer `AnyObject` over `class` for class-based protocols
     public let anyObjectProtocol = FormatRule(
-        help: "Prefer `AnyObject` over `class` in protocol definitions."
+        help: "在协议定义中，优先使用“AnyObject”而不是“class”。"
     ) { formatter in
         formatter.forEach(.keyword("protocol")) { i, _ in
             guard formatter.options.swiftVersion >= "4.1",
@@ -4824,7 +4820,7 @@ public struct _FormatRules {
 
     /// Remove redundant `break` keyword from switch cases
     public let redundantBreak = FormatRule(
-        help: "Remove redundant `break` in switch case."
+        help: "删除switch case中多余的“break”。"
     ) { formatter in
         formatter.forEach(.keyword("break")) { i, _ in
             guard formatter.last(.nonSpaceOrCommentOrLinebreak, before: i) != .startOfScope(":"),
@@ -4844,7 +4840,7 @@ public struct _FormatRules {
 
     /// Removed backticks from `self` when strongifying
     public let strongifiedSelf = FormatRule(
-        help: "Remove backticks around `self` in Optional unwrap expressions."
+        help: "删除可选展开表达式中“self”周围的反引号。"
     ) { formatter in
         formatter.forEach(.identifier("`self`")) { i, _ in
             guard formatter.options.swiftVersion >= "4.2",
@@ -4860,7 +4856,7 @@ public struct _FormatRules {
 
     /// Remove redundant @objc annotation
     public let redundantObjc = FormatRule(
-        help: "Remove redundant `@objc` annotations."
+        help: "删除多余的“@objc”注释。"
     ) { formatter in
         let objcAttributes = [
             "@IBOutlet", "@IBAction",
@@ -4935,7 +4931,7 @@ public struct _FormatRules {
 
     /// Replace Array<T>, Dictionary<T, U> and Optional<T> with [T], [T: U] and T?
     public let typeSugar = FormatRule(
-        help: "Prefer shorthand syntax for Arrays, Dictionaries and Optionals.",
+        help: "优先使用数组、字典和可选值的简写语法。",
         options: ["shortoptionals"]
     ) { formatter in
         formatter.forEach(.startOfScope("<")) { i, _ in
@@ -5029,7 +5025,7 @@ public struct _FormatRules {
 
     /// Remove redundant access control level modifiers in extensions
     public let redundantExtensionACL = FormatRule(
-        help: "Remove redundant access control modifiers."
+        help: "删除多余的访问控制修饰符。"
     ) { formatter in
         formatter.forEach(.keyword("extension")) { i, _ in
             var acl = ""
@@ -5053,7 +5049,7 @@ public struct _FormatRules {
 
     /// Replace `fileprivate` with `private` where possible
     public let redundantFileprivate = FormatRule(
-        help: "Prefer `private` over `fileprivate` where equivalent."
+        help: "在同等情况下，优先选择“private”而不是“fileprivate”。"
     ) { formatter in
         guard !formatter.options.fragment else { return }
 
@@ -5245,7 +5241,7 @@ public struct _FormatRules {
 
     /// Reorders "yoda conditions" where constant is placed on lhs of a comparison
     public let yodaConditions = FormatRule(
-        help: "Prefer constant values to be on the right-hand-side of expressions.",
+        help: "优先将常量值放在表达式的右侧。",
         options: ["yodaswap"]
     ) { formatter in
         func valuesInRangeAreConstant(_ range: CountableRange<Int>) -> Bool {
@@ -5372,7 +5368,7 @@ public struct _FormatRules {
     }
 
     public let leadingDelimiters = FormatRule(
-        help: "Move leading delimiters to the end of the previous line.",
+        help: "将前导分隔符移至上一行的末尾。",
         sharedOptions: ["linebreaks"]
     ) { formatter in
         formatter.forEach(.delimiter) { i, _ in
@@ -5398,7 +5394,7 @@ public struct _FormatRules {
     }
 
     public let wrapAttributes = FormatRule(
-        help: "Wrap @attributes onto a separate line, or keep them on the same line.",
+        help: "将 @attributes 包裹到单独的行上，或将它们保留在同一行上。",
         options: ["funcattributes", "typeattributes", "varattributes"],
         sharedOptions: ["linebreaks", "maxwidth"]
     ) { formatter in
@@ -5481,7 +5477,7 @@ public struct _FormatRules {
     }
 
     public let preferKeyPath = FormatRule(
-        help: "Convert trivial `map { $0.foo }` closures to keyPath-based syntax."
+        help: "将简单的 `map { $0.foo }` 闭包转换为基于 Path 的关键语法。"
     ) { formatter in
         formatter.forEach(.startOfScope("{")) { i, _ in
             guard formatter.options.swiftVersion >= "5.2",
@@ -5549,7 +5545,7 @@ public struct _FormatRules {
     }
 
     public let organizeDeclarations = FormatRule(
-        help: "Organize declarations within class, struct, enum, actor, and extension bodies.",
+        help: "在class, struct, enum, actor, extension内声明。",
         runOnceOnly: true,
         disabledByDefault: true,
         orderAfter: ["extensionAccessControl", "redundantFileprivate"],
@@ -5578,7 +5574,7 @@ public struct _FormatRules {
     }
 
     public let extensionAccessControl = FormatRule(
-        help: "Configure the placement of an extension's access control keyword.",
+        help: "配置扩展程序访问控制关键字的位置。",
         options: ["extensionacl"]
     ) { formatter in
         guard !formatter.options.fragment else { return }
@@ -5688,7 +5684,7 @@ public struct _FormatRules {
     }
 
     public let markTypes = FormatRule(
-        help: "Add a MARK comment before top-level types and extensions.",
+        help: "在顶级类型和扩展之前添加 MARK 注释。",
         runOnceOnly: true,
         disabledByDefault: true,
         options: ["marktypes", "typemark", "markextensions", "extensionmark", "groupedextension"],
@@ -5932,9 +5928,8 @@ public struct _FormatRules {
 
     public let sortDeclarations = FormatRule(
         help: """
-        Sorts the body of declarations with // swiftformat:sort
-        and declarations between // swiftformat:sort:begin and
-        // swiftformat:sort:end comments.
+        使用 // swiftformat:sort 以及 // swiftformat:sort:begin 
+        和 // swiftformat:sort:end 注释之间的声明对声明主体进行排序。
         """
     ) { formatter in
         formatter.forEachToken(
@@ -6056,8 +6051,8 @@ public struct _FormatRules {
 
     public let assertionFailures = FormatRule(
         help: """
-        Changes all instances of assert(false, ...) to assertionFailure(...)
-        and precondition(false, ...) to preconditionFailure(...).
+        将所有断言（assert(false, ...)实例更改为断言失败assertionFailure(...),
+        并将precondition(false, ...)更改为preconditionFailure(...)。
         """
     ) { formatter in
         formatter.forEachToken { i, token in
@@ -6087,7 +6082,7 @@ public struct _FormatRules {
     }
 
     public let acronyms = FormatRule(
-        help: "Capitalize acronyms when the first character is capitalized.",
+        help: "当第一个字符大写时，首字母缩略词也要大写。",
         disabledByDefault: true,
         options: ["acronyms"]
     ) { formatter in
@@ -6152,7 +6147,7 @@ public struct _FormatRules {
     }
 
     public let blockComments = FormatRule(
-        help: "Convert block comments to consecutive single line comments.",
+        help: "将块注释转换为连续的单行注释。",
         disabledByDefault: true
     ) { formatter in
         formatter.forEachToken { i, token in
@@ -6280,8 +6275,7 @@ public struct _FormatRules {
 
     public let redundantClosure = FormatRule(
         help: """
-        Removes redundant closures bodies, containing a single statement,
-        which are called immediately.
+        删除多余的闭包体，其中包含立即调用的单个语句。
         """,
         disabledByDefault: false,
         orderAfter: ["redundantReturn"]
@@ -6461,7 +6455,7 @@ public struct _FormatRules {
     }
 
     public let redundantOptionalBinding = FormatRule(
-        help: "Remove redundant identifiers in optional binding conditions.",
+        help: "删除可选绑定条件中的冗余标识符。",
         // We can convert `if let foo = self.foo` to just `if let foo`,
         // but only if `redundantSelf` can first remove the `self.`.
         orderAfter: ["redundantSelf"]
@@ -6494,10 +6488,11 @@ public struct _FormatRules {
 
     public let opaqueGenericParameters = FormatRule(
         help: """
-        Use opaque generic parameters (`some Protocol`) instead of generic parameters
-        with constraints (`T where T: Protocol`, etc) where equivalent. Also supports
-        primary associated types for common standard library types, so definitions like
-        `T where T: Collection, T.Element == Foo` are updated to `some Collection<Foo>`.
+        在等效情况下，使用不透明的通用参数（“some Protocol”）
+        而不是带有约束的通用参数（“T where T：Protocol”等）。
+        还支持常见标准库类型的主要关联类型，因此像
+        “T where T: Collection, T.Element == Foo”这样的定义
+        更新为“some Collection<Foo>”。
         """,
         options: ["someany"]
     ) { formatter in
@@ -6748,8 +6743,8 @@ public struct _FormatRules {
 
     public let genericExtensions = FormatRule(
         help: """
-        Use angle brackets (`extension Array<Foo>`) for generic type extensions
-        instead of type constraints (`extension Array where Element == Foo`).
+        使用尖括号 (`extension Array<Foo>`) 进行泛型类型扩展，
+        而不是类型约束 (`extension Array where Element == Foo`)。
         """,
         options: ["generictypes"]
     ) { formatter in
@@ -6863,7 +6858,7 @@ public struct _FormatRules {
     }
 
     public let docComments = FormatRule(
-        help: "Use doc comments for API declarations, otherwise use regular comments.",
+        help: "对 API 声明使用文档注释，否则使用常规注释。",
         disabledByDefault: true,
         orderAfter: ["fileHeader"]
     ) { formatter in
@@ -7001,7 +6996,7 @@ public struct _FormatRules {
     }
 
     public let conditionalAssignment = FormatRule(
-        help: "Assign properties using if / switch expressions.",
+        help: "使用 if / switch 表达式分配属性。",
         orderAfter: ["redundantReturn"]
     ) { formatter in
         // If / switch expressions were added in Swift 5.9 (SE-0380)
@@ -7174,7 +7169,7 @@ public struct _FormatRules {
     }
 
     public let sortTypealiases = FormatRule(
-        help: "Sort protocol composition typealiases alphabetically."
+        help: "按字母顺序对协议组合类型别名进行排序。"
     ) { formatter in
         formatter.forEach(.keyword("typealias")) { typealiasIndex, _ in
             guard let (equalsIndex, andTokenIndices, endIndex) = formatter.parseProtocolCompositionTypealias(at: typealiasIndex),
@@ -7298,7 +7293,7 @@ public struct _FormatRules {
     }
 
     public let redundantInternal = FormatRule(
-        help: "Remove redundant internal access control."
+        help: "删除多余的内部访问控制。"
     ) { formatter in
         formatter.forEach(.keyword("internal")) { internalKeywordIndex, _ in
             let accessControlLevels = ["public", "package", "internal", "private", "fileprivate"]
@@ -7327,7 +7322,7 @@ public struct _FormatRules {
     }
 
     public let preferForLoop = FormatRule(
-        help: "Convert functional `forEach` calls to for loops.",
+        help: "将函数“for Each”调用转换为 for 循环。",
         options: ["anonymousforeach", "onelineforeach"]
     ) { formatter in
         formatter.forEach(.identifier("forEach")) { forEachIndex, _ in
@@ -7600,7 +7595,7 @@ public struct _FormatRules {
     }
 
     public let noExplicitOwnership = FormatRule(
-        help: "Don't use explicit ownership modifiers (borrowing / consuming).",
+        help: "不要使用显式所有权修饰符(borrowing / consuming)。",
         disabledByDefault: true
     ) { formatter in
         formatter.forEachToken { keywordIndex, token in
@@ -7636,7 +7631,7 @@ public struct _FormatRules {
     }
 
     public let wrapMultilineConditionalAssignment = FormatRule(
-        help: "Wrap multiline conditional assignment expressions after the assignment operator.",
+        help: "将多行条件赋值表达式包裹在赋值运算符之后。",
         disabledByDefault: true,
         orderAfter: ["conditionalAssignment"],
         sharedOptions: ["linebreaks"]

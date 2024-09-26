@@ -10,6 +10,7 @@
 		4D0CAD7F2B50ED5000671DD4 /* Singularize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */; };
 		4D0CAD802B50ED5000671DD4 /* Singularize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */; };
 		4D3B8E97299B899A001C7A88 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3B8E96299B899A001C7A88 /* Regex.swift */; };
+		4D6CA6E82CA41DC6004DAA6E /* SwiftFormat in Frameworks */ = {isa = PBXBuildFile; productRef = 4D6CA6E72CA41DC6004DAA6E /* SwiftFormat */; };
 		4DB1DA1327D7678E0031CA5C /* FormattingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */; };
 		4DB1DA1527D767BE0031CA5C /* OptionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */; };
 		4DB1DA1727D768140031CA5C /* SupportedContentUTIs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */; };
@@ -183,6 +184,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4D6CA6E82CA41DC6004DAA6E /* SwiftFormat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -404,6 +406,9 @@
 				Base,
 			);
 			mainGroup = EFC97800238529EE006ED781;
+			packageReferences = (
+				4D6CA6E62CA41DC6004DAA6E /* XCRemoteSwiftPackageReference "SwiftFormat" */,
+			);
 			productRefGroup = EFC97800238529EE006ED781;
 			projectDirPath = "";
 			projectRoot = "";
@@ -663,11 +668,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "XcodePlugin/Supporting Files/XcodePlugin.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = F35YF899E4;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = BX45AJXQR7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -679,6 +686,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = mac_any_dev;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -690,11 +698,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "XcodePlugin/Supporting Files/XcodePlugin.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = F35YF899E4;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = BX45AJXQR7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "XcodePlugin/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -706,6 +716,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
 				PRODUCT_NAME = "XCode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = mac_any_dev;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -715,11 +726,13 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "MyPlugin/Supporting Files/MyPlugin.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = F35YF899E4;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = BX45AJXQR7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -737,6 +750,7 @@
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = mac_any_dev;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -747,11 +761,13 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "MyPlugin/Supporting Files/MyPlugin.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = F35YF899E4;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = BX45AJXQR7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = MyPlugin/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -769,6 +785,7 @@
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = mac_any_dev;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -805,6 +822,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4D6CA6E62CA41DC6004DAA6E /* XCRemoteSwiftPackageReference "SwiftFormat" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nicklockwood/SwiftFormat";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.54.5;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4D6CA6E72CA41DC6004DAA6E /* SwiftFormat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4D6CA6E62CA41DC6004DAA6E /* XCRemoteSwiftPackageReference "SwiftFormat" */;
+			productName = SwiftFormat;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EFC97801238529EE006ED781 /* Project object */;
 }

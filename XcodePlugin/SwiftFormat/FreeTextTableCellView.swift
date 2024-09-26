@@ -40,7 +40,9 @@ class FreeTextTableCellView: NSTableCellView {
             guard let model = objectValue as? UserSelectionFreeText else {
                 return
             }
-            title.stringValue = model.title ?? ""
+            // 显示中文说明
+            title.stringValue = model.description ?? ""
+            //title.stringValue = model.title ?? ""
             freeTextField.isEditable = model.isEnabled
             freeTextField.stringValue = model.selection
             updateErrorState()

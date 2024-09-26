@@ -46,9 +46,12 @@ class ListSelectionTableCellView: NSTableCellView {
             guard let model = objectValue as? UserSelectionList else {
                 return
             }
+            // 显示中文说明
+            toolTip = model.title
+            title.stringValue = model.description ?? ""
+            //title.stringValue = model.title ?? ""
+            //toolTip = model.description
             title.textColor = model.isEnabled ? .textColor : .disabledControlTextColor
-            title.stringValue = model.title ?? ""
-            toolTip = model.description
             dropDown.isEnabled = model.isEnabled
             dropDown.removeAllItems()
             dropDown.addItems(withTitles: model.options.map { $0 })
