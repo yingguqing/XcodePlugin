@@ -31,7 +31,7 @@
 
 import Foundation
 
-class OptionDescriptor {
+public class OptionDescriptor {
     enum ArgumentType: EnumAssociable {
         /// index 0 is official value, others are acceptable
         case binary(true: [String], false: [String])
@@ -194,6 +194,9 @@ class OptionDescriptor {
         self.argumentName = argumentName
         self.displayName = displayName
         self.help = help
+        for option in help.quotedValues {
+            assert(T(rawValue: option) ?? altOptions[option] != nil, "Option \(option) doesn't exist")
+        }
         self.deprecationMessage = deprecationMessage
         self.type = type
         toOptions = { rawValue, options in
@@ -296,7 +299,18 @@ class OptionDescriptor {
     }
 }
 
-let Descriptors = _Descriptors()
+private extension String {
+    var quotedValues: [String] {
+        let parts = components(separatedBy: "\"")
+        var even = false
+        return parts.compactMap {
+            defer { even = !even }
+            return even ? $0.components(separatedBy: "/").first : nil
+        }
+    }
+}
+
+public let Descriptors = _Descriptors()
 
 private var _allDescriptors: [OptionDescriptor] = {
     var descriptors = [OptionDescriptor]()
@@ -319,7 +333,7 @@ private let _formattingDescriptors: [OptionDescriptor] = {
     return _allDescriptors.filter { !internalDescriptors.contains($0.argumentName) }
 }()
 
-extension _Descriptors {
+public extension _Descriptors {
     var formatting: [OptionDescriptor] {
         _formattingDescriptors
     }
@@ -342,7 +356,7 @@ extension _Descriptors {
     }
 }
 
-struct _Descriptors {
+public struct _Descriptors {
     let lineAfterMarks = OptionDescriptor(
         argumentName: "lineaftermarks",
         displayName: "Blank line after \"MARK\"",
@@ -496,13 +510,17 @@ struct _Descriptors {
         help: "Wrap ternary operators: \"default\", \"before-operators\"",
         keyPath: \.wrapTernaryOperators
     )
-    let closingParenOnSameLine = OptionDescriptor(
+    let closingParenPosition = OptionDescriptor(
         argumentName: "closingparen",
         displayName: "Closing Paren Position",
         help: "Closing paren position: \"balanced\" (default) or \"same-line\"",
-        keyPath: \.closingParenOnSameLine,
-        trueValues: ["same-line"],
-        falseValues: ["balanced"]
+        keyPath: \.closingParenPosition
+    )
+    let callSiteClosingParenPosition = OptionDescriptor(
+        argumentName: "callsiteparen",
+        displayName: "Call Site Closing Paren",
+        help: "Closing paren at call sites: \"balanced\" or \"same-line\"",
+        keyPath: \.callSiteClosingParenPosition
     )
     let uppercaseHex = OptionDescriptor(
         argumentName: "hexliteralcase",
@@ -692,6 +710,12 @@ struct _Descriptors {
             }
         }
     )
+    let typeDelimiterSpacing = OptionDescriptor(
+        argumentName: "typedelimiter",
+        displayName: "Type delimiter spacing",
+        help: "\"space-after\" (default), \"spaced\" or \"no-space\"",
+        keyPath: \.typeDelimiterSpacing
+    )
     let spaceAroundRangeOperators = OptionDescriptor(
         argumentName: "ranges",
         displayName: "Ranges",
@@ -833,6 +857,12 @@ struct _Descriptors {
         help: "Minimum line count to organize extension body. Defaults to 0",
         keyPath: \.organizeExtensionThreshold
     )
+    let organizationMode = OptionDescriptor(
+        argumentName: "organizationmode",
+        displayName: "Declaration Organization Mode",
+        help: "Organize declarations by \"visibility\" (default) or \"type\"",
+        keyPath: \.organizationMode
+    )
     let funcAttributes = OptionDescriptor(
         argumentName: "funcattributes",
         displayName: "Function Attributes",
@@ -845,11 +875,29 @@ struct _Descriptors {
         help: "Type @attributes: \"preserve\", \"prev-line\", or \"same-line\"",
         keyPath: \.typeAttributes
     )
-    let varAttributes = OptionDescriptor(
-        argumentName: "varattributes",
-        displayName: "Var Attributes",
-        help: "Property @attributes: \"preserve\", \"prev-line\", or \"same-line\"",
-        keyPath: \.varAttributes
+    let storedVarAttributes = OptionDescriptor(
+        argumentName: "storedvarattrs",
+        displayName: "Stored Property Attributes",
+        help: "Stored var @attribs: \"preserve\", \"prev-line\", or \"same-line\"",
+        keyPath: \.storedVarAttributes
+    )
+    let computedVarAttributes = OptionDescriptor(
+        argumentName: "computedvarattrs",
+        displayName: "Computed Property Attributes",
+        help: "Computed var @attribs: \"preserve\", \"prev-line\", \"same-line\"",
+        keyPath: \.computedVarAttributes
+    )
+    let complexAttributes = OptionDescriptor(
+        argumentName: "complexattrs",
+        displayName: "Complex Attributes",
+        help: "Complex @attributes: \"preserve\", \"prev-line\", or \"same-line\"",
+        keyPath: \.complexAttributes
+    )
+    let complexAttributesExceptions = OptionDescriptor(
+        argumentName: "noncomplexattrs",
+        displayName: "Complex Attribute exceptions",
+        help: "List of @attributes to exclude from complexattrs rule",
+        keyPath: \.complexAttributesExceptions
     )
     let yodaSwap = OptionDescriptor(
         argumentName: "yodaswap",
@@ -878,7 +926,7 @@ struct _Descriptors {
     let acronyms = OptionDescriptor(
         argumentName: "acronyms",
         displayName: "Acronyms",
-        help: "Acronyms to auto-capitalize. Defaults to \"ID,URL,UUID\".",
+        help: "Acronyms to auto-capitalize. Defaults to \"ID,URL,UUID\"",
         keyPath: \.acronyms
     )
     let indentStrings = OptionDescriptor(
@@ -928,7 +976,7 @@ struct _Descriptors {
     let preserveAnonymousForEach = OptionDescriptor(
         argumentName: "anonymousforeach",
         displayName: "Anonymous forEach closures",
-        help: "Convert anonymous forEach: \"convert\" (default) or \"ignore\".",
+        help: "Convert anonymous forEach: \"convert\" (default) or \"ignore\"",
         keyPath: \.preserveAnonymousForEach,
         trueValues: ["ignore", "preserve"],
         falseValues: ["convert"]
@@ -936,10 +984,56 @@ struct _Descriptors {
     let preserveSingleLineForEach = OptionDescriptor(
         argumentName: "onelineforeach",
         displayName: "Single-line forEach closures",
-        help: "Convert one-line forEach: \"convert\" or \"ignore\" (default).",
+        help: "Convert one-line forEach: \"convert\" or \"ignore\" (default)",
         keyPath: \.preserveSingleLineForEach,
         trueValues: ["ignore", "preserve"],
         falseValues: ["convert"]
+    )
+    let preserveDocComments = OptionDescriptor(
+        argumentName: "doccomments",
+        displayName: "Doc comments",
+        help: "Doc comments: \"before-declarations\" (default) or \"preserve\"",
+        keyPath: \.preserveDocComments,
+        trueValues: ["preserve"],
+        falseValues: ["before-declarations", "declarations"]
+    )
+    let conditionalAssignmentOnlyAfterNewProperties = OptionDescriptor(
+        argumentName: "condassignment",
+        displayName: "Apply conditionalAssignment rule",
+        help: "Use cond. assignment: \"after-property\" (default) or \"always\"",
+        keyPath: \.conditionalAssignmentOnlyAfterNewProperties,
+        trueValues: ["after-property"],
+        falseValues: ["always"]
+    )
+    let initCoderNil = OptionDescriptor(
+        argumentName: "initcodernil",
+        displayName: "Return nil in init?(coder)",
+        help: "Replace fatalError with nil in unavailable init?(coder:)",
+        keyPath: \.initCoderNil,
+        trueValues: ["true", "enabled"],
+        falseValues: ["false", "disabled"]
+    )
+    let dateFormat = OptionDescriptor(
+        argumentName: "dateformat",
+        displayName: "Date format",
+        help: "\"system\" (default), \"iso\", \"dmy\", \"mdy\" or custom",
+        keyPath: \.dateFormat,
+        fromArgument: { DateFormat(rawValue: $0) },
+        toArgument: { $0.rawValue }
+    )
+    let timeZone = OptionDescriptor(
+        argumentName: "timezone",
+        displayName: "Date formatting timezone",
+        help: "\"system\" (default) or a valid identifier/abbreviation",
+        keyPath: \.timeZone,
+        fromArgument: { FormatTimeZone(rawValue: $0) },
+        toArgument: { $0.rawValue }
+    )
+    let nilInit = OptionDescriptor(
+        argumentName: "nilinit",
+        displayName: "Nil init type",
+        help: "\"remove\" (default) redundant nil or \"insert\" missing nil",
+        keyPath: \.nilInit
     )
 
     // MARK: - Internal
@@ -1004,6 +1098,13 @@ struct _Descriptors {
         keyPath: \.experimentalRules,
         trueValues: ["enabled", "true"],
         falseValues: ["disabled", "false"]
+    )
+    let varAttributes = OptionDescriptor(
+        argumentName: "varattributes",
+        displayName: "Var Attributes",
+        help: "Property @attributes: \"preserve\", \"prev-line\", or \"same-line\"",
+        deprecationMessage: "Use with `--storedvarattrs` or `--computedvarattrs` instead.",
+        keyPath: \.varAttributes
     )
 
     // MARK: - RENAMED

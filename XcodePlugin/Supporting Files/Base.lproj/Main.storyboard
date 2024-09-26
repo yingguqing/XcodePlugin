@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22154"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23094"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -418,19 +418,19 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="nbi-V0-Yhx">
-                                <rect key="frame" x="0.0" y="472" width="498" height="5"/>
+                                <rect key="frame" x="0.0" y="476" width="498" height="5"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="60n-IV-nQQ"/>
                                 </constraints>
                             </box>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="33" horizontalPageScroll="10" verticalLineScroll="33" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="Uqs-UE-NGi">
-                                <rect key="frame" x="0.0" y="0.0" width="498" height="436"/>
+                                <rect key="frame" x="0.0" y="0.0" width="498" height="440"/>
                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="ipD-ZJ-LHs">
-                                    <rect key="frame" x="0.0" y="0.0" width="498" height="436"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="498" height="440"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="30" rowSizeStyle="automatic" usesAutomaticRowHeights="YES" viewBased="YES" id="kgM-yn-gmw">
-                                            <rect key="frame" x="0.0" y="0.0" width="498" height="436"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="498" height="440"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="3" height="3"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -574,7 +574,7 @@
                                 </scroller>
                             </scrollView>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hAp-QY-YoH">
-                                <rect key="frame" x="6" y="473" width="190" height="42"/>
+                                <rect key="frame" x="6" y="477" width="190" height="42"/>
                                 <buttonCell key="cell" type="check" title="Infer Options Automatically" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="sD0-g1-bNW">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -587,7 +587,7 @@
                                 </connections>
                             </button>
                             <popUpButton horizontalHuggingPriority="500" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1oR-O3-T0n">
-                                <rect key="frame" x="416" y="480" width="78" height="25"/>
+                                <rect key="frame" x="416" y="484" width="78" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="O7Z-yB-e0K" id="JeR-ob-g3w">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" usesAppearanceFont="YES"/>
@@ -604,7 +604,7 @@
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Dxq-Qs-8c9">
-                                <rect key="frame" x="335" y="486" width="82" height="16"/>
+                                <rect key="frame" x="335" y="490" width="82" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Swift version" id="KsH-Kb-2ow">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -612,7 +612,7 @@
                                 </textFieldCell>
                             </textField>
                             <searchField wantsLayer="YES" focusRingType="none" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wc9-0u-Pp5">
-                                <rect key="frame" x="8" y="444" width="482" height="22"/>
+                                <rect key="frame" x="8" y="448" width="482" height="22"/>
                                 <searchFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" borderStyle="bezel" usesSingleLineMode="YES" bezelStyle="round" id="5Y1-0Q-gE7">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -734,7 +734,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2mL-qq-vfc">
-                                <rect key="frame" x="18" y="296" width="83" height="16"/>
+                                <rect key="frame" x="18" y="296" width="81" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••//注释代码" id="E6q-XU-ZGf">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -750,7 +750,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="P6m-QP-S8F">
-                                <rect key="frame" x="18" y="248" width="83" height="16"/>
+                                <rect key="frame" x="18" y="248" width="81" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••格式化代码" id="feB-J3-b09">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -758,7 +758,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ghg-5m-d0R">
-                                <rect key="frame" x="18" y="200" width="117" height="16"/>
+                                <rect key="frame" x="18" y="200" width="114" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••上/下一行回车" id="aPN-88-JO7">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -782,7 +782,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ctk-IA-fF9">
-                                <rect key="frame" x="18" y="152" width="117" height="16"/>
+                                <rect key="frame" x="18" y="152" width="114" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••导入头文件" id="mXf-rC-iiN">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -798,7 +798,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Y1G-cy-Ziy">
-                                <rect key="frame" x="18" y="88" width="117" height="16"/>
+                                <rect key="frame" x="18" y="88" width="114" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••先中内容大/小写" id="5eX-ri-fQS">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -814,7 +814,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dTZ-gj-dh1">
-                                <rect key="frame" x="18" y="40" width="117" height="16"/>
+                                <rect key="frame" x="18" y="40" width="114" height="16"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="••/**/注释" id="QjP-dz-Nbh">
                                     <font key="font" metaFont="systemMedium" size="13"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>

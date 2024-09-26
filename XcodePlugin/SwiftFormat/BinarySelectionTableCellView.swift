@@ -47,10 +47,12 @@ final class BinarySelectionTableCellView: NSTableCellView {
                 return
             }
             // 显示中文说明
-            checkbox.title = model.description  ?? ""
-            toolTip = model.title
-            //toolTip = model.description
-            //checkbox.title = model.title ?? ""
+            if !model.chineseHelp.isEmpty {
+                checkbox.title = model.chineseHelp
+            } else {
+                toolTip = model.description
+                checkbox.title = model.title ?? ""
+            }
             checkbox.isEnabled = model.isEnabled
             checkbox.state = model.selection ? .on : .off
         }

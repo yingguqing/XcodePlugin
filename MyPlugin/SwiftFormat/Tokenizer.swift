@@ -2,8 +2,6 @@
 //  Tokenizer.swift
 //  SwiftFormat
 //
-//  Version 0.53.0
-//
 //  Created by Nick Lockwood on 11/08/2016.
 //  Copyright 2016 Nick Lockwood
 //
@@ -65,18 +63,27 @@ public extension String {
 
     /// Is this string a comment directive (MARK:, TODO:, swiftlint:, etc)?
     var isCommentDirective: Bool {
+        commentDirective != nil
+    }
+
+    /// Returns comment directive prefix (MARK:, TODO:, swiftlint:, etc)?
+    var commentDirective: String? {
         let parts = split(separator: ":")
         guard parts.count > 1 else {
-            return false
+            return nil
         }
         let exclude = ["note", "warning"]
-        return !parts[0].contains(" ") && !exclude.contains(parts[0].lowercased()) && !parts[1].hasPrefix("//")
+        guard !parts[0].contains(" "), !exclude.contains(parts[0].lowercased()), !parts[1].hasPrefix("//") else {
+            return nil
+        }
+        return String(parts[0])
     }
 }
 
 /// Classes of token used for matching
 public enum TokenType {
     case space
+    case comment
     case linebreak
     case endOfStatement
     case startOfScope
@@ -95,6 +102,7 @@ public enum TokenType {
     case spaceOrComment
     case spaceOrLinebreak
     case spaceOrCommentOrLinebreak
+    case keywordOrAttribute
     case identifierOrKeyword
 
     /// NOT types
@@ -318,6 +326,8 @@ public extension Token {
         switch type {
         case .space:
             return isSpace
+        case .comment:
+            return isComment
         case .spaceOrComment:
             return isSpaceOrComment
         case .spaceOrLinebreak:
@@ -334,6 +344,8 @@ public extension Token {
             return isEndOfScope
         case .keyword:
             return isKeyword
+        case .keywordOrAttribute:
+            return isKeywordOrAttribute
         case .identifier:
             return isIdentifier
         case .identifierOrKeyword:
@@ -365,7 +377,7 @@ public extension Token {
         }
     }
 
-    var isAttribute: Bool { isKeyword && string.hasPrefix("@") }
+    var isAttribute: Bool { isKeywordOrAttribute && string.hasPrefix("@") }
     var isDelimiter: Bool { hasType(of: .delimiter("")) }
     var isOperator: Bool { hasType(of: .operator("", .none)) }
     var isUnwrapOperator: Bool { isOperator("?", .postfix) || isOperator("!", .postfix) }
@@ -374,9 +386,10 @@ public extension Token {
     var isError: Bool { hasType(of: .error("")) }
     var isStartOfScope: Bool { hasType(of: .startOfScope("")) }
     var isEndOfScope: Bool { hasType(of: .endOfScope("")) }
-    var isKeyword: Bool { hasType(of: .keyword("")) }
+    var isKeyword: Bool { isKeywordOrAttribute && !string.hasPrefix("@") }
+    var isKeywordOrAttribute: Bool { hasType(of: .keyword("")) }
     var isIdentifier: Bool { hasType(of: .identifier("")) }
-    var isIdentifierOrKeyword: Bool { isIdentifier || isKeyword }
+    var isIdentifierOrKeyword: Bool { isIdentifier || isKeywordOrAttribute }
     var isSpace: Bool { hasType(of: .space("")) }
     var isLinebreak: Bool { hasType(of: .linebreak("", 0)) }
     var isEndOfStatement: Bool { self == .delimiter(";") || isLinebreak }
@@ -389,7 +402,7 @@ public extension Token {
         if case let .endOfScope(string) = self {
             return ["case", "default"].contains(string)
         }
-        return false
+        return self == .keyword("@unknown") // support `@unknown default` as well
     }
 
     func isOperator(_ string: String) -> Bool {
@@ -419,6 +432,15 @@ public extension Token {
              .startOfScope("//"),
              .startOfScope("/*"),
              .endOfScope("*/"):
+            return true
+        default:
+            return false
+        }
+    }
+
+    var isCommentBody: Bool {
+        switch self {
+        case .commentBody:
             return true
         default:
             return false
@@ -1773,7 +1795,7 @@ public func tokenize(_ source: String) -> [Token] {
                 switch token {
                 case let .operator(string, _):
                     switch string {
-                    case ".", "==", "?", "!", "&", "->":
+                    case ".", "==", "?", "!", "&", "->", "~":
                         if index(of: .nonSpaceOrCommentOrLinebreak, before: count - 1) == scopeIndex {
                             // These are allowed in a generic, but not as the first character
                             fallthrough
@@ -1789,7 +1811,7 @@ public func tokenize(_ source: String) -> [Token] {
                     convertOpeningChevronToOperator(at: scopeIndex)
                     processToken()
                     return
-                case .endOfScope, .keyword:
+                case .keyword where !token.isAttribute, .endOfScope:
                     // If we encountered a keyword, or closing scope token that wasn't >
                     // then the opening < must have been an operator after all
                     convertOpeningChevronToOperator(at: scopeIndex)
@@ -1821,7 +1843,14 @@ public func tokenize(_ source: String) -> [Token] {
                     scopeIndex = scopeIndexStack[scopeStackIndex]
                     scope = tokens[scopeIndex]
                 }
-                if [.startOfScope("{"), .startOfScope(":")].contains(scope) {
+                switch scope {
+                case .startOfScope("("):
+                    if scopeIndex > 0, tokens[scopeIndex - 1].isAttribute {
+                        tokens[tokens.count - 1] = .identifier(string)
+                        processToken()
+                        return
+                    }
+                case .startOfScope("{"), .startOfScope(":"):
                     switch string {
                     case "default":
                         tokens[tokens.count - 1] = .endOfScope(string)
@@ -1831,11 +1860,6 @@ public func tokenize(_ source: String) -> [Token] {
                         if let keywordIndex = index(of: .keyword, before: scopeIndex) {
                             var keyword = tokens[keywordIndex]
                             if keyword == .keyword("where"),
-                               let keywordIndex = index(of: .keyword, before: keywordIndex)
-                            {
-                                keyword = tokens[keywordIndex]
-                            }
-                            if keyword.isAttribute,
                                let keywordIndex = index(of: .keyword, before: keywordIndex)
                             {
                                 keyword = tokens[keywordIndex]
@@ -1862,6 +1886,8 @@ public func tokenize(_ source: String) -> [Token] {
                     default:
                         break
                     }
+                default:
+                    break
                 }
             } else if scope == .startOfScope(":") {
                 if [.keyword("#else"), .keyword("#elseif")].contains(token) {

@@ -3,14 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		4D0CAD7F2B50ED5000671DD4 /* Singularize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */; };
 		4D0CAD802B50ED5000671DD4 /* Singularize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */; };
 		4D3B8E97299B899A001C7A88 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3B8E96299B899A001C7A88 /* Regex.swift */; };
-		4D6CA6E82CA41DC6004DAA6E /* SwiftFormat in Frameworks */ = {isa = PBXBuildFile; productRef = 4D6CA6E72CA41DC6004DAA6E /* SwiftFormat */; };
 		4DB1DA1327D7678E0031CA5C /* FormattingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */; };
 		4DB1DA1527D767BE0031CA5C /* OptionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */; };
 		4DB1DA1727D768140031CA5C /* SupportedContentUTIs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */; };
@@ -19,6 +18,7 @@
 		4DB1DA1C27D7694C0031CA5C /* OptionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */; };
 		4DB1DA1E27D76FC50031CA5C /* RulesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCC7EE02386204300B6407B /* RulesStore.swift */; };
 		4DB1DA1F27D770AA0031CA5C /* FormattingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */; };
+		4DF636E22CA54A7A006E711E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 4DF636E12CA54A7A006E711E /* Localizable.xcstrings */; };
 		8465639626784D42007BD521 /* XcodeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; };
 		8465639726784D42007BD521 /* XcodeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84A30FED255153580082233F /* XcodeKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		BE7B0C072415DE8200D16F65 /* ToColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE7B0C062415DE8200D16F65 /* ToColor.swift */; };
@@ -120,11 +120,13 @@
 /* Begin PBXFileReference section */
 		4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Singularize.swift; sourceTree = "<group>"; };
 		4D3B8E96299B899A001C7A88 /* Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
+		4D6CA7042CA513CE004DAA6E /* mul */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = mul; path = mul.lproj/Main.xcstrings; sourceTree = "<group>"; };
 		4DB1DA1227D7678E0031CA5C /* FormattingHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormattingHelpers.swift; sourceTree = "<group>"; };
 		4DB1DA1427D767BE0031CA5C /* OptionDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionDescriptor.swift; sourceTree = "<group>"; };
 		4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SupportedContentUTIs.swift; sourceTree = "<group>"; };
 		4DB1DA1827D768DD0031CA5C /* CommandErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandErrors.swift; sourceTree = "<group>"; };
 		4DB1DA1A27D769260031CA5C /* XCSourceTextBuffer+SwiftFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCSourceTextBuffer+SwiftFormat.swift"; sourceTree = "<group>"; };
+		4DF636E12CA54A7A006E711E /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		84A30FED255153580082233F /* XcodeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XcodeKit.framework; path = Library/Frameworks/XcodeKit.framework; sourceTree = DEVELOPER_DIR; };
 		BE7B0C062415DE8200D16F65 /* ToColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToColor.swift; sourceTree = "<group>"; };
 		EF5EF26523D3E8C30070032C /* Shell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
@@ -136,7 +138,7 @@
 		EF5EF26B23D3E8C30070032C /* ShellError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShellError.swift; sourceTree = "<group>"; };
 		EF5EF26C23D3E8C30070032C /* ProcessRunnerError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessRunnerError.swift; sourceTree = "<group>"; };
 		EFB8D67E238D2E8C0081C450 /* libswiftCore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftCore.tbd; path = usr/lib/swift/libswiftCore.tbd; sourceTree = SDKROOT; };
-		EFC97809238529EE006ED781 /* XCode插件.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "XCode插件.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EFC97809238529EE006ED781 /* xcode插件.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "xcode插件.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFC9780C238529EE006ED781 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EFC97810238529F1006ED781 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EFC97813238529F1006ED781 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -184,7 +186,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D6CA6E82CA41DC6004DAA6E /* SwiftFormat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,7 +215,7 @@
 		EFC9780A238529EE006ED781 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EFC97809238529EE006ED781 /* XCode插件.app */,
+				EFC97809238529EE006ED781 /* xcode插件.app */,
 				EFC9782023852A17006ED781 /* XCodePlugin.appex */,
 			);
 			name = Products;
@@ -304,9 +305,9 @@
 				EFCC7EDD2386204300B6407B /* Options.swift */,
 				EFCC7EDC2386204300B6407B /* OptionsStore.swift */,
 				EFCC7EE52386204300B6407B /* ParsingHelpers.swift */,
-				4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */,
 				EFCC7EE62386204300B6407B /* Rules.swift */,
 				EFCC7EE02386204300B6407B /* RulesStore.swift */,
+				4D0CAD7E2B50ED5000671DD4 /* Singularize.swift */,
 				4DB1DA1627D768140031CA5C /* SupportedContentUTIs.swift */,
 				EFCC7EE82386204300B6407B /* SwiftFormat.swift */,
 				EFCC7EE42386204300B6407B /* Tokenizer.swift */,
@@ -334,6 +335,7 @@
 				EFC97812238529F1006ED781 /* Main.storyboard */,
 				EFC97815238529F1006ED781 /* Info.plist */,
 				EFC97816238529F1006ED781 /* XcodePlugin.entitlements */,
+				4DF636E12CA54A7A006E711E /* Localizable.xcstrings */,
 			);
 			path = "Supporting Files";
 			sourceTree = "<group>";
@@ -357,7 +359,7 @@
 			);
 			name = XcodePlugin;
 			productName = XcodePlugin;
-			productReference = EFC97809238529EE006ED781 /* XCode插件.app */;
+			productReference = EFC97809238529EE006ED781 /* xcode插件.app */;
 			productType = "com.apple.product-type.application";
 		};
 		EFC9781F23852A17006ED781 /* MyPlugin */ = {
@@ -404,10 +406,10 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = EFC97800238529EE006ED781;
 			packageReferences = (
-				4D6CA6E62CA41DC6004DAA6E /* XCRemoteSwiftPackageReference "SwiftFormat" */,
 			);
 			productRefGroup = EFC97800238529EE006ED781;
 			projectDirPath = "";
@@ -425,6 +427,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EFC97811238529F1006ED781 /* Assets.xcassets in Resources */,
+				4DF636E22CA54A7A006E711E /* Localizable.xcstrings in Resources */,
 				EFC97814238529F1006ED781 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -533,6 +536,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				EFC97813238529F1006ED781 /* Base */,
+				4D6CA7042CA513CE004DAA6E /* mul */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -545,6 +549,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -594,12 +599,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -609,6 +616,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -652,11 +660,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
@@ -684,7 +694,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
-				PRODUCT_NAME = "XCode插件";
+				PRODUCT_NAME = "xcode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = mac_any_dev;
 				SWIFT_VERSION = 5.0;
@@ -714,7 +724,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
-				PRODUCT_NAME = "XCode插件";
+				PRODUCT_NAME = "xcode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = mac_any_dev;
 				SWIFT_VERSION = 5.0;
@@ -822,25 +832,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		4D6CA6E62CA41DC6004DAA6E /* XCRemoteSwiftPackageReference "SwiftFormat" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/nicklockwood/SwiftFormat";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.54.5;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		4D6CA6E72CA41DC6004DAA6E /* SwiftFormat */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4D6CA6E62CA41DC6004DAA6E /* XCRemoteSwiftPackageReference "SwiftFormat" */;
-			productName = SwiftFormat;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EFC97801238529EE006ED781 /* Project object */;
 }

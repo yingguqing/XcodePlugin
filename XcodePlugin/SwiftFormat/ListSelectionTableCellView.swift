@@ -47,10 +47,12 @@ class ListSelectionTableCellView: NSTableCellView {
                 return
             }
             // 显示中文说明
-            toolTip = model.title
-            title.stringValue = model.description ?? ""
-            //title.stringValue = model.title ?? ""
-            //toolTip = model.description
+            if !model.chineseHelp.isEmpty {
+                title.stringValue = model.chineseHelp
+            } else {
+                title.stringValue = model.title ?? ""
+                toolTip = model.description
+            }
             title.textColor = model.isEnabled ? .textColor : .disabledControlTextColor
             dropDown.isEnabled = model.isEnabled
             dropDown.removeAllItems()

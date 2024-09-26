@@ -378,8 +378,10 @@ private struct Inference {
         options.wrapCollections = formatter.wrapMode(for: "[")
     }
 
-    let closingParenOnSameLine = OptionInferrer { formatter, options in
-        var balanced = 0, sameLine = 0
+    let closingParenPosition = OptionInferrer { formatter, options in
+        var functionCallSameLine = 0, functionCallBalanced = 0
+        var functionDeclarationSameLine = 0, functionDeclarationBalanced = 0
+
         formatter.forEach(.startOfScope("(")) { i, _ in
             guard let closingBraceIndex = formatter.endOfScope(at: i),
                   let linebreakIndex = formatter.index(of: .linebreak, after: i),
@@ -387,13 +389,43 @@ private struct Inference {
             else {
                 return
             }
-            if formatter.last(.nonSpaceOrComment, before: closingBraceIndex)?.isLinebreak == true {
-                balanced += 1
+
+            let isClosingParenOnSameLine = (formatter.last(.nonSpaceOrComment, before: closingBraceIndex)?.isLinebreak != true)
+
+            if formatter.isFunctionCall(at: i) {
+                if isClosingParenOnSameLine {
+                    functionCallSameLine += 1
+                } else {
+                    functionCallBalanced += 1
+                }
             } else {
-                sameLine += 1
+                if isClosingParenOnSameLine {
+                    functionDeclarationSameLine += 1
+                } else {
+                    functionDeclarationBalanced += 1
+                }
             }
         }
-        options.closingParenOnSameLine = (sameLine > balanced)
+
+        // Decide on callSiteClosingParenPosition
+        if functionCallSameLine > functionCallBalanced && functionDeclarationBalanced > functionDeclarationSameLine {
+            options.callSiteClosingParenPosition = .sameLine
+        } else {
+            options.callSiteClosingParenPosition = .balanced
+        }
+
+        // If callSiteClosingParenPosition is sameLine, trust only the declarations to infer closingParenPosition
+        if options.callSiteClosingParenPosition == .sameLine {
+            options.closingParenPosition = functionDeclarationSameLine > functionDeclarationBalanced ? .sameLine : .balanced
+        } else {
+            let balanced = functionDeclarationBalanced + functionCallBalanced
+            let sameLine = functionDeclarationSameLine + functionCallSameLine
+            options.closingParenPosition = sameLine > balanced ? .sameLine : .balanced
+        }
+
+        if options.closingParenPosition == options.callSiteClosingParenPosition {
+            options.callSiteClosingParenPosition = .default
+        }
     }
 
     let uppercaseHex = OptionInferrer { formatter, options in
@@ -966,7 +998,7 @@ private struct Inference {
                         prevIndex -= 1
                     }
                     if let name = name {
-                        processAccessors(["get", "set", "willSet", "didSet"], for: name,
+                        processAccessors(["get", "set", "willSet", "didSet", "init", "_modify"], for: name,
                                          at: &index, localNames: localNames, members: members,
                                          typeStack: &typeStack, membersByType: &membersByType,
                                          classMembersByType: &classMembersByType,
@@ -1247,7 +1279,7 @@ private struct Inference {
     let elseOnNextLine = OptionInferrer { formatter, options in
         var sameLine = 0, nextLine = 0
         formatter.forEach(.keyword) { i, token in
-            guard ["else", "catch", "while"].contains(token.string) else { return }
+            guard [.keyword("else"), .keyword("catch"), .keyword("while")].contains(token) else { return }
             // Check for brace
             guard let braceIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, before: i, if: {
                 $0 == .endOfScope("}")

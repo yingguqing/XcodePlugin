@@ -1,0 +1,1536 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "1b7-l0-nxx.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Find\"; ObjectID = \"1b7-l0-nxx\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Find"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find"
+          }
+        }
+      }
+    },
+    "1Xt-HY-uBw.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"XcodePlugin\"; ObjectID = \"1Xt-HY-uBw\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "XcodePlugin"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "XcodePlugin"
+          }
+        }
+      }
+    },
+    "2aq-kN-Stu.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"1. 打开系统设置\\n2. 点击 \\\"扩展\\\"\\n3. 选择 \\\"Xcode Source Editor\\\"\\n4. 打开 “Xcod插件”前面的开关\\n5. 重启Xcode\"; ObjectID = \"2aq-kN-Stu\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "1. 打开系统设置\n2. 点击 \"扩展\"\n3. 选择 \"Xcode Source Editor\"\n4. 打开 “Xcod插件”前面的开关\n5. 重启Xcode"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. 打开系统设置\n2. 点击 \"扩展\"\n3. 选择 \"Xcode Source Editor\"\n4. 打开 “Xcod插件”前面的开关\n5. 重启Xcode"
+          }
+        }
+      }
+    },
+    "2oI-Rn-ZJC.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Transformations\"; ObjectID = \"2oI-Rn-ZJC\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Transformations"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transformations"
+          }
+        }
+      }
+    },
+    "3IN-sU-3Bg.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Spelling\"; ObjectID = \"3IN-sU-3Bg\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Spelling"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelling"
+          }
+        }
+      }
+    },
+    "3rS-ZA-NoH.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Speech\"; ObjectID = \"3rS-ZA-NoH\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Speech"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speech"
+          }
+        }
+      }
+    },
+    "4EN-yA-p0u.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Find\"; ObjectID = \"4EN-yA-p0u\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Find"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find"
+          }
+        }
+      }
+    },
+    "4sb-4s-VLi.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Quit XcodePlugin\"; ObjectID = \"4sb-4s-VLi\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Quit XcodePlugin"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit XcodePlugin"
+          }
+        }
+      }
+    },
+    "5eX-ri-fQS.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"••先中内容大/小写\"; ObjectID = \"5eX-ri-fQS\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "••先中内容大/小写"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "••先中内容大/小写"
+          }
+        }
+      }
+    },
+    "5kV-Vb-QxS.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"About XcodePlugin\"; ObjectID = \"5kV-Vb-QxS\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "About XcodePlugin"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About XcodePlugin"
+          }
+        }
+      }
+    },
+    "5QF-Oa-p0T.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Edit\"; ObjectID = \"5QF-Oa-p0T\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Edit"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        }
+      }
+    },
+    "6dh-zS-Vam.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Redo\"; ObjectID = \"6dh-zS-Vam\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Redo"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redo"
+          }
+        }
+      }
+    },
+    "6ui-WR-whc.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Item 2\"; ObjectID = \"6ui-WR-whc\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Item 2"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Item 2"
+          }
+        }
+      }
+    },
+    "8P4-Yc-iZQ.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Open Recent\"; ObjectID = \"8P4-Yc-iZQ\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open Recent"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Recent"
+          }
+        }
+      }
+    },
+    "9ic-FL-obx.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Substitutions\"; ObjectID = \"9ic-FL-obx\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Substitutions"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Substitutions"
+          }
+        }
+      }
+    },
+    "9yt-4B-nSM.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Smart Copy/Paste\"; ObjectID = \"9yt-4B-nSM\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Smart Copy/Paste"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart Copy/Paste"
+          }
+        }
+      }
+    },
+    "9ZR-Qg-hHT.title" : {
+      "comment" : "Class = \"NSViewController\"; title = \"Swift格式化规则\"; ObjectID = \"9ZR-Qg-hHT\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Swift格式化规则"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swift格式化规则"
+          }
+        }
+      }
+    },
+    "78Y-hA-62v.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Correct Spelling Automatically\"; ObjectID = \"78Y-hA-62v\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Correct Spelling Automatically"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correct Spelling Automatically"
+          }
+        }
+      }
+    },
+    "aPN-88-JO7.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"••上/下一行回车\"; ObjectID = \"aPN-88-JO7\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "••上/下一行回车"
+          }
+        }
+      }
+    },
+    "aUF-d1-5bR.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Window\"; ObjectID = \"aUF-d1-5bR\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Window"
+          }
+        }
+      }
+    },
+    "AYu-sK-qS6.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Main Menu\"; ObjectID = \"AYu-sK-qS6\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Main Menu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Main Menu"
+          }
+        }
+      }
+    },
+    "bib-Uj-vzu.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"File\"; ObjectID = \"bib-Uj-vzu\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "File"
+          }
+        }
+      }
+    },
+    "BOF-NM-1cW.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Preferences…\"; ObjectID = \"BOF-NM-1cW\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Preferences…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preferences…"
+          }
+        }
+      }
+    },
+    "Bqz-w6-WkJ.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"在Xcode里使用本插件\"; ObjectID = \"Bqz-w6-WkJ\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "在Xcode里使用本插件"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在Xcode里使用本插件"
+          }
+        }
+      }
+    },
+    "bSV-6b-LIX.title" : {
+      "comment" : "Class = \"NSButtonCell\"; title = \"Check\"; ObjectID = \"bSV-6b-LIX\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Check"
+          }
+        }
+      }
+    },
+    "buJ-ug-pKt.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Use Selection for Find\"; ObjectID = \"buJ-ug-pKt\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Use Selection for Find"
+          }
+        }
+      }
+    },
+    "c8a-y6-VQd.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Transformations\"; ObjectID = \"c8a-y6-VQd\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Transformations"
+          }
+        }
+      }
+    },
+    "cdg-k9-3uT.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Open Recent\"; ObjectID = \"cdg-k9-3uT\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open Recent"
+          }
+        }
+      }
+    },
+    "cGj-If-toE.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Item 2\"; ObjectID = \"cGj-If-toE\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Item 2"
+          }
+        }
+      }
+    },
+    "csf-1y-Qf7.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"怎么安装?\"; ObjectID = \"csf-1y-Qf7\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "怎么安装?"
+          }
+        }
+      }
+    },
+    "ctb-sf-Ndd.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"使用Xcode打开代码文件 — 点击 \\\"Editor\\\" , 在\\\"Xcode插件\\\"里可以看到插件提供的功能\"; ObjectID = \"ctb-sf-Ndd\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "使用Xcode打开代码文件 — 点击 \"Editor\" , 在\"Xcode插件\"里可以看到插件提供的功能"
+          }
+        }
+      }
+    },
+    "cwL-P1-jid.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Smart Links\"; ObjectID = \"cwL-P1-jid\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Smart Links"
+          }
+        }
+      }
+    },
+    "d9M-CD-aMd.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Make Lower Case\"; ObjectID = \"d9M-CD-aMd\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Make Lower Case"
+          }
+        }
+      }
+    },
+    "Dgb-ee-FoF.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"Xcode插件是Xcoe的一个扩展插件，能为开发提供一些特定的功能，如格式化代码，删除所选行等。\"; ObjectID = \"Dgb-ee-FoF\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Xcode插件是Xcoe的一个扩展插件，能为开发提供一些特定的功能，如格式化代码，删除所选行等。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcode插件是Xcoe的一个扩展插件，能为开发提供一些特定的功能，如格式化代码，删除所选行等。"
+          }
+        }
+      }
+    },
+    "dlG-Gw-5zq.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Clear Menu\"; ObjectID = \"dlG-Gw-5zq\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Clear Menu"
+          }
+        }
+      }
+    },
+    "dMs-cI-mzQ.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"File\"; ObjectID = \"dMs-cI-mzQ\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "File"
+          }
+        }
+      }
+    },
+    "dRJ-4n-Yzg.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Undo\"; ObjectID = \"dRJ-4n-Yzg\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Undo"
+          }
+        }
+      }
+    },
+    "Dv1-io-Yv7.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Spelling and Grammar\"; ObjectID = \"Dv1-io-Yv7\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Spelling and Grammar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelling and Grammar"
+          }
+        }
+      }
+    },
+    "E6q-XU-ZGf.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"••//注释代码\"; ObjectID = \"E6q-XU-ZGf\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "••//注释代码"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "••//注释代码"
+          }
+        }
+      }
+    },
+    "eGI-X6-vwy.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"快捷添加一个回车，不用光标处在尾部\"; ObjectID = \"eGI-X6-vwy\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "快捷添加一个回车，不用光标处在尾部"
+          }
+        }
+      }
+    },
+    "f0Q-ZF-A9D.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"••向上/向下 复制\"; ObjectID = \"f0Q-ZF-A9D\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "••向上/向下 复制"
+          }
+        }
+      }
+    },
+    "F2S-fz-NVQ.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Help\"; ObjectID = \"F2S-fz-NVQ\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Help"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Help"
+          }
+        }
+      }
+    },
+    "feB-J3-b09.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"••格式化代码\"; ObjectID = \"feB-J3-b09\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "••格式化代码"
+          }
+        }
+      }
+    },
+    "FeM-D8-WVr.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Substitutions\"; ObjectID = \"FeM-D8-WVr\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Substitutions"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Substitutions"
+          }
+        }
+      }
+    },
+    "FKE-Sm-Kum.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"XcodePlugin Help\"; ObjectID = \"FKE-Sm-Kum\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "XcodePlugin Help"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "XcodePlugin Help"
+          }
+        }
+      }
+    },
+    "gfM-Xs-9ix.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Item 1\"; ObjectID = \"gfM-Xs-9ix\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Item 1"
+          }
+        }
+      }
+    },
+    "GPk-u2-pke.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"将选中的内容进行大/小写转换\"; ObjectID = \"GPk-u2-pke\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "将选中的内容进行大/小写转换"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将选中的内容进行大/小写转换"
+          }
+        }
+      }
+    },
+    "gVA-U4-sdL.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Paste\"; ObjectID = \"gVA-U4-sdL\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Paste"
+          }
+        }
+      }
+    },
+    "hef-MV-HTR.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"Option name\"; ObjectID = \"hef-MV-HTR\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Option name"
+          }
+        }
+      }
+    },
+    "HFo-cy-zxI.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Show Spelling and Grammar\"; ObjectID = \"HFo-cy-zxI\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show Spelling and Grammar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Spelling and Grammar"
+          }
+        }
+      }
+    },
+    "HFQ-gK-NFA.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Text Replacement\"; ObjectID = \"HFQ-gK-NFA\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Text Replacement"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text Replacement"
+          }
+        }
+      }
+    },
+    "hQb-2v-fYv.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Smart Quotes\"; ObjectID = \"hQb-2v-fYv\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Smart Quotes"
+          }
+        }
+      }
+    },
+    "hz2-CU-CR7.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Check Document Now\"; ObjectID = \"hz2-CU-CR7\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Check Document Now"
+          }
+        }
+      }
+    },
+    "hz9-B4-Xy5.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Services\"; ObjectID = \"hz9-B4-Xy5\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Services"
+          }
+        }
+      }
+    },
+    "i6H-TZ-zhM.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"  将选中行的代码复制到选中行的上面/下面\"; ObjectID = \"i6H-TZ-zhM\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "  将选中行的代码复制到选中行的上面/下面"
+          }
+        }
+      }
+    },
+    "IAo-SY-fd9.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Save\"; ObjectID = \"IAo-SY-fd9\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Save"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        }
+      }
+    },
+    "IQv-IB-iLA.title" : {
+      "comment" : "Class = \"NSWindow\"; title = \"Xcode插件\"; ObjectID = \"IQv-IB-iLA\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Xcode插件"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcode插件"
+          }
+        }
+      }
+    },
+    "Jn2-k0-Toh.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"格式化当前代码，会自动识别OC和Swift\"; ObjectID = \"Jn2-k0-Toh\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "格式化当前代码，会自动识别OC和Swift"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "格式化当前代码，会自动识别OC和Swift"
+          }
+        }
+      }
+    },
+    "joQ-yG-elE.title" : {
+      "comment" : "Class = \"NSButtonCell\"; title = \"Title\"; ObjectID = \"joQ-yG-elE\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Title"
+          }
+        }
+      }
+    },
+    "Jye-eL-EAS.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"Xcode插件是什么?\"; ObjectID = \"Jye-eL-EAS\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Xcode插件是什么?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcode插件是什么?"
+          }
+        }
+      }
+    },
+    "Kd2-mp-pUS.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Show All\"; ObjectID = \"Kd2-mp-pUS\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show All"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show All"
+          }
+        }
+      }
+    },
+    "KsH-Kb-2ow.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"Swift version\"; ObjectID = \"KsH-Kb-2ow\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Swift version"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swift version"
+          }
+        }
+      }
+    },
+    "LE2-aR-0XJ.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Bring All to Front\"; ObjectID = \"LE2-aR-0XJ\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Bring All to Front"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bring All to Front"
+          }
+        }
+      }
+    },
+    "lgP-ch-cLS.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"自动添加/删除选中代码里的/**/，删除时，/**/必须是开始和结束\"; ObjectID = \"lgP-ch-cLS\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "自动添加/删除选中代码里的/**/，删除时，/**/必须是开始和结束"
+          }
+        }
+      }
+    },
+    "Lua-ub-IdX.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Reset to Defaults\"; ObjectID = \"Lua-ub-IdX\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reset to Defaults"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset to Defaults"
+          }
+        }
+      }
+    },
+    "mK6-2p-4JG.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Check Grammar With Spelling\"; ObjectID = \"mK6-2p-4JG\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Check Grammar With Spelling"
+          }
+        }
+      }
+    },
+    "mXf-rC-iiN.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"••导入头文件\"; ObjectID = \"mXf-rC-iiN\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "••导入头文件"
+          }
+        }
+      }
+    },
+    "NMo-om-nkz.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Services\"; ObjectID = \"NMo-om-nkz\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Services"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services"
+          }
+        }
+      }
+    },
+    "NWG-st-jah.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"Rule name\"; ObjectID = \"NWG-st-jah\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Rule name"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rule name"
+          }
+        }
+      }
+    },
+    "O7Z-yB-e0K.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Item 1\"; ObjectID = \"O7Z-yB-e0K\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Item 1"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Item 1"
+          }
+        }
+      }
+    },
+    "Olw-nP-bQN.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Hide XcodePlugin\"; ObjectID = \"Olw-nP-bQN\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hide XcodePlugin"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide XcodePlugin"
+          }
+        }
+      }
+    },
+    "OwM-mh-QMV.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Find Previous\"; ObjectID = \"OwM-mh-QMV\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Find Previous"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find Previous"
+          }
+        }
+      }
+    },
+    "OY7-WF-poV.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Minimize\"; ObjectID = \"OY7-WF-poV\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Minimize"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimize"
+          }
+        }
+      }
+    },
+    "Oyz-dy-DGm.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Stop Speaking\"; ObjectID = \"Oyz-dy-DGm\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Stop Speaking"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Speaking"
+          }
+        }
+      }
+    },
+    "pa3-QI-u2k.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Delete\"; ObjectID = \"pa3-QI-u2k\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete"
+          }
+        }
+      }
+    },
+    "q09-fT-Sye.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Find Next\"; ObjectID = \"q09-fT-Sye\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Find Next"
+          }
+        }
+      }
+    },
+    "QjP-dz-Nbh.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"••/**/注释\"; ObjectID = \"QjP-dz-Nbh\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "••/**/注释"
+          }
+        }
+      }
+    },
+    "R4o-n2-Eq4.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Zoom\"; ObjectID = \"R4o-n2-Eq4\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Zoom"
+          }
+        }
+      }
+    },
+    "rbD-Rh-wIN.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Check Spelling While Typing\"; ObjectID = \"rbD-Rh-wIN\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Check Spelling While Typing"
+          }
+        }
+      }
+    },
+    "rgM-f4-ycn.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Smart Dashes\"; ObjectID = \"rgM-f4-ycn\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Smart Dashes"
+          }
+        }
+      }
+    },
+    "Ruw-6m-B2m.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Select All\"; ObjectID = \"Ruw-6m-B2m\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select All"
+          }
+        }
+      }
+    },
+    "S0p-oC-mLd.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Jump to Selection\"; ObjectID = \"S0p-oC-mLd\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Jump to Selection"
+          }
+        }
+      }
+    },
+    "sD0-g1-bNW.title" : {
+      "comment" : "Class = \"NSButtonCell\"; title = \"Infer Options Automatically\"; ObjectID = \"sD0-g1-bNW\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Infer Options Automatically"
+          }
+        }
+      }
+    },
+    "Td7-aD-5lo.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Window\"; ObjectID = \"Td7-aD-5lo\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Window"
+          }
+        }
+      }
+    },
+    "tdg-dR-UDt.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Item 3\"; ObjectID = \"tdg-dR-UDt\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Item 3"
+          }
+        }
+      }
+    },
+    "tRr-pd-1PS.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Data Detectors\"; ObjectID = \"tRr-pd-1PS\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Data Detectors"
+          }
+        }
+      }
+    },
+    "tv9-Ar-NaJ.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"可以在代码任意地方快捷导入头文件，如果有选中文本，自动将选中文件作为头文件名\"; ObjectID = \"tv9-Ar-NaJ\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "可以在代码任意地方快捷导入头文件，如果有选中文本，自动将选中文件作为头文件名"
+          }
+        }
+      }
+    },
+    "UEZ-Bs-lqG.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Capitalize\"; ObjectID = \"UEZ-Bs-lqG\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Capitalize"
+          }
+        }
+      }
+    },
+    "uQy-DD-JDr.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"XcodePlugin\"; ObjectID = \"uQy-DD-JDr\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "XcodePlugin"
+          }
+        }
+      }
+    },
+    "uRl-iY-unG.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Cut\"; ObjectID = \"uRl-iY-unG\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cut"
+          }
+        }
+      }
+    },
+    "Vdr-fp-XzO.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Hide Others\"; ObjectID = \"Vdr-fp-XzO\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hide Others"
+          }
+        }
+      }
+    },
+    "vmV-6d-7jI.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Make Upper Case\"; ObjectID = \"vmV-6d-7jI\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Make Upper Case"
+          }
+        }
+      }
+    },
+    "W48-6f-4Dl.title" : {
+      "comment" : "Class = \"NSMenu\"; title = \"Edit\"; ObjectID = \"W48-6f-4Dl\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Edit"
+          }
+        }
+      }
+    },
+    "Was-JA-tGl.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Open...\"; ObjectID = \"Was-JA-tGl\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open..."
+          }
+        }
+      }
+    },
+    "WeT-3V-zwk.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Paste and Match Style\"; ObjectID = \"WeT-3V-zwk\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Paste and Match Style"
+          }
+        }
+      }
+    },
+    "wpr-3q-Mcd.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Help\"; ObjectID = \"wpr-3q-Mcd\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Help"
+          }
+        }
+      }
+    },
+    "x3v-GG-iWU.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Copy\"; ObjectID = \"x3v-GG-iWU\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Copy"
+          }
+        }
+      }
+    },
+    "XfG-lQ-9wD.title" : {
+      "comment" : "Class = \"NSViewController\"; title = \"快捷键\"; ObjectID = \"XfG-lQ-9wD\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "快捷键"
+          }
+        }
+      }
+    },
+    "xrE-MZ-jX0.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Speech\"; ObjectID = \"xrE-MZ-jX0\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Speech"
+          }
+        }
+      }
+    },
+    "Xz5-n4-O0W.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Find…\"; ObjectID = \"Xz5-n4-O0W\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Find…"
+          }
+        }
+      }
+    },
+    "yes-JB-Tx3.title" : {
+      "comment" : "Class = \"NSTextFieldCell\"; title = \"使用//注释代码，系统的注释都是在最开始\"; ObjectID = \"yes-JB-Tx3\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "使用//注释代码，系统的注释都是在最开始"
+          }
+        }
+      }
+    },
+    "YEy-JH-Tfz.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Find and Replace…\"; ObjectID = \"YEy-JH-Tfz\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Find and Replace…"
+          }
+        }
+      }
+    },
+    "Ynk-f8-cLZ.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Start Speaking\"; ObjectID = \"Ynk-f8-cLZ\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Start Speaking"
+          }
+        }
+      }
+    },
+    "z6F-FW-3nz.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Show Substitutions\"; ObjectID = \"z6F-FW-3nz\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show Substitutions"
+          }
+        }
+      }
+    },
+    "zgZ-vx-tUs.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Item 3\"; ObjectID = \"zgZ-vx-tUs\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Item 3"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

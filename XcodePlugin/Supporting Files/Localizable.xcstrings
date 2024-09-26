@@ -1,0 +1,1184 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "acronyms" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当首字母大写时，将首字母缩略词大写。"
+          }
+        }
+      }
+    },
+    "andOperator" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 if、guard 或 while 条件中优先使用逗号而不是 &&。"
+          }
+        }
+      }
+    },
+    "anyObjectProtocol" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在协议定义中优先使用 AnyObject 而不是 class。"
+          }
+        }
+      }
+    },
+    "applicationMain" : {
+      "comment" : "Localizable.strings\n  XcodePlugin\n\n  Created by zhouziyuan on 2024/9/26.\n  Copyright © 2024 影孤清. All rights reserved.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用 @main 替换过时的 @UIApplicationMain 和 @NSApplicationMain 属性，适用于 Swift 5.3 及以上版本。"
+          }
+        }
+      }
+    },
+    "assertionFailures" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将所有 assert(false, ...) 的实例更改为 assertionFailure(...)，并将 precondition(false, ...) 更改为 preconditionFailure(...)。"
+          }
+        }
+      }
+    },
+    "blankLineAfterImports" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在导入语句后插入空行。"
+          }
+        }
+      }
+    },
+    "blankLineAfterSwitchCase" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在多行 switch case 之后插入一个空行（不包括最后一个 case，该 case 后面跟着闭合大括号）。"
+          }
+        }
+      }
+    },
+    "blankLinesAroundMark" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 `MARK:` 注释前后插入空行。"
+          }
+        }
+      }
+    },
+    "blankLinesAtEndOfScope" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除作用域结束处的尾随空行。"
+          }
+        }
+      }
+    },
+    "blankLinesAtStartOfScope" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除作用域开始处的前导空行。"
+          }
+        }
+      }
+    },
+    "blankLinesBetweenChainedFunctions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除链式函数之间的空行，但保留换行。"
+          }
+        }
+      }
+    },
+    "blankLinesBetweenImports" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除导入语句之间的空行。"
+          }
+        }
+      }
+    },
+    "blankLinesBetweenScopes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在类、结构体、枚举、扩展、协议或函数声明之前插入空行。"
+          }
+        }
+      }
+    },
+    "blockComments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将块注释转换为连续的单行注释。"
+          }
+        }
+      }
+    },
+    "braces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "根据所选风格（K&R 或 Allman）包装大括号。"
+          }
+        }
+      }
+    },
+    "conditionalAssignment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 if / switch 表达式赋值属性。"
+          }
+        }
+      }
+    },
+    "consecutiveBlankLines" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将连续的空行替换为单个空行。"
+          }
+        }
+      }
+    },
+    "consecutiveSpaces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将连续空格替换为单个空格。"
+          }
+        }
+      }
+    },
+    "consistentSwitchCaseSpacing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确保 switch 语句中所有 case 之间的间距一致。"
+          }
+        }
+      }
+    },
+    "docComments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对 API 声明使用文档注释，否则使用常规注释。"
+          }
+        }
+      }
+    },
+    "duplicateImports" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除重复的导入语句。"
+          }
+        }
+      }
+    },
+    "elseOnSameLine" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "根据当前风格放置 `else`、`catch` 或 `while` 关键字（同一行或下一行）。"
+          }
+        }
+      }
+    },
+    "emptyBraces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除空大括号内的空格。"
+          }
+        }
+      }
+    },
+    "enumNamespaces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将仅用于托管静态成员的类型转换为枚举（空枚举是创建 Swift 命名空间的标准方法，因为它无法实例化）。"
+          }
+        }
+      }
+    },
+    "extensionAccessControl" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配置扩展的访问控制关键字的位置。"
+          }
+        }
+      }
+    },
+    "fileHeader" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对所有文件使用指定的源文件头模板。"
+          }
+        }
+      }
+    },
+    "genericExtensions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对于泛型类型扩展，使用尖括号 (extension Array<Foo>) 而不是类型约束 (extension Array where Element == Foo)。"
+          }
+        }
+      }
+    },
+    "headerFileName" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确保头注释中的文件名与实际文件名匹配。"
+          }
+        }
+      }
+    },
+    "hoistAwait" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将内联 `await` 关键字移至表达式开始处。"
+          }
+        }
+      }
+    },
+    "hoistPatternLet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在模式内重新定位 `let` 或 `var` 绑定。"
+          }
+        }
+      }
+    },
+    "hoistTry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将内联 `try` 关键字移至表达式开始处。"
+          }
+        }
+      }
+    },
+    "indent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "根据作用域级别缩进代码。"
+          }
+        }
+      }
+    },
+    "initCoderUnavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在未实现的必需 `init(coder:)` 上添加 `@available(*, unavailable)` 属性。"
+          }
+        }
+      }
+    },
+    "isEmpty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "优先使用 isEmpty 而不是将 count 与零进行比较。"
+          }
+        }
+      }
+    },
+    "leadingDelimiters" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将行首的分隔符移动到前一行的末尾。"
+          }
+        }
+      }
+    },
+    "linebreakAtEndOfFile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在文件末尾添加空行。"
+          }
+        }
+      }
+    },
+    "linebreaks" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对所有换行使用指定的换行符（CR、LF 或 CRLF）。"
+          }
+        }
+      }
+    },
+    "markTypes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在顶级类型和扩展之前添加 MARK 注释。"
+          }
+        }
+      }
+    },
+    "modifierOrder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用一致的成员修饰符顺序。"
+          }
+        }
+      }
+    },
+    "noExplicitOwnership" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不要使用显式所有权修饰符（借用 / 消费）。"
+          }
+        }
+      }
+    },
+    "numberFormatting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对数字字面量使用一致的分组。组将通过 `_` 分隔符分隔，以提高可读性。对于每种数字类型，您可以指定组大小（每组的数字位数）和阈值（在应用分组之前，数字的最小位数）。"
+          }
+        }
+      }
+    },
+    "opaqueGenericParameters" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在等价情况下使用不透明的泛型参数 (some Protocol) 而不是带有约束的泛型参数 (T where T: Protocol 等)。同时支持标准库类型的主要关联类型，因此像 T where T: Collection, T.Element == Foo 的定义被更新为 some Collection<Foo>。"
+          }
+        }
+      }
+    },
+    "organizeDeclarations" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在类、结构体、枚举、演员和扩展体内组织声明。"
+          }
+        }
+      }
+    },
+    "preferForLoop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将函数式的 forEach 调用转换为 for 循环。"
+          }
+        }
+      }
+    },
+    "preferKeyPath" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将简单的 map { $0.foo } 闭包转换为基于 keyPath 的语法。"
+          }
+        }
+      }
+    },
+    "redundantBackticks" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除标识符周围冗余的反引号。"
+          }
+        }
+      }
+    },
+    "redundantBreak" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 switch case 中移除多余的 break。"
+          }
+        }
+      }
+    },
+    "redundantExtensionACL" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除多余的访问控制修饰符。"
+          }
+        }
+      }
+    },
+    "redundantFileprivate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在等价的情况下优先使用 private 而不是 fileprivate。"
+          }
+        }
+      }
+    },
+    "redundantGet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除计算属性内部不需要的 `get` 子句。"
+          }
+        }
+      }
+    },
+    "redundantInit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果不需要，移除显式的 `init`。"
+          }
+        }
+      }
+    },
+    "redundantInternal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除多余的内部访问控制。"
+          }
+        }
+      }
+    },
+    "redundantLet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从被忽略的变量中移除冗余的 `let`/`var`。"
+          }
+        }
+      }
+    },
+    "redundantLetError" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从 catch 子句中移除多余的 let error。"
+          }
+        }
+      }
+    },
+    "redundantNilInit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除/插入冗余的 `nil` 默认值（可选变量默认是 nil）。"
+          }
+        }
+      }
+    },
+    "redundantObjc" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除多余的 @objc 注解。"
+          }
+        }
+      }
+    },
+    "redundantOptionalBinding" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在可选绑定条件中移除多余的标识符。"
+          }
+        }
+      }
+    },
+    "redundantParens" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除冗余的括号。"
+          }
+        }
+      }
+    },
+    "redundantPattern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除冗余的模式匹配参数语法。"
+          }
+        }
+      }
+    },
+    "redundantProperty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "简化立即返回的多余属性定义。"
+          }
+        }
+      }
+    },
+    "redundantRawValues" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除枚举情况下冗余的原始字符串值。"
+          }
+        }
+      }
+    },
+    "redundantReturn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除不需要的 `return` 关键字。"
+          }
+        }
+      }
+    },
+    "redundantSelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在适用的情况下插入/移除显式的 `self`。"
+          }
+        }
+      }
+    },
+    "redundantStaticSelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在适用的情况下移除显式的 `Self`。"
+          }
+        }
+      }
+    },
+    "redundantType" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从变量声明中移除冗余类型。"
+          }
+        }
+      }
+    },
+    "redundantTypedThrows" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将 throws(any Error) 转换为 throws，并将 throws(Never) 转换为非抛出。"
+          }
+        }
+      }
+    },
+    "redundantVoidReturnType" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除显式的 `Void` 返回类型。"
+          }
+        }
+      }
+    },
+    "RredundantClosure" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除包含单个语句且立即调用的多余闭包体。"
+          }
+        }
+      }
+    },
+    "semicolons" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除分号。"
+          }
+        }
+      }
+    },
+    "sortDeclarations" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 // swiftformat排序声明主体，并在 // \nswiftformat:sort和 // swiftformat:sort注释之间排序声明。"
+          }
+        }
+      }
+    },
+    "sortedImports" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按字母顺序排序导入语句。"
+          }
+        }
+      }
+    },
+    "sortedSwitchCases" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按字母顺序排序 switch 情况。"
+          }
+        }
+      }
+    },
+    "sortImports" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按字母顺序排序导入语句。"
+          }
+        }
+      }
+    },
+    "sortSwitchCases" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按字母顺序排序 switch 情况。"
+          }
+        }
+      }
+    },
+    "sortTypealiases" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按字母顺序对协议组合类型别名进行排序。"
+          }
+        }
+      }
+    },
+    "spaceAroundBraces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在大括号周围添加或移除空格。"
+          }
+        }
+      }
+    },
+    "spaceAroundBrackets" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在方括号周围添加或移除空格。"
+          }
+        }
+      }
+    },
+    "spaceAroundComments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在注释前和/或后添加空格。"
+          }
+        }
+      }
+    },
+    "spaceAroundGenerics" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除尖括号周围的空格。"
+          }
+        }
+      }
+    },
+    "spaceAroundOperators" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在运算符或分隔符周围添加或移除空格。"
+          }
+        }
+      }
+    },
+    "spaceAroundParens" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在括号周围添加或移除空格。"
+          }
+        }
+      }
+    },
+    "spaceInsideBraces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在大括号内添加空格。"
+          }
+        }
+      }
+    },
+    "spaceInsideBrackets" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除方括号内的空格。"
+          }
+        }
+      }
+    },
+    "spaceInsideComments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在注释内添加前导和/或尾随空格。"
+          }
+        }
+      }
+    },
+    "spaceInsideGenerics" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除尖括号内的空格。"
+          }
+        }
+      }
+    },
+    "spaceInsideParens" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除括号内的空格。"
+          }
+        }
+      }
+    },
+    "specifiers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用一致的成员修饰符顺序。"
+          }
+        }
+      }
+    },
+    "strongifiedSelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在可选解包表达式中移除 self 周围的反引号。"
+          }
+        }
+      }
+    },
+    "strongOutlets" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从 `@IBOutlet` 属性中移除 `weak` 修饰符。"
+          }
+        }
+      }
+    },
+    "todos" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用正确的格式化方式处理 `TODO:`、`MARK:` 或 `FIXME:` 注释。"
+          }
+        }
+      }
+    },
+    "trailingClosures" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在适用的情况下使用尾随闭包语法。"
+          }
+        }
+      }
+    },
+    "trailingCommas" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在集合字面量的最后一个项中添加或移除尾随逗号。"
+          }
+        }
+      }
+    },
+    "trailingSpace" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除行末尾的尾随空格。"
+          }
+        }
+      }
+    },
+    "typeSugar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "优先使用数组、字典和可选值的简写语法。"
+          }
+        }
+      }
+    },
+    "unusedArguments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用 `_` 标记未使用的函数参数。"
+          }
+        }
+      }
+    },
+    "void" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在类型声明中使用 `Void`，在值中使用 `()`。"
+          }
+        }
+      }
+    },
+    "wrap" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "换行超出指定最大宽度的行。"
+          }
+        }
+      }
+    },
+    "wrapArguments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对齐换行的函数参数或集合元素。"
+          }
+        }
+      }
+    },
+    "wrapAttributes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将 @attributes 包裹到单独一行，或者保持在同一行。"
+          }
+        }
+      }
+    },
+    "wrapConditionalBodies" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将内联条件语句的主体换行。"
+          }
+        }
+      }
+    },
+    "wrapEnumCases" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将逗号分隔的枚举情况重写为每行一个情况。"
+          }
+        }
+      }
+    },
+    "wrapLoopBodies" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将内联循环语句的主体换行。"
+          }
+        }
+      }
+    },
+    "wrapMultilineConditionalAssignment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在赋值运算符之后换行包裹多行条件赋值表达式。"
+          }
+        }
+      }
+    },
+    "wrapMultilineStatementBraces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "包装多行语句的开括号。"
+          }
+        }
+      }
+    },
+    "wrapSingleLineComments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "换行超出指定 `--maxwidth` 的单行 `//` 注释。"
+          }
+        }
+      }
+    },
+    "wrapSwitchCases" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将逗号分隔的 switch 情况换行。"
+          }
+        }
+      }
+    },
+    "yodaConditions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "优先将常量值放在表达式的右侧。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

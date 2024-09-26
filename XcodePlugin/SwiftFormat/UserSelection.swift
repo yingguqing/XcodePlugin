@@ -42,6 +42,12 @@ class UserSelection {
     let title: String?
     let description: String?
     let isEnabled: Bool
+    lazy var chineseHelp:String = {
+        guard let title, !title.isEmpty else { return "" }
+        let value = NSLocalizedString(title, comment: "")
+        guard value != title else { return "" }
+        return value
+    }()
 
     init(identifier: String, title: String?, description: String?, isEnabled: Bool) {
         self.identifier = identifier

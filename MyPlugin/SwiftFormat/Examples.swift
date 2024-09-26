@@ -552,6 +552,8 @@ private struct Examples {
     """
 
     let redundantNilInit = """
+    `--nilinit remove`
+
     ```diff
     - var foo: Int? = nil
     + var foo: Int?
@@ -565,6 +567,13 @@ private struct Examples {
     ```diff
     // doesn't affect non-nil initialization
     var foo: Int? = 0
+    ```
+
+    `--nilinit insert`
+
+    ```diff
+    - var foo: Int?
+    + var foo: Int? = nil
     ```
     """
 
@@ -644,7 +653,7 @@ private struct Examples {
     +     "foo"
       }
 
-      // Swift 5.9+ (SE-0380)
+      // Swift 5.9+ (SE-0380) and with conditionalAssignment rule enabled
       func foo(_ condition: Bool) -> String {
           if condition {
     -         return "foo"
@@ -928,6 +937,9 @@ private struct Examples {
     - convenience private init()
     + private convenience init()
     ```
+
+    **NOTE:** If the `--modifierorder` option isn't set, the default order will be:
+    `\(_FormatRules.defaultModifierOrder.flatMap { $0 }.joined(separator: "`, `"))`
     """
 
     let strongifiedSelf = """
@@ -1268,6 +1280,8 @@ private struct Examples {
     """
 
     let organizeDeclarations = """
+    `--organizationmode visibility` (default)
+
     ```diff
       public class Foo {
     -     public func c() -> String {}
@@ -1307,6 +1321,47 @@ private struct Examples {
     +     // MARK: Private
     +
     +     private let g: Int = 2
+    +
+     }
+    ```
+
+    `--organizationmode type`
+
+    ```diff
+      public class Foo {
+    -     public func c() -> String {}
+    -
+    -     public let a: Int = 1
+    -     private let g: Int = 2
+    -     let e: Int = 2
+    -     public let b: Int = 3
+    -
+    -     public func d() {}
+    -     func f() {}
+    -     init() {}
+    -     deinit() {}
+     }
+
+      public class Foo {
+    +
+    +     // MARK: Properties
+    +
+    +     public let a: Int = 1
+    +     public let b: Int = 3
+    +
+    +     let e: Int = 2
+    +
+    +     private let g: Int = 2
+    +
+    +     // MARK: Lifecycle
+    +
+    +     init() {}
+    +     deinit() {}
+    +
+    +     // MARK: Functions
+    +
+    +     public func c() -> String {}
+    +     public func d() {}
     +
      }
     ```
@@ -1563,18 +1618,81 @@ private struct Examples {
     `{year}` | Current year
     `{created}` | File creation date
     `{created.year}` | File creation year
+    `{author}` | Name and email of the user who first committed the file
+    `{author.name}` | Name of the user who first committed the file
+    `{author.email}` | Email of the user who first committed the file
 
     **Example**:
 
-    `--header \\n {file}\\n\\n Copyright © {created.year} CompanyName.\\n`
+    `--header \\n {file}\\n\\n Copyright © {created.year} {author.name}.\\n`
 
     ```diff
     - // SomeFile.swift
 
     + //
     + //  SomeFile.swift
-    + //  Copyright © 2023 CompanyName.
+    + //  Copyright © 2023 Tim Apple.
     + //
+    ```
+
+    You can use the following built-in formats for `--dateformat`:
+
+    Token | Description
+    --- | ---
+    system | Use the local system locale
+    iso | ISO 8601 (yyyy-MM-dd)
+    dmy | Date/Month/Year (dd/MM/yyyy)
+    mdy | Month/Day/Year (MM/dd/yyyy)
+
+    Custom formats are defined using
+    [Unicode symbols](https://www.unicode.org/reports/tr35/tr35-31/tr35-dates.html#Date_Field_Symbol_Table).
+
+    `--dateformat iso`
+
+    ```diff
+    - // Created {created}
+    + // Created 2023-08-10
+    ```
+
+    `--dateformat dmy`
+
+    ```diff
+    - // Created {created}
+    + // Created 10/08/2023
+    ```
+
+    `--dateformat mdy`
+
+    ```diff
+    - // Created {created}
+    + // Created 08/10/2023
+    ```
+
+    `--dateformat 'yyyy.MM.dd.HH.mm'`
+
+    ```diff
+    - // Created {created}
+    + // Created 2023.08.10.11.00
+    ```
+
+    Setting a time zone enforces consistent date formatting across environments
+    around the world. By default the local system locale is used and for convenience
+    `gmt` and `utc` can be used. The time zone can be further customized by
+    setting it to a abbreviation/time zone identifier supported by the Swift
+    standard library.
+
+    `--dateformat 'yyyy-MM-dd HH:mm ZZZZ' --timezone utc`
+
+    ```diff
+    - // Created {created}
+    + // Created 2023-08-10 11:00 GMT
+    ```
+
+    `--dateformat 'yyyy-MM-dd HH:mm ZZZZ' --timezone Pacific/Fiji`
+
+    ```diff
+    - // Created 2023-08-10 11:00 GMT
+    + // Created 2023-08-10 23:00 GMT+12:00
     ```
     """
 
@@ -1586,12 +1704,10 @@ private struct Examples {
     -     foo = "foo"
     +     "foo"
       } else {
-    -     bar = "bar"
+    -     foo = "bar"
     +     "bar"
       }
-    ```
 
-    ```diff
     - let foo: String
     - switch condition {
     + let foo = switch condition {
@@ -1601,6 +1717,17 @@ private struct Examples {
       case false:
     -     foo = "bar"
     +     "bar"
+      }
+
+    // With --condassignment always (disabled by default)
+    - switch condition {
+    + foo.bar = switch condition {
+      case true:
+    -     foo.bar = "baaz"
+    +     "baaz"
+      case false:
+    -     foo.bar = "quux"
+    +     "quux"
       }
     ```
     """
@@ -1674,7 +1801,31 @@ private struct Examples {
     ```
     """
 
+    let blankLineAfterSwitchCase = #"""
+    ```diff
+      func handle(_ action: SpaceshipAction) {
+          switch action {
+          case .engageWarpDrive:
+              navigationComputer.destination = targetedDestination
+              await warpDrive.spinUp()
+              warpDrive.activate()
+    +
+          case let .scanPlanet(planet):
+              scanner.target = planet
+              scanner.scanAtmosphere()
+              scanner.scanBiosphere()
+              scanner.scanForArticialLife()
+    +
+          case .handleIncomingEnergyBlast:
+              await energyShields.prepare()
+              energyShields.engage()
+          }
+      }
+    ```
+    """#
+
     let wrapMultilineConditionalAssignment = #"""
+    ```diff
     - let planetLocation = if let star = planet.star {
     -     "The \(star.name) system"
     - } else {
@@ -1686,5 +1837,79 @@ private struct Examples {
     +     } else {
     +         "Rogue planet"
     +     }
+    ```
     """#
+
+    let consistentSwitchCaseSpacing = #"""
+    ```diff
+      func handle(_ action: SpaceshipAction) {
+          switch action {
+          case .engageWarpDrive:
+              navigationComputer.destination = targetedDestination
+              await warpDrive.spinUp()
+              warpDrive.activate()
+
+          case .enableArtificialGravity:
+              artificialGravityEngine.enable(strength: .oneG)
+    +
+          case let .scanPlanet(planet):
+              scanner.target = planet
+              scanner.scanAtmosphere()
+              scanner.scanBiosphere()
+              scanner.scanForArtificialLife()
+
+          case .handleIncomingEnergyBlast:
+              energyShields.engage()
+          }
+      }
+    ```
+
+    ```diff
+      var name: PlanetType {
+      switch self {
+      case .mercury:
+          "Mercury"
+    -
+      case .venus:
+          "Venus"
+      case .earth:
+          "Earth"
+      case .mars:
+          "Mars"
+    -
+      case .jupiter:
+          "Jupiter"
+      case .saturn:
+          "Saturn"
+      case .uranus:
+          "Uranus"
+      case .neptune:
+          "Neptune"
+      }
+    ```
+    """#
+
+    let redundantProperty = """
+    ```diff
+      func foo() -> Foo {
+    -   let foo = Foo()
+    -   return foo
+    +   return Foo()
+      }
+    ```
+    """
+
+    let redundantTypedThrows = """
+    ```diff
+    - func foo() throws(Never) -> Int {
+    + func foo() -> Int {
+          return 0
+      }
+
+    - func foo() throws(any Error) -> Int {
+    + func foo() throws -> Int {
+          throw MyError.foo
+      }
+    ```
+    """
 }
