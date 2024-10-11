@@ -10,6 +10,7 @@ import Cocoa
 import XcodeKit
 
 // MARK: 导入头文件
+
 class AddImport: NSObject, XCSourceEditorCommand {
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void) {
         do {
@@ -45,7 +46,7 @@ private extension XCSourceEditorCommandInvocation {
         guard let selection = self.selections.first else { throw CommandError.noSelection }
         let selectionLine = selection.start.line
         let importString = self.lines[selectionLine].trimmingCharacters(in: .whitespaces)
-        if !isValid(importString: importString) {
+        if !self.isValid(importString: importString) {
             var start = 0
             var selectString = "<#header#>"
             if selection.start.line == selection.end.line, selection.start.column != selection.end.column {
@@ -65,43 +66,14 @@ private extension XCSourceEditorCommandInvocation {
             self.buffer.selections.add(selectionPosition)
             return
         }
-        let line = appropriateLine(ignoringLine: selectionLine)
+        let line = self.appropriateLine(ignoringLine: selectionLine)
+        // 没有获取到插入位置时，不处理
         guard line != NSNotFound else { return }
-        var lineToRemove: Int = NSNotFound
-        guard self.buffer.canIncludeImportString(importString, atLine: line) else {
-            // we need to run this on the main thread since we're getting called on a seconday thread
-            OperationQueue.main.addOperation({
-                lineToRemove = selectionLine
-                let doubleImportAlert = NSAlert()
-                doubleImportAlert.icon = #imageLiteral(resourceName: "ImportIcon")
-                doubleImportAlert.messageText = AddImportOperationConstants.doubleImportWarningString
-                doubleImportAlert.addButton(withTitle: AddImportOperationConstants.cancelRemoveImportButtonString)
-                // We're creating a "fake" view so that the text doesn't wrap on two lines
-                let fakeRect: NSRect = .init(x: 0, y: 0, width: 307, height: 0)
-                let fakeView = NSView(frame: fakeRect)
-                doubleImportAlert.accessoryView = fakeView
-                NSSound.beep()
-                let frontmostApplication = NSWorkspace.shared.frontmostApplication
-                let appWindow = doubleImportAlert.window
-                appWindow.makeKeyAndOrderFront(appWindow)
-                NSApp.activate(ignoringOtherApps: true)
-                let response = doubleImportAlert.runModal()
-                if response == NSApplication.ModalResponse.alertFirstButtonReturn {
-                    let currentPosition = XCSourceTextPosition(line: selectionLine, column: 0)
-                    let updatedSelection = XCSourceTextRange(start: currentPosition, end: currentPosition)
-                    self.buffer.lines.removeObject(at: lineToRemove)
-                    self.buffer.selections.setArray([updatedSelection])
-                }
-                NSApp.deactivate()
-                frontmostApplication?.activate(options: [])
-            })
-            return
-        }
-        
         self.buffer.lines.removeObject(at: selectionLine)
-        self.buffer.lines.insert(importString, at: line)
-        
-        // add a new selection. Bug fix for #7
+        // 如果头文件没有被导入过，能正常导入时，才插入
+        if self.buffer.canIncludeImportString(importString, atLine: line) {
+            self.buffer.lines.insert(importString, at: line)
+        }
         let currentPosition = XCSourceTextPosition(line: selectionLine, column: 0)
         let updatedSelection = XCSourceTextRange(start: currentPosition, end: currentPosition)
         self.buffer.selections.setArray([updatedSelection])
@@ -133,7 +105,7 @@ private extension XCSourceEditorCommandInvocation {
                 continue
             }
             
-            if isValid(importString: line) {
+            if self.isValid(importString: line) {
                 lineNumber = index
             }
         }
@@ -175,6 +147,6 @@ private extension XCSourceTextBuffer {
 private extension String {
     func isWhitespaceOrNewline() -> Bool {
         let string = self.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-        return string.count == 0
+        return string.isEmpty
     }
 }
