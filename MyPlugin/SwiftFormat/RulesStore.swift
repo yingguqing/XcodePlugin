@@ -33,7 +33,7 @@ import Foundation
 import NaturalLanguage
 
 extension UserDefaults {
-    static let groupDomain = "com.charcoaldesign.SwiftFormat"
+    static let groupDomain = "com.yingguqing.xcode.plugin"
 
     func clearAll(in domainName: String) {
         persistentDomain(forName: domainName)?.forEach {

@@ -693,7 +693,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.4;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yingguqing.xcodeplugin;
 				PRODUCT_NAME = "xcode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = mac_any_dev;
@@ -723,7 +723,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.4;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yingguqing.xcodeplugin;
 				PRODUCT_NAME = "xcode插件";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = mac_any_dev;
@@ -756,7 +756,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yingguqing.xcodeplugin.extension;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -791,7 +791,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meilamei.XcodePlugin;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yingguqing.xcodeplugin.extension;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME)";
 				PRODUCT_NAME = XCodePlugin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
