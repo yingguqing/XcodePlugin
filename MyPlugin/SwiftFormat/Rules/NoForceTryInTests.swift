@@ -1,0 +1,71 @@
+// Created by Andy Bartholomew on 5/30/25.
+// Copyright © 2025 Airbnb Inc. All rights reserved.
+
+import Foundation
+
+public extension FormatRule {
+    static let noForceTryInTests = FormatRule(
+        help: "Write tests that use `throws` instead of using `try!`."
+    ) { formatter in
+        guard let testFramework = formatter.detectTestingFramework() else {
+            return
+        }
+
+        formatter.forEach(.keyword("func")) { funcKeywordIndex, _ in
+            guard let functionDecl = formatter.parseFunctionDeclaration(keywordIndex: funcKeywordIndex),
+                  formatter.isTestCase(at: funcKeywordIndex, in: functionDecl, for: testFramework),
+                  let bodyRange = functionDecl.bodyRange
+            else { return }
+
+            // Find all `try!` and remove the `!`
+            var foundAnyTryExclamationMarks = false
+            for index in bodyRange.reversed() {
+                guard formatter.tokens[index] == .keyword("try") else { continue }
+                guard let nextTokenIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, after: index)
+                else { return }
+                let nextToken = formatter.tokens[nextTokenIndex]
+                if nextToken != .operator("!", .postfix) {
+                    continue
+                }
+
+                // Only remove the `!` if we are not within a closure or nested function,
+                // where it's not safe to just remove the `!` and make our function throw.
+                guard formatter.tryKeywordSupported(at: index, in: functionDecl) else { continue }
+
+                formatter.removeToken(at: nextTokenIndex)
+                foundAnyTryExclamationMarks = true
+            }
+
+            // If we found any `!`s, add a `throws` if it doesn't already exist.
+            guard foundAnyTryExclamationMarks else { return }
+
+            formatter.addThrowsEffect(to: functionDecl)
+        }
+    } examples: {
+        """
+        ```diff
+          import Testing
+
+          struct MyFeatureTests {
+        -     @Test func doSomething() {
+        -         try! MyFeature().doSomething()
+        +     @Test func doSomething() throws {
+        +         try MyFeature().doSomething()
+              }
+          }
+        ```
+
+        ```diff
+          import XCTest
+
+          class MyFeatureTests: XCTestCase {
+        -     func test_doSomething() {
+        -         try! MyFeature().doSomething()
+        +     func test_doSomething() throws {
+        +         try MyFeature().doSomething()
+              }
+          }
+        ```
+        """
+    }
+}

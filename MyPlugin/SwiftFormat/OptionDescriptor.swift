@@ -31,10 +31,9 @@
 
 import Foundation
 
-public class OptionDescriptor {
+final class OptionDescriptor {
     enum ArgumentType: EnumAssociable {
-        /// index 0 is official value, others are acceptable
-        case binary(true: [String], false: [String])
+        case binary(true: String, false: String)
         case `enum`([String])
         case text
         case int
@@ -45,21 +44,11 @@ public class OptionDescriptor {
     let argumentName: String // command-line argument; must not change
     fileprivate(set) var propertyName = "" // internal property; ok to change this
     let displayName: String
-    let help: String
-    fileprivate(set) var deprecationMessage: String?
+    private(set) var help: String
+    let deprecationMessage: String?
     let toOptions: (String, inout FormatOptions) throws -> Void
     let fromOptions: (FormatOptions) -> String
-    private(set) var type: ArgumentType
-
-    var isDeprecated: Bool {
-        deprecationMessage != nil
-    }
-
-    var isRenamed: Bool {
-        isDeprecated && Descriptors.all.contains(where: {
-            $0.propertyName == propertyName && $0.argumentName != argumentName
-        })
-    }
+    let type: ArgumentType
 
     var defaultArgument: String {
         fromOptions(FormatOptions.default)
@@ -70,12 +59,6 @@ public class OptionDescriptor {
         return (try? toOptions(arg, &options)) != nil
     }
 
-    fileprivate func renamed(to newPropertyName: String) -> OptionDescriptor {
-        propertyName = newPropertyName
-        deprecationMessage = "Use --\(newPropertyName) instead."
-        return self
-    }
-
     var isSetType: Bool {
         guard case .set = type else {
             return false
@@ -83,135 +66,263 @@ public class OptionDescriptor {
         return true
     }
 
-    init(argumentName: String,
-         displayName: String,
-         help: String,
-         deprecationMessage: String? = nil,
-         keyPath: WritableKeyPath<FormatOptions, Bool>,
-         trueValues: [String],
-         falseValues: [String])
-    {
-        assert(argumentName.count <= Options.maxArgumentNameLength)
+    /// List of valid arguments (for boolean or enum-type options)
+    var validArguments: [String]? {
+        switch type {
+        case let .binary(true: trueValue, false: falseValue):
+            return [trueValue, falseValue]
+        case let .enum(values):
+            return values
+        case .array, .set, .int, .text:
+            return nil
+        }
+    }
+
+    /// Formatted list of valid arguments (for boolean or enum-type options)
+    var argumentList: String? {
+        validArguments?.formattedList(default: defaultArgument)
+    }
+
+    /// Designated initializer
+    private init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String?,
+        toOptions: @escaping (String, inout FormatOptions) throws -> Void,
+        fromOptions: @escaping (FormatOptions) -> String,
+        type: ArgumentType
+    ) {
         assert(argumentName == argumentName.lowercased())
+
         self.argumentName = argumentName
         self.displayName = displayName
         self.help = help
         self.deprecationMessage = deprecationMessage
-        type = .binary(true: trueValues, false: falseValues)
-        toOptions = { value, options in
-            switch value.lowercased() {
-            case let value where trueValues.contains(value):
-                options[keyPath: keyPath] = true
-            case let value where falseValues.contains(value):
-                options[keyPath: keyPath] = false
-            default:
-                throw FormatError.options("")
+        self.toOptions = toOptions
+        self.fromOptions = fromOptions
+        self.type = type
+
+        // Auto-populate help options
+        if help.hasSuffix(":") {
+            guard let argumentList else {
+                preconditionFailure("Cannot auto-populate options for \(argumentName)")
             }
-        }
-        fromOptions = { options in
-            options[keyPath: keyPath] ? trueValues[0] : falseValues[0]
+            self.help = "\(help) \(argumentList)"
         }
     }
+}
 
-    init<T>(argumentName: String,
-            displayName: String,
-            help: String,
-            deprecationMessage: String? = nil,
-            keyPath: WritableKeyPath<FormatOptions, T>,
-            fromArgument: @escaping (String) -> T?,
-            toArgument: @escaping (T) -> String)
-    {
-        self.argumentName = argumentName
-        self.displayName = displayName
-        self.help = help
-        self.deprecationMessage = deprecationMessage
-        type = .text
-        toOptions = { key, options in
-            guard let value = fromArgument(key) else {
-                throw FormatError.options("")
-            }
-            options[keyPath: keyPath] = value
-        }
-        fromOptions = { options in
-            toArgument(options[keyPath: keyPath])
-        }
+extension OptionDescriptor {
+    var isDeprecated: Bool {
+        deprecationMessage != nil
     }
 
-    convenience init(argumentName: String,
-                     displayName: String,
-                     help: String,
-                     deprecationMessage: String? = nil,
-                     keyPath: WritableKeyPath<FormatOptions, String>,
-                     options: KeyValuePairs<String, String>)
-    {
-        let map: [String: String] = Dictionary(options.map { ($0, $1) }, uniquingKeysWith: { $1 })
-        let keys = Array(map.keys).sorted()
-        self.init(argumentName: argumentName,
-                  displayName: displayName,
-                  help: help,
-                  deprecationMessage: deprecationMessage,
-                  keyPath: keyPath,
-                  fromArgument: { map[$0.lowercased()] },
-                  toArgument: { value in
-                      if let key = map.first(where: { $0.value == value })?.key {
-                          return key
-                      }
-                      let fallback = FormatOptions.default[keyPath: keyPath]
-                      if let key = map.first(where: { $0.value == fallback })?.key {
-                          return key
-                      }
-                      return keys[0]
-                  })
-        type = .enum(keys)
+    var isRenamed: Bool {
+        isDeprecated && help.hasPrefix("Renamed to")
     }
 
-    convenience init(argumentName: String,
-                     displayName: String,
-                     help: String,
-                     deprecationMessage: String? = nil,
-                     keyPath: WritableKeyPath<FormatOptions, Int>)
-    {
+    /// Returns the new argument name for a property that has been renamed
+    var newArgumentName: String? {
+        isRenamed ? String(help.dropFirst("Renamed to --".count)) : nil
+    }
+
+    /// Mark an option as having been renamed
+    /// Note: this only affects the documentation, and not its behavior
+    func renamed(to newArgumentName: String) -> OptionDescriptor {
+        .init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: "Renamed to --\(newArgumentName)",
+            deprecationMessage: "Use --\(newArgumentName) instead.",
+            toOptions: toOptions,
+            fromOptions: fromOptions,
+            type: type
+        )
+    }
+
+    /// Define a boolean option with simple true/false values
+    convenience init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, Bool>
+    ) {
         self.init(
             argumentName: argumentName,
             displayName: displayName,
             help: help,
             deprecationMessage: deprecationMessage,
             keyPath: keyPath,
+            trueValues: ["true"],
+            falseValues: ["false"]
+        )
+    }
+
+    /// Define a boolean option with an array of true/false values
+    /// Note: only the first true/false value are included in help/docs
+    convenience init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, Bool>,
+        trueValues: [String],
+        falseValues: [String]
+    ) {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            deprecationMessage: deprecationMessage,
+            toOptions: { value, options in
+                switch value.lowercased() {
+                case let value where trueValues.contains(where: { value == $0.lowercased() }):
+                    options[keyPath: keyPath] = true
+                case let value where falseValues.contains(where: { value == $0.lowercased() }):
+                    options[keyPath: keyPath] = false
+                default:
+                    throw FormatError.options("")
+                }
+            },
+            fromOptions: { options in
+                options[keyPath: keyPath] ? trueValues[0] : falseValues[0]
+            },
+            type: .binary(true: trueValues[0], false: falseValues[0])
+        )
+    }
+
+    /// Define a freeform option with closures to convert to/from an argument string
+    convenience init<T>(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, T>,
+        type: ArgumentType,
+        fromArgument: @escaping (String) throws -> T?,
+        toArgument: @escaping (T) -> String
+    ) {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            deprecationMessage: deprecationMessage,
+            toOptions: { argument, options in
+                guard let value = try fromArgument(argument) else {
+                    throw FormatError.options("")
+                }
+                options[keyPath: keyPath] = value
+            },
+            fromOptions: { options in
+                toArgument(options[keyPath: keyPath])
+            },
+            type: type
+        )
+    }
+
+    /// Define a list-type option with automatic mapping between keys and values
+    convenience init<T: Equatable>(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, T>,
+        options: KeyValuePairs<String, T>
+    ) {
+        let map = Dictionary(uniqueKeysWithValues: options.map { ($0.lowercased(), $1) })
+        let defaultValue = FormatOptions.default[keyPath: keyPath]
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            deprecationMessage: deprecationMessage,
+            keyPath: keyPath,
+            type: .enum(options.map(\.key)),
+            fromArgument: { map[$0.lowercased()] },
+            toArgument: { value in
+                if let key = options.first(where: { $0.value == value })?.key {
+                    return key
+                }
+                // TODO: is this fallback path needed? how would a non-existent value arise?
+                return map.first(where: { $0.value == defaultValue })!.key
+            }
+        )
+    }
+
+    // TODO: we should add some sort of range validation to this
+    // Define an integer option
+    convenience init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, Int>
+    ) {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            deprecationMessage: deprecationMessage,
+            keyPath: keyPath,
+            type: .int,
             fromArgument: { Int($0).map { max(0, $0) } },
             toArgument: { String($0) }
         )
-        type = .int
     }
 
-    init<T: RawRepresentable>(argumentName: String,
-                              displayName: String,
-                              help: String,
-                              deprecationMessage: String? = nil,
-                              keyPath: WritableKeyPath<FormatOptions, T>,
-                              type: ArgumentType,
-                              altOptions: [String: T] = [:]) where T.RawValue == String
-    {
-        self.argumentName = argumentName
-        self.displayName = displayName
-        self.help = help
-        for option in help.quotedValues {
-            assert(T(rawValue: option) ?? altOptions[option] != nil, "Option \(option) doesn't exist")
-        }
-        self.deprecationMessage = deprecationMessage
-        self.type = type
-        toOptions = { rawValue, options in
-            guard let value = T(rawValue: rawValue) ?? T(rawValue: rawValue.lowercased()) ??
-                altOptions[rawValue] ?? altOptions[rawValue.lowercased()]
-            else {
-                throw FormatError.options("")
-            }
-            options[keyPath: keyPath] = value
-        }
-        fromOptions = { options in
-            options[keyPath: keyPath].rawValue
+    /// Define a raw-representable option
+    convenience init<T: RawRepresentable>(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, T>,
+        type: ArgumentType,
+        altOptions: [String: T] = [:]
+    ) where T.RawValue == String {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            deprecationMessage: deprecationMessage,
+            keyPath: keyPath,
+            type: type,
+            fromArgument: {
+                T(rawValue: $0) ?? T(rawValue: $0.lowercased()) ??
+                    altOptions[$0] ?? altOptions[$0.lowercased()]
+            },
+            toArgument: { $0.rawValue }
+        )
+
+        // Validate help
+        for value in help.quotedValues {
+            assert(T(rawValue: value) ?? altOptions[value] != nil, "Option \"\(value)\" doesn't exist")
         }
     }
 
+    /// Define a plain text option
+    convenience init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, String>
+    ) {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            deprecationMessage: deprecationMessage,
+            keyPath: keyPath,
+            type: .text,
+            fromArgument: { $0 },
+            toArgument: { $0 }
+        )
+    }
+
+    /// Define a String-representable option
     @_disfavoredOverload
     convenience init<T: RawRepresentable>(
         argumentName: String,
@@ -230,6 +341,7 @@ public class OptionDescriptor {
         )
     }
 
+    /// Define a String-representable option with a fixed set of CaseIterable argument values
     convenience init<T: RawRepresentable & CaseIterable>(
         argumentName: String,
         displayName: String,
@@ -244,58 +356,140 @@ public class OptionDescriptor {
             help: help,
             deprecationMessage: deprecationMessage,
             keyPath: keyPath,
-            type: .enum(T.allCases.map { $0.rawValue }),
+            type: .enum(T.allCases.map(\.rawValue)),
             altOptions: altOptions
         )
     }
 
-    init(argumentName: String,
-         displayName: String,
-         help: String,
-         deprecationMessage: String? = nil,
-         keyPath: WritableKeyPath<FormatOptions, [String]>,
-         validate: @escaping (String) throws -> Void = { _ in })
-    {
-        self.argumentName = argumentName
-        self.displayName = displayName
-        self.help = help
-        self.deprecationMessage = deprecationMessage
-        type = .array
-        toOptions = { value, options in
-            let values = parseCommaDelimitedList(value)
-            for (index, value) in values.enumerated() {
-                if values[0 ..< index].contains(value) {
-                    throw FormatError.options("Duplicate value '\(value)'")
-                }
-                try validate(value)
-            }
-            options[keyPath: keyPath] = values
-        }
-        fromOptions = { options in
-            options[keyPath: keyPath].joined(separator: ",")
-        }
+    /// Define a StringArray-type option with a validation callback applied to the whole argument array
+    convenience init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, [String]>,
+        validateArray: @escaping ([String]) throws -> Void = { _ in }
+    ) {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            deprecationMessage: deprecationMessage,
+            keyPath: keyPath,
+            type: .array,
+            fromArgument: {
+                let values = parseCommaDelimitedList($0)
+                try validateArray(values)
+                return values
+            },
+            toArgument: { $0.joined(separator: ",") }
+        )
     }
 
-    init(argumentName: String,
-         displayName: String,
-         help: String,
-         deprecationMessage: String? = nil,
-         keyPath: WritableKeyPath<FormatOptions, Set<String>>,
-         validate: @escaping (String) throws -> Void = { _ in })
-    {
-        self.argumentName = argumentName
-        self.displayName = displayName
-        self.help = help
-        self.deprecationMessage = deprecationMessage
-        type = .set
-        toOptions = { value, options in
-            let values = parseCommaDelimitedList(value)
-            try values.forEach(validate)
-            options[keyPath: keyPath] = Set(values)
-        }
-        fromOptions = { options in
-            options[keyPath: keyPath].sorted().joined(separator: ",")
-        }
+    /// Define a StringArray-type option with a validation callback applied individually to each argument
+    convenience init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage _: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, [String]>,
+        validate: @escaping (String) throws -> Void = { _ in }
+    ) {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            keyPath: keyPath,
+            validateArray: { values in
+                for (index, value) in values.enumerated() {
+                    if values[0 ..< index].contains(value) {
+                        throw FormatError.options("Duplicate value '\(value)'")
+                    }
+                    try validate(value)
+                }
+            }
+        )
+    }
+
+    /// Define an optional StringArray-type option with a validation callback applied to the whole argument array
+    convenience init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, [String]?>,
+        validateArray: @escaping ([String]) throws -> Void = { _ in }
+    ) {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            deprecationMessage: deprecationMessage,
+            toOptions: { value, options in
+                let values = parseCommaDelimitedList(value)
+
+                if values.isEmpty {
+                    options[keyPath: keyPath] = nil
+                } else {
+                    try validateArray(values)
+                    options[keyPath: keyPath] = values
+                }
+            },
+            fromOptions: { options in
+                options[keyPath: keyPath]?.joined(separator: ",") ?? ""
+            },
+            type: .array
+        )
+    }
+
+    /// Define an optional StringArray-type option with a validation callback applied individually to each argument
+    convenience init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage _: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, [String]?>,
+        validate: @escaping (String) throws -> Void = { _ in }
+    ) {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            keyPath: keyPath,
+            validateArray: { values in
+                for (index, value) in values.enumerated() {
+                    if values[0 ..< index].contains(value) {
+                        throw FormatError.options("Duplicate value '\(value)'")
+                    }
+                    try validate(value)
+                }
+            }
+        )
+    }
+
+    /// Define a StringSet-type option with a validation callback applied individually to each argument
+    convenience init(
+        argumentName: String,
+        displayName: String,
+        help: String,
+        deprecationMessage: String? = nil,
+        keyPath: WritableKeyPath<FormatOptions, Set<String>>,
+        validate: @escaping (String) throws -> Void = { _ in }
+    ) {
+        self.init(
+            argumentName: argumentName,
+            displayName: displayName,
+            help: help,
+            deprecationMessage: deprecationMessage,
+            keyPath: keyPath,
+            type: .set,
+            fromArgument: {
+                let values = parseCommaDelimitedList($0)
+                try values.forEach(validate)
+                return Set(values)
+            },
+            toArgument: { $0.sorted().joined(separator: ",") }
+        )
     }
 }
 
@@ -310,7 +504,7 @@ private extension String {
     }
 }
 
-public let Descriptors = _Descriptors()
+let Descriptors = _Descriptors()
 
 private var _allDescriptors: [OptionDescriptor] = {
     var descriptors = [OptionDescriptor]()
@@ -318,7 +512,14 @@ private var _allDescriptors: [OptionDescriptor] = {
         guard let name = label, var descriptor = value as? OptionDescriptor else {
             continue
         }
-        if descriptor.propertyName.isEmpty {
+        if let newArgumentName = descriptor.newArgumentName {
+            guard let old = descriptors.first(where: {
+                $0.argumentName == newArgumentName
+            }) else {
+                preconditionFailure("No property matches argument name \(newArgumentName)")
+            }
+            descriptor.propertyName = old.propertyName
+        } else {
             descriptor.propertyName = name
         }
         descriptors.append(descriptor)
@@ -329,11 +530,11 @@ private var _allDescriptors: [OptionDescriptor] = {
 private var _descriptorsByName: [String: OptionDescriptor] = Dictionary(uniqueKeysWithValues: _allDescriptors.map { ($0.argumentName, $0) })
 
 private let _formattingDescriptors: [OptionDescriptor] = {
-    let internalDescriptors = Descriptors.internal.map { $0.argumentName }
+    let internalDescriptors = Descriptors.internal.map(\.argumentName)
     return _allDescriptors.filter { !internalDescriptors.contains($0.argumentName) }
 }()
 
-public extension _Descriptors {
+extension _Descriptors {
     var formatting: [OptionDescriptor] {
         _formattingDescriptors
     }
@@ -344,11 +545,26 @@ public extension _Descriptors {
             fragment,
             ignoreConflictMarkers,
             swiftVersion,
+            languageMode,
+            markdownFiles,
+            unknownOptions,
         ]
     }
 
     /// An Array of all descriptors
-    var all: [OptionDescriptor] { _allDescriptors }
+    var all: [OptionDescriptor] {
+        _allDescriptors
+    }
+
+    /// All deprecated descriptors
+    var deprecated: [OptionDescriptor] {
+        _allDescriptors.filter(\.isDeprecated)
+    }
+
+    /// All renamed descriptors
+    var renamed: [OptionDescriptor] {
+        _allDescriptors.filter(\.isRenamed)
+    }
 
     /// A Dictionary of descriptors by name
     var byName: [String: OptionDescriptor] {
@@ -356,20 +572,19 @@ public extension _Descriptors {
     }
 }
 
-public struct _Descriptors {
+struct _Descriptors {
     let lineAfterMarks = OptionDescriptor(
-        argumentName: "lineaftermarks",
+        argumentName: "line-after-marks",
         displayName: "Blank line after \"MARK\"",
-        help: "Insert blank line after \"MARK:\": \"true\" (default) or \"false\"",
-        keyPath: \.lineAfterMarks,
-        trueValues: ["true"],
-        falseValues: ["false"]
+        help: "Insert blank line after \"MARK:\":",
+        keyPath: \.lineAfterMarks
     )
     let indent = OptionDescriptor(
         argumentName: "indent",
         displayName: "Indent",
         help: "Number of spaces to indent, or \"tab\" to use tabs",
         keyPath: \.indent,
+        type: .text,
         fromArgument: { arg in
             switch arg.lowercased() {
             case "tab", "tabs", "tabbed":
@@ -383,54 +598,58 @@ public struct _Descriptors {
     let linebreak = OptionDescriptor(
         argumentName: "linebreaks",
         displayName: "Linebreak Character",
-        help: "Linebreak character to use: \"cr\", \"crlf\" or \"lf\" (default)",
+        help: "Linebreak character to use:",
         keyPath: \.linebreak,
-        options: ["cr": "\r", "lf": "\n", "crlf": "\r\n"]
+        options: ["cr": "\r", "crlf": "\r\n", "lf": "\n"]
     )
-    let allowInlineSemicolons = OptionDescriptor(
+    let semicolons = OptionDescriptor(
         argumentName: "semicolons",
         displayName: "Semicolons",
-        help: "Allow semicolons: \"never\" or \"inline\" (default)",
-        keyPath: \.allowInlineSemicolons,
-        trueValues: ["inline"],
-        falseValues: ["never", "false"]
+        help: "Allow semicolons:",
+        keyPath: \.semicolons,
+        altOptions: [
+            "inline": .inlineOnly,
+            "false": .never,
+        ]
     )
     let spaceAroundOperatorDeclarations = OptionDescriptor(
-        argumentName: "operatorfunc",
+        argumentName: "operator-func",
         displayName: "Operator Functions",
-        help: "Spacing for operator funcs: \"spaced\" (default) or \"no-space\"",
+        help: "Operator function spacing:",
         keyPath: \.spaceAroundOperatorDeclarations,
-        trueValues: ["spaced", "space", "spaces"],
-        falseValues: ["no-space", "nospace"]
+        altOptions: [
+            "space": .insert,
+            "spaces": .insert,
+            "nospace": .remove,
+            "preserve": .preserve,
+            "preserve-spaces": .preserve,
+            "preservespaces": .preserve,
+        ]
     )
     let useVoid = OptionDescriptor(
-        argumentName: "voidtype",
+        argumentName: "void-type",
         displayName: "Void Type",
-        help: "How void types are represented: \"void\" (default) or \"tuple\"",
+        help: "How Void types are represented:",
         keyPath: \.useVoid,
-        trueValues: ["void"],
+        trueValues: ["Void"],
         falseValues: ["tuple", "tuples", "()"]
     )
     let indentCase = OptionDescriptor(
-        argumentName: "indentcase",
+        argumentName: "indent-case",
         displayName: "Indent Case",
-        help: "Indent cases inside a switch: \"true\" or \"false\" (default)",
-        keyPath: \.indentCase,
-        trueValues: ["true"],
-        falseValues: ["false"]
+        help: "Indent cases inside a switch statement:",
+        keyPath: \.indentCase
     )
     let trailingCommas = OptionDescriptor(
-        argumentName: "commas",
-        displayName: "Commas",
-        help: "Commas in collection literals: \"always\" (default) or \"inline\"",
-        keyPath: \.trailingCommas,
-        trueValues: ["always", "true"],
-        falseValues: ["inline", "false"]
+        argumentName: "trailing-commas",
+        displayName: "Trailing commas",
+        help: "Include trailing commas:",
+        keyPath: \.trailingCommas
     )
     let truncateBlankLines = OptionDescriptor(
-        argumentName: "trimwhitespace",
+        argumentName: "trim-whitespace",
         displayName: "Trim White Space",
-        help: "Trim trailing space: \"always\" (default) or \"nonblank-lines\"",
+        help: "Trim trailing whitespace:",
         keyPath: \.truncateBlankLines,
         trueValues: ["always"],
         falseValues: ["nonblank-lines", "nonblank", "non-blank-lines", "non-blank",
@@ -439,7 +658,7 @@ public struct _Descriptors {
     let allmanBraces = OptionDescriptor(
         argumentName: "allman",
         displayName: "Allman Braces",
-        help: "Use allman indentation style: \"true\" or \"false\" (default)",
+        help: "Use Allman indentation style:",
         keyPath: \.allmanBraces,
         trueValues: ["true", "enabled"],
         falseValues: ["false", "disabled"]
@@ -447,253 +666,297 @@ public struct _Descriptors {
     let fileHeader = OptionDescriptor(
         argumentName: "header",
         displayName: "Header",
-        help: "Header comments: \"strip\", \"ignore\", or the text you wish use",
+        help: "Header comments: \"strip\", \"ignore\" (default), or the text you wish use",
         keyPath: \.fileHeader
     )
     let ifdefIndent = OptionDescriptor(
         argumentName: "ifdef",
         displayName: "Ifdef Indent",
-        help: "#if indenting: \"indent\" (default), \"no-indent\" or \"outdent\"",
+        help: "#if statement indenting:",
         keyPath: \.ifdefIndent
     )
-    let wrapArguments = OptionDescriptor(
-        argumentName: "wraparguments",
-        displayName: "Wrap Arguments",
-        help: "Wrap all arguments: \"before-first\", \"after-first\", \"preserve\"",
-        keyPath: \.wrapArguments
-    )
     let wrapEnumCases = OptionDescriptor(
-        argumentName: "wrapenumcases",
+        argumentName: "wrap-enum-cases",
         displayName: "Wrap Enum Cases",
-        help: "Wrap enum cases: \"always\" (default) or \"with-values\"",
+        help: "Enum case wrapping:",
         keyPath: \.wrapEnumCases
     )
+    let wrapSingleLineEnumCases = OptionDescriptor(
+        argumentName: "wrap-single-line-enum-cases",
+        displayName: "Wrap Single-line Enum Cases",
+        help: "Wrap comma-delimited enum cases following the opening brace:",
+        keyPath: \.wrapSingleLineEnumCases,
+        trueValues: ["true"],
+        falseValues: ["false"]
+    )
+    let wrapArguments = OptionDescriptor(
+        argumentName: "wrap-arguments",
+        displayName: "Wrap Arguments",
+        help: "Function argument wrapping:",
+        keyPath: \.wrapArguments
+    )
     let wrapParameters = OptionDescriptor(
-        argumentName: "wrapparameters",
+        argumentName: "wrap-parameters",
         displayName: "Wrap Parameters",
-        help: "Wrap func params: \"before-first\", \"after-first\", \"preserve\"",
+        help: "Function call parameter wrapping:",
         keyPath: \.wrapParameters
     )
     let wrapCollections = OptionDescriptor(
-        argumentName: "wrapcollections",
+        argumentName: "wrap-collections",
         displayName: "Wrap Collections",
-        help: "Wrap array/dict: \"before-first\", \"after-first\", \"preserve\"",
+        help: "Collection literal element wrapping:",
         keyPath: \.wrapCollections
     )
     let wrapTypealiases = OptionDescriptor(
-        argumentName: "wraptypealiases",
+        argumentName: "wrap-type-aliases",
         displayName: "Wrap Typealiases",
-        help: "Wrap typealiases: \"before-first\", \"after-first\", \"preserve\"",
+        help: "Typealias wrapping:",
         keyPath: \.wrapTypealiases
     )
     let wrapReturnType = OptionDescriptor(
-        argumentName: "wrapreturntype",
+        argumentName: "wrap-return-type",
         displayName: "Wrap Return Type",
-        help: "Wrap return type: \"if-multiline\", \"preserve\" (default)",
+        help: "Function return type wrapping:",
         keyPath: \.wrapReturnType
     )
     let wrapEffects = OptionDescriptor(
-        argumentName: "wrapeffects",
-        displayName: "Wrap Function Effects (throws, async)",
-        help: "Wrap effects: \"if-multiline\", \"never\", \"preserve\"",
+        argumentName: "wrap-effects",
+        displayName: "Wrap Function Effects",
+        help: "Function effects (throws, async) wrapping:",
         keyPath: \.wrapEffects
     )
     let wrapConditions = OptionDescriptor(
-        argumentName: "wrapconditions",
+        argumentName: "wrap-conditions",
         displayName: "Wrap Conditions",
-        help: "Wrap conditions: \"before-first\", \"after-first\", \"preserve\"",
+        help: "Conditional expression wrapping:",
         keyPath: \.wrapConditions
     )
     let wrapTernaryOperators = OptionDescriptor(
-        argumentName: "wrapternary",
+        argumentName: "wrap-ternary",
         displayName: "Wrap Ternary Operators",
-        help: "Wrap ternary operators: \"default\", \"before-operators\"",
+        help: "Ternary expression wrapping: \"default\" (wrap if needed) or \"before-operators\"",
         keyPath: \.wrapTernaryOperators
     )
+    let wrapStringInterpolation = OptionDescriptor(
+        argumentName: "wrap-string-interpolation",
+        displayName: "Wrap String Interpolation",
+        help: "Wrap string interpolation if it exceeds max width:",
+        keyPath: \.wrapStringInterpolation,
+        trueValues: ["true", "default"], // "default" was previously the default value, but is now deprecated.
+        falseValues: ["false", "preserve"]
+    )
     let closingParenPosition = OptionDescriptor(
-        argumentName: "closingparen",
+        argumentName: "closing-paren",
         displayName: "Closing Paren Position",
-        help: "Closing paren position: \"balanced\" (default) or \"same-line\"",
+        help: "Closing paren placement:",
         keyPath: \.closingParenPosition
     )
     let callSiteClosingParenPosition = OptionDescriptor(
-        argumentName: "callsiteparen",
+        argumentName: "call-site-paren",
         displayName: "Call Site Closing Paren",
-        help: "Closing paren at call sites: \"balanced\" or \"same-line\"",
+        help: "Closing paren placement at function call sites:",
         keyPath: \.callSiteClosingParenPosition
     )
     let uppercaseHex = OptionDescriptor(
-        argumentName: "hexliteralcase",
+        argumentName: "hex-literal-case",
         displayName: "Hex Literal Case",
-        help: "Casing for hex literals: \"uppercase\" (default) or \"lowercase\"",
+        help: "Case for letters in hex literals:",
         keyPath: \.uppercaseHex,
         trueValues: ["uppercase", "upper"],
         falseValues: ["lowercase", "lower"]
     )
     let uppercaseExponent = OptionDescriptor(
-        argumentName: "exponentcase",
+        argumentName: "exponent-case",
         displayName: "Exponent Case",
-        help: "Case of 'e' in numbers: \"lowercase\" or \"uppercase\" (default)",
+        help: "Case for 'e' in exponent literals:",
         keyPath: \.uppercaseExponent,
         trueValues: ["uppercase", "upper"],
         falseValues: ["lowercase", "lower"]
     )
     let decimalGrouping = OptionDescriptor(
-        argumentName: "decimalgrouping",
+        argumentName: "decimal-grouping",
         displayName: "Decimal Grouping",
-        help: "Decimal grouping,threshold (default: 3,6) or \"none\", \"ignore\"",
+        help: "Decimal grouping and threshold (default: 3,6) or \"none\", \"ignore\"",
         keyPath: \.decimalGrouping
     )
     let fractionGrouping = OptionDescriptor(
-        argumentName: "fractiongrouping",
+        argumentName: "fraction-grouping",
         displayName: "Fraction Grouping",
-        help: "Group digits after '.': \"enabled\" or \"disabled\" (default)",
+        help: "Grouping of decimal digits after the '.':",
         keyPath: \.fractionGrouping,
         trueValues: ["enabled", "true"],
         falseValues: ["disabled", "false"]
     )
     let exponentGrouping = OptionDescriptor(
-        argumentName: "exponentgrouping",
+        argumentName: "exponent-grouping",
         displayName: "Exponent Grouping",
-        help: "Group exponent digits: \"enabled\" or \"disabled\" (default)",
+        help: "Grouping of exponent digits:",
         keyPath: \.exponentGrouping,
         trueValues: ["enabled", "true"],
         falseValues: ["disabled", "false"]
     )
     let binaryGrouping = OptionDescriptor(
-        argumentName: "binarygrouping",
+        argumentName: "binary-grouping",
         displayName: "Binary Grouping",
-        help: "Binary grouping,threshold (default: 4,8) or \"none\", \"ignore\"",
+        help: "Binary grouping and threshold (default: 4,8) or \"none\", \"ignore\"",
         keyPath: \.binaryGrouping
     )
     let octalGrouping = OptionDescriptor(
-        argumentName: "octalgrouping",
+        argumentName: "octal-grouping",
         displayName: "Octal Grouping",
-        help: "Octal grouping,threshold (default: 4,8) or \"none\", \"ignore\"",
+        help: "Octal grouping and threshold (default: 4,8) or \"none\", \"ignore\"",
         keyPath: \.octalGrouping
     )
     let hexGrouping = OptionDescriptor(
-        argumentName: "hexgrouping",
+        argumentName: "hex-grouping",
         displayName: "Hex Grouping",
-        help: "Hex grouping,threshold (default: 4,8) or \"none\", \"ignore\"",
+        help: "Hex grouping and threshold (default: 4,8) or \"none\", \"ignore\"",
         keyPath: \.hexGrouping
     )
     let hoistPatternLet = OptionDescriptor(
-        argumentName: "patternlet",
+        argumentName: "pattern-let",
         displayName: "Pattern Let",
-        help: "let/var placement in patterns: \"hoist\" (default) or \"inline\"",
+        help: "Placement of let/var in patterns:",
         keyPath: \.hoistPatternLet,
         trueValues: ["hoist"],
         falseValues: ["inline"]
     )
     let stripUnusedArguments = OptionDescriptor(
-        argumentName: "stripunusedargs",
+        argumentName: "strip-unused-args",
         displayName: "Strip Unused Arguments",
-        help: "\"closure-only\", \"unnamed-only\" or \"always\" (default)",
+        help: "Strip unused arguments:",
         keyPath: \.stripUnusedArguments
     )
-    let elseOnNextLine = OptionDescriptor(
-        argumentName: "elseposition",
+    let elsePosition = OptionDescriptor(
+        argumentName: "else-position",
         displayName: "Else Position",
-        help: "Placement of else/catch: \"same-line\" (default) or \"next-line\"",
-        keyPath: \.elseOnNextLine,
-        trueValues: ["next-line", "nextline"],
-        falseValues: ["same-line", "sameline"]
+        help: "Placement of else/catch:",
+        keyPath: \.elsePosition,
+        altOptions: ["nextline": .nextLine, "sameline": .sameLine]
     )
     let guardElsePosition = OptionDescriptor(
-        argumentName: "guardelse",
+        argumentName: "guard-else",
         displayName: "Guard Else Position",
-        help: "Guard else: \"same-line\", \"next-line\" or \"auto\" (default)",
+        help: "Placement of else in guard statements:",
         keyPath: \.guardElsePosition
     )
     let explicitSelf = OptionDescriptor(
         argumentName: "self",
         displayName: "Self",
-        help: "Explicit self: \"insert\", \"remove\" (default) or \"init-only\"",
+        help: "Explicit self:",
         keyPath: \.explicitSelf
     )
     let selfRequired = OptionDescriptor(
-        argumentName: "selfrequired",
+        argumentName: "self-required",
         displayName: "Self Required",
-        help: "Comma-delimited list of functions with @autoclosure arguments",
-        keyPath: \FormatOptions.selfRequired
+        help: "Comma-delimited list of functions / types with @autoclosure arguments",
+        keyPath: \FormatOptions.selfRequired,
+        type: .set,
+        fromArgument: { FormatOptions.default.selfRequired.union(parseCommaDelimitedList($0)) },
+        toArgument: { $0.sorted().joined(separator: ",") }
     )
     let throwCapturing = OptionDescriptor(
-        argumentName: "throwcapturing",
+        argumentName: "throw-capturing",
         displayName: "Throw Capturing",
         help: "List of functions with throwing @autoclosure arguments",
         keyPath: \FormatOptions.throwCapturing
     )
     let asyncCapturing = OptionDescriptor(
-        argumentName: "asynccapturing",
+        argumentName: "async-capturing",
         displayName: "Async Capturing",
         help: "List of functions with async @autoclosure arguments",
         keyPath: \FormatOptions.asyncCapturing
     )
     let importGrouping = OptionDescriptor(
-        argumentName: "importgrouping",
+        argumentName: "import-grouping",
         displayName: "Import Grouping",
-        help: "\"testable-first/last\", \"alpha\" (default) or \"length\"",
+        help: "Comma-delimited list of import sorting/grouping options: \"alpha\", \"access-control\", \"length\", \"testable-first\", \"testable-last\", \"attributes-last\". Defaults to \"access-control,alpha\"",
         keyPath: \FormatOptions.importGrouping,
-        altOptions: [
-            "alphabetized": .alpha,
-            "alphabetical": .alpha,
-            "testable-top": .testableFirst,
-            "testable-bottom": .testableLast,
-        ]
+        type: .text,
+        fromArgument: { arg in
+            parseCommaDelimitedList(arg).compactMap { ImportGrouping(rawValue: $0) }
+        },
+        toArgument: { options in
+            options.map(\.rawValue).joined(separator: ",")
+        }
+    )
+    let hoistImports = OptionDescriptor(
+        argumentName: "hoist-imports",
+        displayName: "Hoist Imports",
+        help: "Hoist file-scope imports to top of file",
+        keyPath: \.hoistImports,
+        trueValues: ["hoist"],
+        falseValues: ["preserve"]
     )
     let trailingClosures = OptionDescriptor(
-        argumentName: "trailingclosures",
+        argumentName: "trailing-closures",
         displayName: "Trailing Closure Functions",
         help: "Comma-delimited list of functions that use trailing closures",
         keyPath: \FormatOptions.trailingClosures
     )
     let neverTrailing = OptionDescriptor(
-        argumentName: "nevertrailing",
+        argumentName: "never-trailing",
         displayName: "Never Trailing Functions",
         help: "List of functions that should never use trailing closures",
         keyPath: \FormatOptions.neverTrailing
     )
+    let wrapClosureBodies = OptionDescriptor(
+        argumentName: "wrap-closure-bodies",
+        displayName: "Wrap Closure Bodies",
+        help: "Comma-delimited list of functions whose closure bodies should wrap, or \"always\". Defaults to \"Task,Task.detached\"",
+        keyPath: \FormatOptions.wrapClosureBodies
+    )
     let xcodeIndentation = OptionDescriptor(
-        argumentName: "xcodeindentation",
+        argumentName: "xcode-indentation",
         displayName: "Xcode Indentation",
-        help: "Match Xcode indenting: \"enabled\" or \"disabled\" (default)",
+        help: "Match Xcode indenting:",
         keyPath: \.xcodeIndentation,
         trueValues: ["enabled", "true"],
         falseValues: ["disabled", "false"]
     )
     let tabWidth = OptionDescriptor(
-        argumentName: "tabwidth",
+        argumentName: "tab-width",
         displayName: "Tab Width",
         help: "The width of a tab character. Defaults to \"unspecified\"",
         keyPath: \.tabWidth,
+        type: .int,
         fromArgument: { $0.lowercased() == "unspecified" ? 0 : Int($0).map { max(0, $0) } },
         toArgument: { $0 > 0 ? String($0) : "unspecified" }
     )
     let maxWidth = OptionDescriptor(
-        argumentName: "maxwidth",
+        argumentName: "max-width",
         displayName: "Max Width",
-        help: "Maximum length of a line before wrapping. defaults to \"none\"",
+        help: "Maximum length of a line before wrapping. Defaults to \"none\"",
         keyPath: \.maxWidth,
+        type: .int,
         fromArgument: { $0.lowercased() == "none" ? 0 : Int($0).map { max(0, $0) } },
         toArgument: { $0 > 0 ? String($0) : "none" }
     )
+    let listWrapThreshold = OptionDescriptor(
+        argumentName: "list-wrap-threshold",
+        displayName: "List Wrap Threshold",
+        help: "Line length triggering wrap for comma-separated lists, in addition to --max-width. Defaults to \"none\"",
+        keyPath: \.listWrapThreshold,
+        type: .int,
+        fromArgument: { $0.lowercased() == "none" ? .some(nil) : Int($0).map { max(0, $0) } },
+        toArgument: { $0.map(String.init) ?? "none" }
+    )
     let smartTabs = OptionDescriptor(
-        argumentName: "smarttabs",
+        argumentName: "smart-tabs",
         displayName: "Smart Tabs",
-        help: "Align code independently of tab width. defaults to \"enabled\"",
+        help: "Align code independently of tab-width:",
         keyPath: \.smartTabs,
         trueValues: ["enabled", "true"],
         falseValues: ["disabled", "false"]
     )
     let assetLiteralWidth = OptionDescriptor(
-        argumentName: "assetliterals",
+        argumentName: "asset-literals",
         displayName: "Asset Literals",
-        help: "Color/image literal width. \"actual-width\" or \"visual-width\"",
+        help: "Formatting of color/image literals:",
         keyPath: \.assetLiteralWidth
     )
     let noSpaceOperators = OptionDescriptor(
-        argumentName: "nospaceoperators",
+        argumentName: "no-space-operators",
         displayName: "No-space Operators",
         help: "Comma-delimited list of operators without surrounding space",
         keyPath: \FormatOptions.noSpaceOperators,
@@ -711,21 +974,27 @@ public struct _Descriptors {
         }
     )
     let typeDelimiterSpacing = OptionDescriptor(
-        argumentName: "typedelimiter",
-        displayName: "Type delimiter spacing",
-        help: "\"space-after\" (default), \"spaced\" or \"no-space\"",
+        argumentName: "type-delimiter",
+        displayName: "Type Delimiter Spacing",
+        help: "Type delimiter spacing:",
         keyPath: \.typeDelimiterSpacing
     )
     let spaceAroundRangeOperators = OptionDescriptor(
         argumentName: "ranges",
         displayName: "Ranges",
-        help: "Spacing for ranges: \"spaced\" (default) or \"no-space\"",
+        help: "Range operator spacing:",
         keyPath: \.spaceAroundRangeOperators,
-        trueValues: ["spaced", "space", "spaces"],
-        falseValues: ["no-space", "nospace"]
+        altOptions: [
+            "space": .insert,
+            "spaces": .insert,
+            "nospace": .remove,
+            "preserve": .preserve,
+            "preserve-spaces": .preserve,
+            "preservespaces": .preserve,
+        ]
     )
     let noWrapOperators = OptionDescriptor(
-        argumentName: "nowrapoperators",
+        argumentName: "no-wrap-operators",
         displayName: "No-wrap Operators",
         help: "Comma-delimited list of operators that shouldn't be wrapped",
         keyPath: \FormatOptions.noWrapOperators,
@@ -741,82 +1010,70 @@ public struct _Descriptors {
         }
     )
     let modifierOrder = OptionDescriptor(
-        argumentName: "modifierorder",
+        argumentName: "modifier-order",
         displayName: "Modifier Order",
         help: "Comma-delimited list of modifiers in preferred order",
         keyPath: \FormatOptions.modifierOrder,
-        validate: {
-            guard _FormatRules.mapModifiers($0) != nil else {
-                let names = _FormatRules.allModifiers
-                    + _FormatRules.semanticModifierGroups
-                let error = "'\($0)' is not a valid modifier"
-                guard let match = $0.bestMatches(in: names).first else {
-                    throw FormatError.options(error)
-                }
-                throw FormatError.options("\(error) (did you mean '\(match)'?)")
+        validate: { modifier in
+            guard _FormatRules.mapModifiers(modifier) != nil else {
+                throw FormatError.invalidOption(
+                    modifier,
+                    for: "modifier-order",
+                    with: _FormatRules.allModifiers + _FormatRules.semanticModifierGroups
+                )
             }
         }
     )
     let shortOptionals = OptionDescriptor(
-        argumentName: "shortoptionals",
+        argumentName: "short-optionals",
         displayName: "Short Optional Syntax",
-        help: "Use ? for optionals \"always\" or \"except-properties\" (default)",
+        help: "Prefer ? shorthand for optionals: \"preserve-struct-inits\" (default) or \"always\"",
         keyPath: \.shortOptionals
     )
     let markTypes = OptionDescriptor(
-        argumentName: "marktypes",
+        argumentName: "mark-types",
         displayName: "Mark Types",
-        help: "Mark types \"always\" (default), \"never\", \"if-not-empty\"",
+        help: "Mark types:",
         keyPath: \.markTypes
     )
     let typeMarkComment = OptionDescriptor(
-        argumentName: "typemark",
+        argumentName: "type-mark",
         displayName: "Type Mark Comment",
         help: "Template for type mark comments. Defaults to \"MARK: - %t\"",
-        keyPath: \.typeMarkComment,
-        fromArgument: { $0 },
-        toArgument: { $0 }
+        keyPath: \.typeMarkComment
     )
     let markExtensions = OptionDescriptor(
-        argumentName: "markextensions",
+        argumentName: "mark-extensions",
         displayName: "Mark Extensions",
-        help: "Mark extensions \"always\" (default), \"never\", \"if-not-empty\"",
+        help: "Mark extensions:",
         keyPath: \.markExtensions
     )
     let extensionMarkComment = OptionDescriptor(
-        argumentName: "extensionmark",
+        argumentName: "extension-mark",
         displayName: "Extension Mark Comment",
         help: "Mark for standalone extensions. Defaults to \"MARK: - %t + %c\"",
-        keyPath: \.extensionMarkComment,
-        fromArgument: { $0 },
-        toArgument: { $0 }
+        keyPath: \.extensionMarkComment
     )
     let groupedExtensionMarkComment = OptionDescriptor(
-        argumentName: "groupedextension",
+        argumentName: "grouped-extension",
         displayName: "Grouped Extension Mark Comment",
         help: "Mark for extension grouped with extended type. (\"MARK: %c\")",
-        keyPath: \.groupedExtensionMarkComment,
-        fromArgument: { $0 },
-        toArgument: { $0 }
+        keyPath: \.groupedExtensionMarkComment
     )
     let markCategories = OptionDescriptor(
-        argumentName: "markcategories",
+        argumentName: "mark-categories",
         displayName: "Mark Categories",
-        help: "Insert MARK comments between categories (true by default)",
-        keyPath: \.markCategories,
-        trueValues: ["true"],
-        falseValues: ["false"]
+        help: "Insert MARK comments between categories:",
+        keyPath: \.markCategories
     )
     let categoryMarkComment = OptionDescriptor(
-        argumentName: "categorymark",
+        argumentName: "category-mark",
         displayName: "Category Mark Comment",
         help: "Template for category mark comments. Defaults to \"MARK: %c\"",
-        keyPath: \.categoryMarkComment,
-        fromArgument: { $0 },
-        toArgument: { $0 }
+        keyPath: \.categoryMarkComment
     )
     let beforeMarks = OptionDescriptor(
-        argumentName: "beforemarks",
+        argumentName: "before-marks",
         displayName: "Before Marks",
         help: "Declarations placed before first mark (e.g. `typealias,struct`)",
         keyPath: \.beforeMarks
@@ -828,99 +1085,215 @@ public struct _Descriptors {
         keyPath: \.lifecycleMethods
     )
     let organizeTypes = OptionDescriptor(
-        argumentName: "organizetypes",
+        argumentName: "organize-types",
         displayName: "Declaration Types to Organize",
         help: "Declarations to organize (default: `class,actor,struct,enum`)",
         keyPath: \.organizeTypes
     )
     let organizeStructThreshold = OptionDescriptor(
-        argumentName: "structthreshold",
+        argumentName: "struct-threshold",
         displayName: "Organize Struct Threshold",
         help: "Minimum line count to organize struct body. Defaults to 0",
         keyPath: \.organizeStructThreshold
     )
     let organizeClassThreshold = OptionDescriptor(
-        argumentName: "classthreshold",
+        argumentName: "class-threshold",
         displayName: "Organize Class Threshold",
         help: "Minimum line count to organize class body. Defaults to 0",
         keyPath: \.organizeClassThreshold
     )
     let organizeEnumThreshold = OptionDescriptor(
-        argumentName: "enumthreshold",
+        argumentName: "enum-threshold",
         displayName: "Organize Enum Threshold",
         help: "Minimum line count to organize enum body. Defaults to 0",
         keyPath: \.organizeEnumThreshold
     )
     let organizeExtensionThreshold = OptionDescriptor(
-        argumentName: "extensionlength",
+        argumentName: "extension-threshold",
         displayName: "Organize Extension Threshold",
         help: "Minimum line count to organize extension body. Defaults to 0",
         keyPath: \.organizeExtensionThreshold
     )
+    let markStructThreshold = OptionDescriptor(
+        argumentName: "mark-struct-threshold",
+        displayName: "Mark Struct Threshold",
+        help: "Minimum line count to add MARK comments in struct body. Defaults to 0",
+        keyPath: \.markStructThreshold
+    )
+    let markClassThreshold = OptionDescriptor(
+        argumentName: "mark-class-threshold",
+        displayName: "Mark Class Threshold",
+        help: "Minimum line count to add MARK comments in class body. Defaults to 0",
+        keyPath: \.markClassThreshold
+    )
+    let markEnumThreshold = OptionDescriptor(
+        argumentName: "mark-enum-threshold",
+        displayName: "Mark Enum Threshold",
+        help: "Minimum line count to add MARK comments in enum body. Defaults to 0",
+        keyPath: \.markEnumThreshold
+    )
+    let markExtensionThreshold = OptionDescriptor(
+        argumentName: "mark-extension-threshold",
+        displayName: "Mark Extension Threshold",
+        help: "Minimum line count to add MARK comments in extension body. Defaults to 0",
+        keyPath: \.markExtensionThreshold
+    )
     let organizationMode = OptionDescriptor(
-        argumentName: "organizationmode",
+        argumentName: "organization-mode",
         displayName: "Declaration Organization Mode",
-        help: "Organize declarations by \"visibility\" (default) or \"type\"",
+        help: "Organize declarations by:",
         keyPath: \.organizationMode
     )
+    let typeBodyMarks = OptionDescriptor(
+        argumentName: "type-body-marks",
+        displayName: "Type Body Mark Comments",
+        help: "MARK comments in type bodies: \"preserve\" (default) or \"remove\"",
+        keyPath: \.typeBodyMarks
+    )
+    let visibilityOrder = OptionDescriptor(
+        argumentName: "visibility-order",
+        displayName: "Organization Order For Visibility",
+        help: "Order for visibility groups inside declaration",
+        keyPath: \.visibilityOrder,
+        validateArray: { order in
+            let essentials = VisibilityCategory.essentialCases.map(\.rawValue)
+            for type in essentials {
+                guard order.contains(type) else {
+                    throw FormatError.options("--visibility-order expects \(type) to be included")
+                }
+            }
+            for type in order {
+                guard let concrete = VisibilityCategory(rawValue: type) else {
+                    throw FormatError.invalidOption(
+                        type,
+                        for: "visibility-order",
+                        with: VisibilityCategory.allCases.map(\.rawValue)
+                    )
+                }
+            }
+        }
+    )
+    let typeOrder = OptionDescriptor(
+        argumentName: "type-order",
+        displayName: "Organization Order For Declaration Types",
+        help: "Order for declaration type groups inside declaration",
+        keyPath: \.typeOrder,
+        validate: { type in
+            guard let concrete = DeclarationType(rawValue: type) else {
+                throw FormatError.invalidOption(
+                    type,
+                    for: "type-order",
+                    with: DeclarationType.allCases.map(\.rawValue)
+                )
+            }
+        }
+    )
+    let customVisibilityMarks = OptionDescriptor(
+        argumentName: "visibility-marks",
+        displayName: "Custom Visibility Marks",
+        help: "Marks for visibility groups (public:Public Fields,..)",
+        keyPath: \.customVisibilityMarks,
+        validate: {
+            if $0.split(separator: ":", maxSplits: 1).count != 2 {
+                throw FormatError.options("--visibilitymarks expects <visibility>:<mark> argument")
+            }
+        }
+    )
+    let customTypeMarks = OptionDescriptor(
+        argumentName: "type-marks",
+        displayName: "Custom Type Marks",
+        help: "Marks for declaration type groups (classMethod:Baaz,..)",
+        keyPath: \.customTypeMarks,
+        validate: {
+            if $0.split(separator: ":", maxSplits: 1).count != 2 {
+                throw FormatError.options("--visibilitymarks expects <visibility>:<mark> argument")
+            }
+        }
+    )
+    let blankLineAfterSubgroups = OptionDescriptor(
+        argumentName: "group-blank-lines",
+        displayName: "Blank Line After Subgroups",
+        help: "Require a blank line after each subgroup. Default: true",
+        keyPath: \.blankLineAfterSubgroups
+    )
+    let alphabeticallySortedDeclarationPatterns = OptionDescriptor(
+        argumentName: "sorted-patterns",
+        displayName: "Declaration Name Patterns To Sort Alphabetically",
+        help: "List of patterns to sort alphabetically without `:sort` mark",
+        keyPath: \.alphabeticallySortedDeclarationPatterns
+    )
+    let locale = OptionDescriptor(
+        argumentName: "locale",
+        displayName: "Sorting Locale",
+        help: "Locale for sorting: \"en_US\" (default), \"system\", or any valid locale identifier",
+        keyPath: \.locale
+    )
     let funcAttributes = OptionDescriptor(
-        argumentName: "funcattributes",
+        argumentName: "func-attributes",
         displayName: "Function Attributes",
-        help: "Function @attributes: \"preserve\", \"prev-line\", or \"same-line\"",
+        help: "Placement for function @attributes:",
         keyPath: \.funcAttributes
     )
     let typeAttributes = OptionDescriptor(
-        argumentName: "typeattributes",
+        argumentName: "type-attributes",
         displayName: "Type Attributes",
-        help: "Type @attributes: \"preserve\", \"prev-line\", or \"same-line\"",
+        help: "Placement for type @attributes:",
         keyPath: \.typeAttributes
     )
     let storedVarAttributes = OptionDescriptor(
-        argumentName: "storedvarattrs",
+        argumentName: "stored-var-attributes",
         displayName: "Stored Property Attributes",
-        help: "Stored var @attribs: \"preserve\", \"prev-line\", or \"same-line\"",
+        help: "Placement for stored var @attributes:",
         keyPath: \.storedVarAttributes
     )
     let computedVarAttributes = OptionDescriptor(
-        argumentName: "computedvarattrs",
+        argumentName: "computed-var-attributes",
         displayName: "Computed Property Attributes",
-        help: "Computed var @attribs: \"preserve\", \"prev-line\", \"same-line\"",
+        help: "Placement for computed var @attributes:",
         keyPath: \.computedVarAttributes
     )
     let complexAttributes = OptionDescriptor(
-        argumentName: "complexattrs",
+        argumentName: "complex-attributes",
         displayName: "Complex Attributes",
-        help: "Complex @attributes: \"preserve\", \"prev-line\", or \"same-line\"",
+        help: "Placement for complex @attributes:",
         keyPath: \.complexAttributes
     )
     let complexAttributesExceptions = OptionDescriptor(
-        argumentName: "noncomplexattrs",
+        argumentName: "non-complex-attributes",
         displayName: "Complex Attribute exceptions",
-        help: "List of @attributes to exclude from complexattrs rule",
+        help: "List of @attributes to exclude from --complexattributes options",
         keyPath: \.complexAttributesExceptions
     )
     let yodaSwap = OptionDescriptor(
-        argumentName: "yodaswap",
+        argumentName: "yoda-swap",
         displayName: "Yoda Swap",
-        help: "Swap yoda values: \"always\" (default) or \"literals-only\"",
+        help: "Swap yoda expression operands:",
         keyPath: \.yodaSwap
     )
     let extensionACLPlacement = OptionDescriptor(
-        argumentName: "extensionacl",
+        argumentName: "extension-acl",
         displayName: "Extension Access Control Level Placement",
-        help: "Place ACL \"on-extension\" (default) or \"on-declarations\"",
+        help: "Access control keyword placement:",
         keyPath: \.extensionACLPlacement
     )
-    let redundantType = OptionDescriptor(
-        argumentName: "redundanttype",
-        displayName: "Redundant Type",
-        help: "\"inferred\", \"explicit\", or \"infer-locals-only\" (default)",
-        keyPath: \.redundantType
+    let propertyTypes = OptionDescriptor(
+        argumentName: "property-types",
+        displayName: "Property Types",
+        help: "Types in property declarations:",
+        keyPath: \.propertyTypes
+    )
+    let inferredTypesInConditionalExpressions = OptionDescriptor(
+        argumentName: "inferred-types",
+        displayName: "Inferred Types",
+        help: "Prefer inferred types:",
+        keyPath: \.inferredTypesInConditionalExpressions,
+        trueValues: ["exclude-cond-exprs"],
+        falseValues: ["always"]
     )
     let emptyBracesSpacing = OptionDescriptor(
-        argumentName: "emptybraces",
+        argumentName: "empty-braces",
         displayName: "Empty Braces",
-        help: "Empty braces: \"no-space\" (default), \"spaced\" or \"linebreak\"",
+        help: "Empty brace spacing:",
         keyPath: \.emptyBracesSpacing
     )
     let acronyms = OptionDescriptor(
@@ -929,111 +1302,373 @@ public struct _Descriptors {
         help: "Acronyms to auto-capitalize. Defaults to \"ID,URL,UUID\"",
         keyPath: \.acronyms
     )
+    let preserveAcronyms = OptionDescriptor(
+        argumentName: "preserve-acronyms",
+        displayName: "Preserve Acronyms",
+        help: "List of symbols to be ignored by the acronyms rule",
+        keyPath: \.preserveAcronyms
+    )
+    let acronymVisibility = OptionDescriptor(
+        argumentName: "acronym-visibility",
+        displayName: "Acronym Visibility",
+        help: "Capitalize acronyms at or below this visibility threshold:",
+        keyPath: \.acronymVisibility,
+        options: [
+            "public": .public,
+            "package": .package,
+            "internal": .internal,
+            "fileprivate": .fileprivate,
+            "private": .private,
+        ]
+    )
+    let typoVisibility = OptionDescriptor(
+        argumentName: "typo-visibility",
+        displayName: "Typo Visibility",
+        help: "Correct typos at or below this visibility threshold:",
+        keyPath: \.typoVisibility,
+        options: [
+            "public": .public,
+            "package": .package,
+            "internal": .internal,
+            "fileprivate": .fileprivate,
+            "private": .private,
+        ]
+    )
+    let typos = OptionDescriptor(
+        argumentName: "typos",
+        displayName: "Custom Typos",
+        help: "Comma-delimited list of typo=correction mappings",
+        keyPath: \.typos,
+        type: .array,
+        fromArgument: { argument in
+            var typos = [String: String]()
+            for mapping in parseCommaDelimitedList(argument) {
+                let pair = mapping.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+                guard pair.count == 2,
+                      !pair[0].isEmpty,
+                      !pair[1].isEmpty,
+                      pair[0].allSatisfy(\.isLetter),
+                      pair[1].allSatisfy(\.isLetter)
+                else {
+                    throw FormatError.options("--typos expects <typo>=<correction> mappings")
+                }
+
+                let typo = pair[0].lowercased()
+                let correction = String(pair[1])
+                guard typos[typo] == nil else {
+                    throw FormatError.options("Duplicate typo '\(pair[0])'")
+                }
+                if let builtInCorrection = commonTypoCorrections[typo],
+                   builtInCorrection != correction.lowercased()
+                {
+                    throw FormatError.options("Custom correction for '\(pair[0])' conflicts with the built-in correction '\(builtInCorrection)'")
+                }
+                typos[typo] = correction
+            }
+            return typos
+        },
+        toArgument: {
+            $0.sorted(by: { $0.key < $1.key })
+                .map { "\($0.key)=\($0.value)" }.joined(separator: ",")
+        }
+    )
+    let ignoredTypos = OptionDescriptor(
+        argumentName: "ignore-typos",
+        displayName: "Ignored Typos",
+        help: "Comma-delimited list of typos to ignore",
+        keyPath: \.ignoredTypos
+    )
+    let indentBlankLines = OptionDescriptor(
+        argumentName: "indent-blank-lines",
+        displayName: "Indent Blank Lines",
+        help: "Indent blank lines:",
+        keyPath: \.indentBlankLines,
+        trueValues: ["true", "enabled"],
+        falseValues: ["false", "disabled"]
+    )
     let indentStrings = OptionDescriptor(
-        argumentName: "indentstrings",
+        argumentName: "indent-strings",
         displayName: "Indent Strings",
-        help: "Indent multiline strings: \"false\" (default) or \"true\"",
+        help: "Indent multiline strings:",
         keyPath: \.indentStrings,
         trueValues: ["true", "enabled"],
         falseValues: ["false", "disabled"]
     )
     let closureVoidReturn = OptionDescriptor(
-        argumentName: "closurevoid",
-        displayName: "Closure Void Return",
-        help: "Closure void returns: \"remove\" (default) or \"preserve\"",
+        argumentName: "closure-void",
+        displayName: "Closure Void",
+        help: "Explicit Void return types in closures:",
         keyPath: \.closureVoidReturn
     )
     let enumNamespaces = OptionDescriptor(
-        argumentName: "enumnamespaces",
-        displayName: "Convert namespaces types to enum",
-        help: "Change type to enum: \"always\" (default) or \"structs-only\"",
+        argumentName: "enum-namespaces",
+        displayName: "Enum Namespaces",
+        help: "Change types used as namespaces to enums:",
         keyPath: \.enumNamespaces
     )
-    let removeStartOrEndBlankLinesFromTypes = OptionDescriptor(
-        argumentName: "typeblanklines",
-        displayName: "Remove blank lines from types",
-        help: "\"remove\" (default) or \"preserve\" blank lines from types",
-        keyPath: \.removeStartOrEndBlankLinesFromTypes,
-        trueValues: ["remove"],
-        falseValues: ["preserve"]
+    let typeBlankLines = OptionDescriptor(
+        argumentName: "type-blank-lines",
+        displayName: "Type blank lines",
+        help: "Blank lines in type declarations:",
+        keyPath: \.typeBlankLines
+    )
+    let scopeBlankLines = OptionDescriptor(
+        argumentName: "scope-blank-lines",
+        displayName: "Scope blank lines",
+        help: "Blank lines in function bodies, closures, and statement blocks:",
+        keyPath: \.scopeBlankLines
     )
     let genericTypes = OptionDescriptor(
-        argumentName: "generictypes",
+        argumentName: "generic-types",
         displayName: "Additional generic types",
-        help: "Semicolon-delimited list of generic types and type parameters",
-        keyPath: \.genericTypes,
-        fromArgument: { $0 },
-        toArgument: { $0 }
+        help: "Semicolon-delimited list of generic types and type parameters. For example: \"LinkedList<Element>;StateStore<State, Action>\"",
+        keyPath: \.genericTypes
     )
     let useSomeAny = OptionDescriptor(
-        argumentName: "someany",
+        argumentName: "some-any",
         displayName: "Use `some Any`",
-        help: "Use `some Any` types: \"true\" (default) or \"false\"",
+        help: "Use `some Any` types:",
         keyPath: \.useSomeAny,
         trueValues: ["true", "enabled"],
         falseValues: ["false", "disabled"]
     )
     let preserveAnonymousForEach = OptionDescriptor(
-        argumentName: "anonymousforeach",
+        argumentName: "anonymous-for-each",
         displayName: "Anonymous forEach closures",
-        help: "Convert anonymous forEach: \"convert\" (default) or \"ignore\"",
+        help: "Convert anonymous forEach closures to for loops:",
         keyPath: \.preserveAnonymousForEach,
         trueValues: ["ignore", "preserve"],
         falseValues: ["convert"]
     )
     let preserveSingleLineForEach = OptionDescriptor(
-        argumentName: "onelineforeach",
+        argumentName: "single-line-for-each",
         displayName: "Single-line forEach closures",
-        help: "Convert one-line forEach: \"convert\" or \"ignore\" (default)",
+        help: "Convert single-line forEach closures to for loops:",
         keyPath: \.preserveSingleLineForEach,
         trueValues: ["ignore", "preserve"],
         falseValues: ["convert"]
     )
-    let preserveDocComments = OptionDescriptor(
-        argumentName: "doccomments",
+    let forWhere = OptionDescriptor(
+        argumentName: "for-where",
+        displayName: "For loop where clauses",
+        help: "Use a where clause instead of a nested if to filter for loops:",
+        keyPath: \.forWhere
+    )
+    let docComments = OptionDescriptor(
+        argumentName: "doc-comments",
         displayName: "Doc comments",
-        help: "Doc comments: \"before-declarations\" (default) or \"preserve\"",
-        keyPath: \.preserveDocComments,
-        trueValues: ["preserve"],
-        falseValues: ["before-declarations", "declarations"]
+        help: "Doc comment placement:",
+        keyPath: \.docComments,
+        altOptions: ["declarations": .beforeDeclarations, "preserve": .preserve]
+    )
+    let excludedDeclarationTypes = OptionDescriptor(
+        argumentName: "excluded-declaration-types",
+        displayName: "Excluded Declaration Types",
+        help: "Declarations whose comments are left as-is, e.g. `case,var`",
+        keyPath: \.excludedDeclarationTypes,
+        validate: { type in
+            guard Token.declarationTypeKeywords.contains(type) else {
+                throw FormatError.invalidOption(
+                    type,
+                    for: "excluded-declaration-types",
+                    with: Token.declarationTypeKeywords.sorted()
+                )
+            }
+        }
     )
     let conditionalAssignmentOnlyAfterNewProperties = OptionDescriptor(
-        argumentName: "condassignment",
+        argumentName: "conditional-assignment",
         displayName: "Apply conditionalAssignment rule",
-        help: "Use cond. assignment: \"after-property\" (default) or \"always\"",
+        help: "Use if/switch expressions for conditional assignment:",
         keyPath: \.conditionalAssignmentOnlyAfterNewProperties,
         trueValues: ["after-property"],
         falseValues: ["always"]
     )
     let initCoderNil = OptionDescriptor(
-        argumentName: "initcodernil",
+        argumentName: "init-coder-nil",
         displayName: "Return nil in init?(coder)",
-        help: "Replace fatalError with nil in unavailable init?(coder:)",
+        help: "Replace fatalError with nil in unavailable init?(coder:):",
         keyPath: \.initCoderNil,
         trueValues: ["true", "enabled"],
         falseValues: ["false", "disabled"]
     )
     let dateFormat = OptionDescriptor(
-        argumentName: "dateformat",
+        argumentName: "date-format",
         displayName: "Date format",
-        help: "\"system\" (default), \"iso\", \"dmy\", \"mdy\" or custom",
-        keyPath: \.dateFormat,
-        fromArgument: { DateFormat(rawValue: $0) },
-        toArgument: { $0.rawValue }
+        help: "File header date format: \"system\" (default), \"iso\", \"dmy\", \"mdy\" or custom",
+        keyPath: \.dateFormat
     )
     let timeZone = OptionDescriptor(
         argumentName: "timezone",
-        displayName: "Date formatting timezone",
-        help: "\"system\" (default) or a valid identifier/abbreviation",
-        keyPath: \.timeZone,
-        fromArgument: { FormatTimeZone(rawValue: $0) },
-        toArgument: { $0.rawValue }
+        displayName: "Date format timezone",
+        help: "File header date timezone: \"system\" (default) or a valid identifier/abbreviation",
+        keyPath: \.timeZone
     )
     let nilInit = OptionDescriptor(
-        argumentName: "nilinit",
+        argumentName: "nil-init",
         displayName: "Nil init type",
-        help: "\"remove\" (default) redundant nil or \"insert\" missing nil",
+        help: "Explicit nil init value for Optional properties:",
         keyPath: \.nilInit
+    )
+    let preservedPrivateDeclarations = OptionDescriptor(
+        argumentName: "preserve-decls",
+        displayName: "Private Declarations to Exclude",
+        help: "Comma separated list of declaration names to exclude",
+        keyPath: \.preservedPrivateDeclarations
+    )
+    let preservedPropertyTypes = OptionDescriptor(
+        argumentName: "preserved-property-types",
+        displayName: "Preserved Property Types",
+        help: "Comma-delimited list of symbols to be ignored and preserved as-is by the propertyTypes rule",
+        keyPath: \.preservedPropertyTypes
+    )
+    let additionalXCTestSymbols = OptionDescriptor(
+        argumentName: "xctest-symbols",
+        displayName: "Additional XCTest symbols",
+        help: "Comma-delimited list of symbols that depend on XCTest",
+        keyPath: \.additionalXCTestSymbols
+    )
+    let defaultTestSuiteAttributes = OptionDescriptor(
+        argumentName: "default-test-suite-attributes",
+        displayName: "Default test suite attributes",
+        help: "Comma-delimited list of attributes to add when converting from XCTest. e.g. \"@MainActor,@Suite(.serialized)\"",
+        keyPath: \.defaultTestSuiteAttributes,
+        validateArray: { array in
+            for attribute in array {
+                guard attribute.isAttribute, !tokenize(attribute).contains(where: \.isError) else {
+                    throw FormatError.options("Invalid attribute: \"\(attribute)\"")
+                }
+            }
+        }
+    )
+    let swiftUIPropertiesSortMode = OptionDescriptor(
+        argumentName: "sort-swiftui-properties",
+        displayName: "Sort SwiftUI Dynamic Properties",
+        help: "SwiftUI property sorting:",
+        keyPath: \.swiftUIPropertiesSortMode
+    )
+    let equatableMacro = OptionDescriptor(
+        argumentName: "equatable-macro",
+        displayName: "The name and module of an Equatable conformance macro",
+        help: "For example: \"@Equatable,EquatableMacroLib\"",
+        keyPath: \.equatableMacro
+    )
+    let urlMacro = OptionDescriptor(
+        argumentName: "url-macro",
+        displayName: "The name and module of a URL macro",
+        help: "For example: --url-macro \"#URL,URLFoundation\"",
+        keyPath: \.urlMacro
+    )
+    let preferFileMacro = OptionDescriptor(
+        argumentName: "file-macro",
+        displayName: "Preferred File Macro",
+        help: "File macro to prefer:",
+        keyPath: \.preferFileMacro,
+        trueValues: ["#file", "file"],
+        falseValues: ["#fileID", "fileID"]
+    )
+    let lineBetweenConsecutiveGuards = OptionDescriptor(
+        argumentName: "line-between-guards",
+        displayName: "Blank Line Between Consecutive Guards",
+        help: "Insert line between guards:",
+        keyPath: \.lineBetweenConsecutiveGuards
+    )
+    let blankLineAfterSwitchCase = OptionDescriptor(
+        argumentName: "blank-line-after-switch-case",
+        displayName: "Blank Line After Switch Cases",
+        help: "Insert line After switch cases:",
+        keyPath: \.blankLineAfterSwitchCase
+    )
+    let redundantThrows = OptionDescriptor(
+        argumentName: "redundant-throws",
+        displayName: "Redundant Throws",
+        help: "Remove redundant throws from functions:",
+        keyPath: \.redundantThrows
+    )
+    let redundantAsync = OptionDescriptor(
+        argumentName: "redundant-async",
+        displayName: "Redundant Async",
+        help: "Remove redundant async from functions:",
+        keyPath: \.redundantAsync
+    )
+    let allowPartialWrapping = OptionDescriptor(
+        argumentName: "allow-partial-wrapping",
+        displayName: "Allow Partial Wrapping",
+        help: "Allow partial argument wrapping:",
+        keyPath: \.allowPartialWrapping
+    )
+    let preferSynthesizedInitForInternalStructs = OptionDescriptor(
+        argumentName: "prefer-synthesized-init-for-internal-structs",
+        displayName: "Prefer Synthesized Init For Internal Structs",
+        help: "For internal structs, remove private access control from properties to enable the synthesized initializer: \"never\" (default), \"always\", or comma-separated list of conformances (e.g. \"View,ViewModifier\")",
+        keyPath: \.preferSynthesizedInitForInternalStructs,
+        type: .text,
+        fromArgument: { PreferSynthesizedInitMode(rawValue: $0) },
+        toArgument: { $0.rawValue }
+    )
+
+    let testCaseNameFormat = OptionDescriptor(
+        argumentName: "test-case-name-format",
+        displayName: "Test Case Name Format",
+        help: "Swift Testing test case name format:",
+        keyPath: \.testCaseNameFormat
+    )
+
+    let suiteNameFormat = OptionDescriptor(
+        argumentName: "suite-name-format",
+        displayName: "Suite Name Format",
+        help: "Swift Testing suite name format:",
+        keyPath: \.suiteNameFormat
+    )
+
+    let testCaseAccessControl = OptionDescriptor(
+        argumentName: "test-case-access-control",
+        displayName: "Test Case Access Control",
+        help: "Access control for test methods:",
+        keyPath: \.testCaseAccessControl
+    )
+
+    let guardLikeIfStatements = OptionDescriptor(
+        argumentName: "guard-like-if-statements",
+        displayName: "Guard-Like If Statements",
+        help: "Convert guard-like trailing if statements in tests:",
+        keyPath: \.guardLikeIfStatements,
+        trueValues: ["convert"],
+        falseValues: ["preserve"]
+    )
+
+    let booleanGuardsInTests = OptionDescriptor(
+        argumentName: "boolean-guards-in-tests",
+        displayName: "Boolean Guards In Tests",
+        help: "Boolean guards: \"preserve-xctest\" (default), \"preserve\" or \"convert\"",
+        keyPath: \.booleanGuardsInTests
+    )
+
+    let redundantOptionalBinding = OptionDescriptor(
+        argumentName: "redundant-optional-binding",
+        displayName: "Redundant Optional Binding",
+        help: "Bindings to simplify: \"same-name-only\" (default) or \"always\"",
+        keyPath: \.redundantOptionalBinding
+    )
+    let singleLineTernary = OptionDescriptor(
+        argumentName: "single-line-ternary",
+        displayName: "Single Line Ternary",
+        help: "Single-line ternary handling: \"convert\" (default) or \"preserve\"",
+        keyPath: \.singleLineTernary
+    )
+    let contentBuilder = OptionDescriptor(
+        argumentName: "content-builder",
+        displayName: "Content Builder",
+        help: "SwiftUI result builder attributes:",
+        keyPath: \.contentBuilder
+    )
+    let preferContentBuilder = OptionDescriptor(
+        argumentName: "prefer-content-builder",
+        displayName: "Prefer Content Builder",
+        help: "Replace legacy builders like @ViewBuilder with @ContentBuilder:",
+        keyPath: \.preferContentBuilder,
+        trueValues: ["true", "enabled"],
+        falseValues: ["false", "disabled"]
     )
 
     // MARK: - Internal
@@ -1041,24 +1676,43 @@ public struct _Descriptors {
     let fragment = OptionDescriptor(
         argumentName: "fragment",
         displayName: "Fragment",
-        help: "Input is part of a larger file: \"true\" or \"false\" (default)",
+        help: "Input is part of a larger file:",
         keyPath: \.fragment,
         trueValues: ["true", "enabled"],
         falseValues: ["false", "disabled"]
     )
     let ignoreConflictMarkers = OptionDescriptor(
-        argumentName: "conflictmarkers",
+        argumentName: "conflict-markers",
         displayName: "Conflict Markers",
-        help: "Merge-conflict markers: \"reject\" (default) or \"ignore\"",
+        help: "Merge-conflict markers:",
         keyPath: \.ignoreConflictMarkers,
         trueValues: ["ignore", "true", "enabled"],
         falseValues: ["reject", "false", "disabled"]
     )
     let swiftVersion = OptionDescriptor(
-        argumentName: "swiftversion",
+        argumentName: "swift-version",
         displayName: "Swift Version",
-        help: "The version of Swift used in the files being formatted",
+        help: "The Swift compiler version used in the files being formatted",
         keyPath: \.swiftVersion
+    )
+    let languageMode = OptionDescriptor(
+        argumentName: "language-mode",
+        displayName: "Swift Language Mode",
+        help: "The Swift language mode used in the files being formatted",
+        keyPath: \.languageMode
+    )
+    let markdownFiles = OptionDescriptor(
+        argumentName: "markdown-files",
+        displayName: "Markdown Files",
+        help: "Swift in markdown files:",
+        keyPath: \.markdownFiles,
+        altOptions: ["format-lenient": .lenient, "format-strict": .strict]
+    )
+    let unknownOptions = OptionDescriptor(
+        argumentName: "unknown-options",
+        displayName: "Unknown Options",
+        help: "Unknown rules or options:",
+        keyPath: \.unknownOptions
     )
 
     // MARK: - DEPRECATED
@@ -1066,14 +1720,14 @@ public struct _Descriptors {
     let indentComments = OptionDescriptor(
         argumentName: "comments",
         displayName: "Comments",
-        help: "Indenting of comment bodies: \"indent\" (default) or \"ignore\"",
+        help: "deprecated",
         deprecationMessage: "Relative indent within multiline comments is now preserved by default.",
         keyPath: \.indentComments,
         trueValues: ["indent", "indented"],
         falseValues: ["ignore"]
     )
     let insertBlankLines = OptionDescriptor(
-        argumentName: "insertlines",
+        argumentName: "insert-lines",
         displayName: "Insert Lines",
         help: "deprecated",
         deprecationMessage: "Use '--enable blankLinesBetweenScopes' or '--enable blankLinesAroundMark' or '--disable blankLinesBetweenScopes' or '--disable blankLinesAroundMark' instead.",
@@ -1082,7 +1736,7 @@ public struct _Descriptors {
         falseValues: ["disabled", "false"]
     )
     let removeBlankLines = OptionDescriptor(
-        argumentName: "removelines",
+        argumentName: "remove-lines",
         displayName: "Remove Lines",
         help: "deprecated",
         deprecationMessage: "Use '--enable blankLinesAtStartOfScope' or '--enable blankLinesAtEndOfScope' or '--disable blankLinesAtStartOfScope' or '--disable blankLinesAtEndOfScope' instead.",
@@ -1093,21 +1747,40 @@ public struct _Descriptors {
     let experimentalRules = OptionDescriptor(
         argumentName: "experimental",
         displayName: "Experimental Rules",
-        help: "Experimental rules: \"enabled\" or \"disabled\" (default)",
+        help: "Experimental rules:",
         deprecationMessage: "Use --enable to opt-in to rules individually.",
         keyPath: \.experimentalRules,
         trueValues: ["enabled", "true"],
         falseValues: ["disabled", "false"]
     )
     let varAttributes = OptionDescriptor(
-        argumentName: "varattributes",
+        argumentName: "var-attributes",
         displayName: "Var Attributes",
-        help: "Property @attributes: \"preserve\", \"prev-line\", or \"same-line\"",
-        deprecationMessage: "Use with `--storedvarattrs` or `--computedvarattrs` instead.",
+        help: "Property @attributes:",
+        deprecationMessage: "Use with `--storedvarattributes` or `--computedvarattributes` instead.",
         keyPath: \.varAttributes
+    )
+    let commas = OptionDescriptor(
+        argumentName: "commas",
+        displayName: "Trailing commas",
+        help: "deprecated",
+        deprecationMessage: "Use '--trailingcommas' instead",
+        keyPath: \.trailingCommas,
+        altOptions: [
+            "inline": .never,
+            "false": .never,
+            "true": .always,
+        ]
     )
 
     // MARK: - RENAMED
+
+    let legacyUnknownRules = OptionDescriptor(
+        argumentName: "unknown-rules",
+        displayName: "Unknown Rules",
+        help: "deprecated",
+        keyPath: \.unknownOptions
+    ).renamed(to: "unknown-options")
 
     let empty = OptionDescriptor(
         argumentName: "empty",
@@ -1116,26 +1789,26 @@ public struct _Descriptors {
         keyPath: \.useVoid,
         trueValues: ["void"],
         falseValues: ["tuple", "tuples"]
-    ).renamed(to: "useVoid")
+    ).renamed(to: "void-type")
 
     let hexLiterals = OptionDescriptor(
-        argumentName: "hexliterals",
-        displayName: "hexliterals",
+        argumentName: "hex-literals",
+        displayName: "hex-literals",
         help: "deprecated",
         keyPath: \.uppercaseHex,
         trueValues: ["uppercase", "upper"],
         falseValues: ["lowercase", "lower"]
-    ).renamed(to: "uppercaseHex")
+    ).renamed(to: "hex-literal-case")
 
     let wrapElements = OptionDescriptor(
-        argumentName: "wrapelements",
+        argumentName: "wrap-elements",
         displayName: "Wrap Elements",
         help: "deprecated",
         keyPath: \.wrapCollections
-    ).renamed(to: "wrapCollections")
+    ).renamed(to: "wrap-collections")
 
     let specifierOrder = OptionDescriptor(
-        argumentName: "specifierorder",
+        argumentName: "specifier-order",
         displayName: "Specifier Order",
         help: "deprecated",
         keyPath: \FormatOptions.modifierOrder,
@@ -1144,5 +1817,88 @@ public struct _Descriptors {
                 throw FormatError.options("'\($0)' is not a valid specifier")
             }
         }
-    ).renamed(to: "modifierOrder")
+    ).renamed(to: "modifier-order")
+
+    let oneLineLineForEach = OptionDescriptor(
+        argumentName: "one-line-for-each",
+        displayName: "Single-line forEach closures",
+        help: "deprecated",
+        keyPath: \.preserveSingleLineForEach,
+        trueValues: ["ignore", "preserve"],
+        falseValues: ["convert"]
+    ).renamed(to: "single-line-for-each")
+
+    let redundantType = OptionDescriptor(
+        argumentName: "redundant-type",
+        displayName: "Redundant Type",
+        help: "deprecated",
+        keyPath: \.propertyTypes
+    ).renamed(to: "property-types")
+
+    let inlinedForEach = OptionDescriptor(
+        argumentName: "inlined-for-each",
+        displayName: "Inlined forEach closures",
+        help: "deprecated",
+        keyPath: \.preserveSingleLineForEach,
+        trueValues: ["ignore", "preserve"],
+        falseValues: ["convert"]
+    ).renamed(to: "single-line-for-each")
+
+    let condAssignment = OptionDescriptor(
+        argumentName: "cond-assignment",
+        displayName: "Apply conditionalAssignment rule",
+        help: "deprecated",
+        keyPath: \.conditionalAssignmentOnlyAfterNewProperties,
+        trueValues: ["after-property"],
+        falseValues: ["always"]
+    ).renamed(to: "conditional-assignment")
+
+    let storedVarAttrs = OptionDescriptor(
+        argumentName: "stored-var-attrs",
+        displayName: "Stored Property Attributes",
+        help: "deprecated",
+        keyPath: \.storedVarAttributes
+    ).renamed(to: "stored-var-attributes")
+
+    let computedVarAttrs = OptionDescriptor(
+        argumentName: "computed-var-attrs",
+        displayName: "Computed Property Attributes",
+        help: "deprecated",
+        keyPath: \.computedVarAttributes
+    ).renamed(to: "computed-var-attributes")
+
+    let complexAttrs = OptionDescriptor(
+        argumentName: "complex-attrs",
+        displayName: "Complex Attributes",
+        help: "deprecated",
+        keyPath: \.complexAttributes
+    ).renamed(to: "complex-attributes")
+
+    let complexAttrsExceptions = OptionDescriptor(
+        argumentName: "non-complex-attrs",
+        displayName: "Complex Attribute exceptions",
+        help: "deprecated",
+        keyPath: \.complexAttributesExceptions
+    ).renamed(to: "non-complex-attributes")
+
+    let preservedSymbols = OptionDescriptor(
+        argumentName: "preserved-symbols",
+        displayName: "Preserved Symbols",
+        help: "deprecated",
+        keyPath: \.preservedPropertyTypes
+    ).renamed(to: "preserved-property-types")
+
+    let swiftUIPropsSortMode = OptionDescriptor(
+        argumentName: "sort-swiftui-props",
+        displayName: "Sort SwiftUI Dynamic Properties",
+        help: "deprecated",
+        keyPath: \.swiftUIPropertiesSortMode
+    ).renamed(to: "sort-swiftui-properties")
+
+    let organizeExtensionLength = OptionDescriptor(
+        argumentName: "extension-length",
+        displayName: "Organize Extension Threshold",
+        help: "deprecated",
+        keyPath: \.organizeExtensionThreshold
+    ).renamed(to: "extension-threshold")
 }

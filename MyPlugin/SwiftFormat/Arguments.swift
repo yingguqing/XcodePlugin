@@ -30,33 +30,260 @@
 //
 
 import Foundation
+import RegexBuilder
 
 extension Options {
-    static let maxArgumentNameLength = 16
-
-    init(_ args: [String: String], in directory: String) throws {
-        fileOptions = try fileOptionsFor(args, in: directory)
-        formatOptions = try formatOptionsFor(args)
-        configURL = args["config"].map { expandPath($0, in: directory) }
+    init(_ args: [String: String],
+         filterOptions: [(filters: [ConfigFilter], options: [String: String])] = [],
+         in directory: String, logger: Logger? = nil) throws
+    {
+        fileOptions = try fileOptionsFor(args, in: directory, logger: logger)
+        formatOptions = try formatOptionsFor(args, logger: logger)
+        configURLs = args["config"].map {
+            parseCommaDelimitedList($0).map { expandPath($0, in: directory) }
+        }
         let lint = args.keys.contains("lint")
         self.lint = lint
-        rules = try rulesFor(args, lint: lint)
+        rules = try rulesFor(args, lint: lint, logger: logger)
+        self.filterOptions = filterOptions
     }
 
-    mutating func addArguments(_ args: [String: String], in directory: String) throws {
+    mutating func addArguments(_ args: [[String: String]], in directory: String, logger: Logger? = nil) throws {
+        for args in args {
+            try addArguments(args, in: directory, logger: logger)
+        }
+    }
+
+    mutating func addArguments(_ args: [String: String], in directory: String, logger: Logger? = nil) throws {
+        guard !args.isEmpty else {
+            return
+        }
         let oldArguments = argumentsFor(self)
-        let newArguments = try mergeArguments(args, into: oldArguments)
-        var newOptions = try Options(newArguments, in: directory)
+        let newArguments = try mergeArguments(args, into: oldArguments, logger: logger)
+        var newOptions = try Options(newArguments, filterOptions: filterOptions, in: directory,
+                                     logger: logger)
         if let fileInfo = formatOptions?.fileInfo {
             newOptions.formatOptions?.fileInfo = fileInfo
         }
-        newOptions.configURL = configURL
+        newOptions.configURLs = configURLs
         self = newOptions
+    }
+
+    /// Adds arguments from any `--filter`ed config that applies to this file
+    mutating func addFilterArguments(path: String, source: String, logger: Logger? = nil) throws {
+        let locale = (formatOptions ?? .default).locale
+        for (filters, options) in filterOptions {
+            if filters.allSatisfy({ $0.matches(path: path, source: source, locale: locale) }) {
+                try applyArguments(options, lint: lint, to: &self, logger: logger)
+            }
+        }
+    }
+}
+
+/// A condition that restricts a `--filter`ed config file section to a subset of the files being formatted
+public enum ConfigFilter: Hashable, CustomStringConvertible {
+    /// Matches files whose path matches the given glob
+    case glob(Glob)
+    /// Matches files whose header comment records a creation date after the given date
+    case headerCreationDate(after: Date)
+
+    /// Parses the comma-delimited value of a `--filter` option.
+    /// A file must match every filter in the list.
+    static func parseList(_ value: String, in directory: String) throws -> [ConfigFilter] {
+        var filters = [ConfigFilter]()
+        var globPatterns = [String]()
+
+        for entry in parseCommaDelimitedList(value) {
+            if let date = try parseHeaderCreationDate(entry) {
+                filters.append(.headerCreationDate(after: date))
+            } else {
+                globPatterns.append(entry)
+            }
+        }
+
+        // Rejoin the glob entries so that `expandGlobs` can handle `{foo,bar}` brace groups itself
+        if !globPatterns.isEmpty {
+            filters += expandGlobs(globPatterns.joined(separator: ","), in: directory).map { .glob($0) }
+        }
+        return filters
+    }
+
+    private static func parseHeaderCreationDate(_ entry: String) throws -> Date? {
+        let prefix = "header-creation-date-after:"
+        guard entry.lowercased().hasPrefix(prefix) else {
+            return nil
+        }
+
+        let dateString = String(entry.dropFirst(prefix.count))
+            .trimmingCharacters(in: .whitespaces)
+
+        guard let date = dateString.date(format: "yyyy-MM-dd") else {
+            throw FormatError.options(
+                "Invalid date '\(dateString)' in --filter \(entry). Expected format: YYYY-MM-DD"
+            )
+        }
+        return date
+    }
+
+    /// Whether this filter matches the given file
+    func matches(path: String, source: String, locale: FormatLocale) -> Bool {
+        switch self {
+        case let .glob(glob):
+            return glob.matches(path)
+        case let .headerCreationDate(after: date):
+            guard let creationDate = source.headerCreationDate(locale: locale) else {
+                return false
+            }
+            return creationDate > date
+        }
+    }
+
+    public var description: String {
+        switch self {
+        case let .glob(glob):
+            return glob.description
+        case let .headerCreationDate(after: date):
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.dateFormat = "yyyy-MM-dd"
+            return "header-creation-date-after:" + formatter.string(from: date)
+        }
     }
 }
 
 extension String {
-    /// Find best match for the string in a list of options
+    /// The date the file was created, from parsing the "Created on" date in the header comment.
+    func headerCreationDate(locale: FormatLocale) -> Date? {
+        // Only parse the header comment, to avoid unnecessarily tokenizing the entire file here
+        let headerLines = components(separatedBy: .newlines)
+            .drop(while: { $0.isEmpty })
+            .prefix(while: { $0.trimmingCharacters(in: .whitespaces).hasPrefix("//") })
+
+        let header = tokenize(headerLines.joined(separator: "\n")).compactMap { token -> String? in
+            guard case let .commentBody(body) = token else { return nil }
+            return body
+        }.joined(separator: "\n")
+
+        return header.dateSubstrings.lazy.compactMap { $0.parsedDate(locale: locale) }.first
+    }
+
+    /// Substrings that look like they could be a date, e.g. `2026-09-01`, `9/1/26`, or `01.09.2026`
+    var dateSubstrings: [String] {
+        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+            return matches(of: Regex {
+                Repeat(.digit, 1 ... 4)
+                One(.anyOf("-/."))
+                Repeat(.digit, 1 ... 2)
+                One(.anyOf("-/."))
+                Repeat(.digit, 1 ... 4)
+            }).map { String($0.output) }
+        }
+
+        // `Regex` isn't available on older platforms
+        var substrings = [String]()
+        var searchRange = startIndex ..< endIndex
+        while let range = range(
+            of: "\\d{1,4}[-/.]\\d{1,2}[-/.]\\d{1,4}", options: .regularExpression, range: searchRange
+        ) {
+            substrings.append(String(self[range]))
+            searchRange = range.upperBound ..< searchRange.upperBound
+        }
+        return substrings
+    }
+
+    /// Parses this date string as `YYYY-MM-DD`, and otherwise using the locale's own
+    /// numeric date format, which accepts either a two or four digit year and
+    /// components that are zero-padded or not. Any of `-`, `/`, or `.` can be
+    /// used as the separator, regardless of the locale's own separator.
+    func parsedDate(locale: FormatLocale) -> Date? {
+        guard let separator = first(where: { "-/.".contains($0) }) else {
+            return nil
+        }
+
+        // A four digit leading component can only be a year. This is checked because `yyyy`
+        // also accepts two digits, so would otherwise parse `9/1/26` as the year 0009.
+        if prefix(while: \.isNumber).count == 4 {
+            return date(format: ["yyyy", "MM", "dd"].joined(separator: String(separator)))
+        }
+
+        // e.g. `M/d/y` in `en_US`, `dd/MM/y` in `en_GB`, or `d.M.y` in `de_DE`
+        guard let template = DateFormatter.dateFormat(
+            fromTemplate: "yMd", options: 0, locale: locale.locale
+        ) else {
+            return nil
+        }
+
+        // Use the separator from this date string rather than the locale's own separator,
+        // since `DateFormatter` on Linux requires the separators to match exactly.
+        let format = template.split(whereSeparator: { !$0.isLetter })
+            .joined(separator: String(separator))
+
+        return date(format: format, locale: locale.locale)
+    }
+
+    /// Parses this string as a date using the given format
+    func date(format: String, locale: Locale = Locale(identifier: "en_US_POSIX")) -> Date? {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.dateFormat = format
+        return formatter.date(from: self)
+    }
+}
+
+extension Array where Element: Equatable {
+    func formattedList(default defaultValue: Element? = nil) -> String
+        where Element: RawRepresentable, Element.RawValue: Equatable
+    {
+        map(\.rawValue).formattedList(default: defaultValue?.rawValue)
+    }
+
+    func formattedList(default: Element? = nil) -> String {
+        if let `default` {
+            assert(contains(where: { $0 == `default` }))
+        }
+        let options: [String] = compactMap {
+            if "\($0)" == "default" {
+                return nil
+            } else if $0 == `default` {
+                return "\"\($0)\" (default)"
+            } else {
+                return "\"\($0)\""
+            }
+        }
+        return options.formattedList(lastSeparator: "or")
+    }
+}
+
+extension Array where Element: StringProtocol {
+    func formattedList(lastSeparator: String) -> String {
+        switch count {
+        case 0:
+            return ""
+        case 1:
+            return String(self[0])
+        case 2:
+            return "\(self[0]) \(lastSeparator) \(self[1])"
+        default:
+            return "\(dropLast().joined(separator: ", ")) \(lastSeparator) \(last!)"
+        }
+    }
+}
+
+extension String {
+    /// Find single best match for the string in a list of options
+    /// If more than one match is equally good, return nil
+    func bestMatch(in options: [String]) -> String? {
+        let matches = bestMatches(in: options)
+        guard let best = matches.first else {
+            return nil
+        }
+        if matches.count > 1, editDistance(from: matches[1]) == editDistance(from: best) {
+            return nil
+        }
+        return best
+    }
+
+    /// Find best matches for the string in a list of options
     func bestMatches(in options: [String]) -> [String] {
         let lowercaseQuery = lowercased()
         // Sort matches by Levenshtein edit distance
@@ -76,7 +303,7 @@ extension String {
                 }
                 return $0.distance < $1.distance
             }
-            .map { $0.0 }
+            .map(\.0)
     }
 
     /// The Damerau-Levenshtein edit-distance between two strings
@@ -108,18 +335,48 @@ extension String {
     }
 }
 
+/// Extract content from a string, stopping at unquoted comment markers
+/// Handles quoted strings and escaped characters properly
+private func contentBeforeUnquotedComment(in string: String) -> String {
+    var result = ""
+    var inQuotes = false
+    var escaped = false
+
+    for char in string {
+        if escaped {
+            result.append(char)
+            escaped = false
+        } else if char == "\\" {
+            result.append(char)
+            escaped = true
+        } else if char == "\"" {
+            result.append(char)
+            inQuotes.toggle()
+        } else if char == "#", !inQuotes {
+            // Found unquoted comment marker, stop here
+            break
+        } else {
+            result.append(char)
+        }
+    }
+
+    return result
+}
+
 /// Parse a space-delimited string into an array of command-line arguments
 /// Replicates the behavior implemented by the console when parsing input
 func parseArguments(_ argumentString: String, ignoreComments: Bool = true) -> [String] {
+    // First handle comments using the shared logic if comments are not ignored
+    let inputString = ignoreComments ? argumentString : contentBeforeUnquotedComment(in: argumentString)
+
     var arguments = [""] // Arguments always begin with script path
-    var characters = String.UnicodeScalarView.SubSequence(argumentString.unicodeScalars)
+    var characters = String.UnicodeScalarView.SubSequence(inputString.unicodeScalars)
     var string = ""
     var escaped = false
     var quoted = false
-    loop: while let char = characters.popFirst() {
+
+    while let char = characters.popFirst() {
         switch char {
-        case "#" where !ignoreComments && !escaped && !quoted:
-            break loop // comment
         case "\\" where !escaped:
             escaped = true
         case "\"" where !escaped && !quoted:
@@ -150,24 +407,74 @@ func parseArguments(_ argumentString: String, ignoreComments: Bool = true) -> [S
 }
 
 /// Parse a flat array of command-line arguments into a dictionary of flags and values
-func preprocessArguments(_ args: [String], _ names: [String]) throws -> [String: String] {
+func preprocessArguments(
+    _ args: [String],
+    _ names: [String],
+    unknownOptions inheritedUnknownOptions: UnknownOptionsMode = .error,
+    logger: Logger? = nil
+) throws -> [String: String] {
+    let unknownOptions = unknownOptionsMode(in: args) ?? inheritedUnknownOptions
     var anonymousArgs = 0
     var namedArgs: [String: String] = [:]
     var name = ""
+    var ignoringUnknownOption = false
+    var optionsEnded = false
     for arg in args {
+        if optionsEnded {
+            namedArgs[String(anonymousArgs)] = arg
+            anonymousArgs += 1
+            continue
+        }
+        if arg == "--" {
+            optionsEnded = true
+            continue
+        }
         if arg.hasPrefix("--") {
-            // Long argument names
+            ignoringUnknownOption = false
+            name = ""
             let key = String(arg.unicodeScalars.dropFirst(2)).lowercased()
-            guard names.contains(key) else {
+
+            if names.contains(key) {
+                name = key
+            }
+
+            // Support legacy `--alloneword` option names by finding
+            // any matching `--kebab-case` option name.
+            else if !key.contains("-") {
+                for kebabCaseName in names {
+                    let nonKebabCaseName = kebabCaseName.replacingOccurrences(of: "-", with: "")
+                    if nonKebabCaseName == key {
+                        name = kebabCaseName
+                        break
+                    }
+                }
+            }
+
+            if name.isEmpty {
+                if unknownOptions != .error {
+                    let error: FormatError
+                    if let match = key.bestMatches(in: names).first {
+                        error = .options("Unknown option --\(key). Did you mean --\(match)?")
+                    } else {
+                        error = .options("Unknown option --\(key)")
+                    }
+                    if unknownOptions == .warn {
+                        logger?.warn("\(error)")
+                    }
+                    ignoringUnknownOption = true
+                    continue
+                }
                 guard let match = key.bestMatches(in: names).first else {
                     throw FormatError.options("Unknown option --\(key)")
                 }
                 throw FormatError.options("Unknown option --\(key). Did you mean --\(match)?")
             }
-            name = key
+
             namedArgs[name] = namedArgs[name] ?? ""
             continue
         } else if arg.hasPrefix("-") {
+            ignoringUnknownOption = false
+            name = ""
             // Short argument names
             let flag = String(arg.unicodeScalars.dropFirst()).lowercased()
             guard let match = names.first(where: { $0.hasPrefix(flag) }) else {
@@ -175,6 +482,12 @@ func preprocessArguments(_ args: [String], _ names: [String]) throws -> [String:
             }
             name = match
             namedArgs[name] = namedArgs[name] ?? ""
+            continue
+        }
+        if ignoringUnknownOption {
+            if !arg.hasSuffix(",") {
+                ignoringUnknownOption = false
+            }
             continue
         }
         if name == "" {
@@ -189,7 +502,7 @@ func preprocessArguments(_ args: [String], _ names: [String]) throws -> [String:
         }
         if let existing = namedArgs[name], !existing.isEmpty,
            // TODO: find a more general way to represent merge-able options
-           ["exclude", "unexclude", "disable", "enable", "lintonly", "rules"].contains(name) ||
+           ["exclude", "unexclude", "disable", "enable", "lint-only", "rules", "config"].contains(name) ||
            Descriptors.all.contains(where: {
                $0.argumentName == name && $0.isSetType
            })
@@ -205,6 +518,21 @@ func preprocessArguments(_ args: [String], _ names: [String]) throws -> [String:
     return namedArgs
 }
 
+private func unknownOptionsMode(in args: [String]) -> UnknownOptionsMode? {
+    var result: UnknownOptionsMode?
+    for index in args.indices.dropLast() {
+        let argument = args[index].lowercased()
+        if argument == "--" {
+            break
+        }
+        guard ["--unknown-options", "--unknownoptions", "--unknown-rules", "--unknownrules"].contains(argument) else {
+            continue
+        }
+        result = UnknownOptionsMode(rawValue: args[args.index(after: index)].lowercased())
+    }
+    return result
+}
+
 /// Parse a comma-delimited list of items
 func parseCommaDelimitedList(_ string: String) -> [String] {
     string.components(separatedBy: ",").compactMap {
@@ -214,28 +542,60 @@ func parseCommaDelimitedList(_ string: String) -> [String] {
 }
 
 /// Parse a comma-delimited string into an array of rules
-let allRules = Set(FormatRules.byName.keys)
-func parseRules(_ rules: String) throws -> [String] {
+let allRules = Set(FormatRules.all.map(\.name))
+let defaultRules = Set(FormatRules.default.map(\.name))
+private let rulesByLowercaseName = Dictionary(uniqueKeysWithValues: allRules.map { ($0.lowercased(), $0) })
+func parseRules(_ rules: String, ignoreUnknown: Bool) throws -> [String] {
     try parseCommaDelimitedList(rules).flatMap { proposedName -> [String] in
         let lowercaseName = proposedName.lowercased()
-        if let name = allRules.first(where: { $0.lowercased() == lowercaseName }) {
+        if let name = rulesByLowercaseName[lowercaseName] {
             return [name]
         } else if lowercaseName == "all" {
             return FormatRules.all.compactMap { $0.isDeprecated ? nil : $0.name }
+        } else if ignoreUnknown {
+            return []
         }
         if Descriptors.all.contains(where: { $0.argumentName == lowercaseName }) {
-            for rule in FormatRules.all where rule.options.contains(lowercaseName) {
+            // Keep the filter in the body to avoid incorrect Swift coverage counts.
+            // swiftformat:disable:next forWhere
+            for rule in FormatRules.all {
+                guard rule.options.contains(lowercaseName) else { continue }
                 throw FormatError.options(
                     "'\(proposedName)' is not a formatting rule. Did you mean '\(rule.name)'?"
                 )
             }
             throw FormatError.options("'\(proposedName)' is not a formatting rule")
         }
+        let message = "Unknown rule '\(proposedName)'"
         guard let match = proposedName.bestMatches(in: Array(allRules)).first else {
-            throw FormatError.options("Unknown rule '\(proposedName)'")
+            throw FormatError.options(message)
         }
-        throw FormatError.options("Unknown rule '\(proposedName)'. Did you mean '\(match)'?")
+        throw FormatError.options("\(message). Did you mean '\(match)'?")
     }
+}
+
+func curryParseRules(config: [String: String], logger: Logger?) throws -> (String) throws -> [String] {
+    let unknownOptions = try unknownOptionsMode(in: config)
+    return { rules in
+        guard unknownOptions == .warn, let logger else {
+            return try parseRules(rules, ignoreUnknown: unknownOptions != .error)
+        }
+        return parseCommaDelimitedList(rules).flatMap { rule in
+            do {
+                return try parseRules(rule, ignoreUnknown: false)
+            } catch {
+                logger.warn("\(error)")
+                return []
+            }
+        }
+    }
+}
+
+func unknownOptionsMode(in config: [String: String]) throws -> UnknownOptionsMode {
+    guard let value = config["unknown-options"] ?? config["unknown-rules"] else { return .error }
+    var options = FormatOptions.default
+    try Descriptors.unknownOptions.toOptions(value, &options)
+    return options.unknownOptions
 }
 
 /// Parse single file path, disallowing globs or commas
@@ -258,7 +618,16 @@ func parsePaths(_ paths: String, in directory: String) throws -> [URL] {
 }
 
 /// Merge two dictionaries of arguments
-func mergeArguments(_ args: [String: String], into config: [String: String]) throws -> [String: String] {
+func mergeArguments(_ args: [String: String], into config: [String: String],
+                    logger: Logger? = nil) throws -> [String: String]
+{
+    var args = args
+    if args["unknown-options"] == nil,
+       let value = args["unknown-rules"]
+    {
+        args["unknown-options"] = value
+    }
+    let parseRules = try curryParseRules(config: config.merging(args) { $1 }, logger: logger)
     var input = config
     var output = args
     // Merge excluded urls
@@ -283,7 +652,7 @@ func mergeArguments(_ args: [String: String], into config: [String: String]) thr
             input["rules"] = nil
             input["enable"] = nil
             input["disable"] = nil
-            input["lintonly"] = nil
+            input["lint-only"] = nil
         }
     } else {
         if let _disable = try output["disable"].map(parseRules) {
@@ -293,8 +662,8 @@ func mergeArguments(_ args: [String: String], into config: [String: String]) thr
             if let enable = try input["enable"].map(parseRules) {
                 input["enable"] = Set(enable).subtracting(_disable).sorted().joined(separator: ",")
             }
-            if let lintonly = try input["lintonly"].map(parseRules) {
-                input["lintonly"] = Set(lintonly).subtracting(_disable).sorted().joined(separator: ",")
+            if let lintonly = try input["lint-only"].map(parseRules) {
+                input["lint-only"] = Set(lintonly).subtracting(_disable).sorted().joined(separator: ",")
             }
             if let disable = try input["disable"].map(parseRules) {
                 input["disable"] = Set(disable).union(_disable).sorted().joined(separator: ",")
@@ -306,18 +675,18 @@ func mergeArguments(_ args: [String: String], into config: [String: String]) thr
                 input["enable"] = Set(enable).union(_enable).sorted().joined(separator: ",")
                 output["enable"] = nil
             }
-            if let lintonly = try input["lintonly"].map(parseRules) {
-                input["lintonly"] = Set(lintonly).subtracting(_enable).sorted().joined(separator: ",")
+            if let lintonly = try input["lint-only"].map(parseRules) {
+                input["lint-only"] = Set(lintonly).subtracting(_enable).sorted().joined(separator: ",")
             }
             if let disable = try input["disable"].map(parseRules) {
                 input["disable"] = Set(disable).subtracting(_enable).sorted().joined(separator: ",")
             }
         }
-        if let _lintonly = try output["lintonly"].map(parseRules) {
-            if let lintonly = try input["lintonly"].map(parseRules) {
-                input["lintonly"] = Set(lintonly).union(_lintonly).sorted().joined(separator: ",")
-                output["lintonly"] = nil
-            }
+        if let _lintonly = try output["lint-only"].map(parseRules),
+           let lintonly = try input["lint-only"].map(parseRules)
+        {
+            input["lint-only"] = Set(lintonly).union(_lintonly).sorted().joined(separator: ",")
+            output["lint-only"] = nil
         }
     }
     // Merge other arguments
@@ -327,44 +696,80 @@ func mergeArguments(_ args: [String: String], into config: [String: String]) thr
     return output
 }
 
-/// Parse a configuration file into a dictionary of arguments
-public func parseConfigFile(_ data: Data) throws -> [String: String] {
+/// Parse a configuration file into a list of argument dictionaries.
+///
+/// Config files can have headers that separate them into separate sections.
+/// Each section is treated as if it were its own file. For example:
+/// ```
+/// --indent 4
+///
+/// [Tests]
+/// --filter **/Tests/**
+/// --indent 2
+/// ```
+public func parseConfigFile(_ data: Data, logger: Logger? = nil) throws -> [[String: String]] {
     guard let input = String(data: data, encoding: .utf8) else {
         throw FormatError.reading("Unable to read data for configuration file")
     }
     let lines = try cumulate(successiveLines: input.components(separatedBy: .newlines))
-    let arguments = try lines.flatMap { line -> [String] in
-        // TODO: parseArguments isn't a perfect fit here - should we use a different approach?
-        let line = line.replacingOccurrences(of: "\\n", with: "\n")
-        let parts = parseArguments(line, ignoreComments: false).dropFirst().map {
-            $0.replacingOccurrences(of: "\n", with: "\\n")
-        }
-        guard let key = parts.first else {
-            return []
-        }
-        if !key.hasPrefix("-") {
-            throw FormatError.options("Unknown option '\(key)' in configuration file")
-        }
-        return [key, parts.dropFirst().joined(separator: " ")]
+
+    let configSegments = lines.split(whereSeparator: { line in
+        line.starts(with: "[") && line.contains("]")
+    })
+
+    guard !configSegments.isEmpty else {
+        return []
     }
-    do {
-        return try preprocessArguments(arguments, optionsArguments)
-    } catch let FormatError.options(message) {
-        throw FormatError.options("\(message) in configuration file")
+
+    var configOptions = [[String: String]]()
+    var unknownOptions = UnknownOptionsMode.error
+
+    for configSegmentLines in configSegments {
+        let arguments = try configSegmentLines.flatMap { line -> [String] in
+            // TODO: parseArguments isn't a perfect fit here - should we use a different approach?
+            let line = line.replacingOccurrences(of: "\\n", with: "\n")
+            let parts = parseArguments(line, ignoreComments: false).dropFirst().map {
+                $0.replacingOccurrences(of: "\n", with: "\\n")
+            }
+            guard let key = parts.first else {
+                return []
+            }
+            if !key.hasPrefix("-") {
+                throw FormatError.options("Unknown option '\(key)' in configuration file")
+            }
+            return [key, parts.dropFirst().joined(separator: " ")]
+        }
+        do {
+            try configOptions.append(preprocessArguments(
+                arguments,
+                optionsArguments,
+                unknownOptions: unknownOptions,
+                logger: logger.map { logger in
+                    Logger { message, type in
+                        logger.print(type == .warning ? "\(message) in configuration file" : message, type)
+                    }
+                }
+            ))
+            unknownOptions = unknownOptionsMode(in: arguments) ?? unknownOptions
+        } catch let FormatError.options(message) {
+            throw FormatError.options("\(message) in configuration file")
+        }
     }
+
+    return configOptions
 }
 
 private func cumulate(successiveLines: [String]) throws -> [String] {
     var cumulatedLines = [String]()
     var iterator = successiveLines.makeIterator()
     while let currentLine = iterator.next() {
-        var cumulatedLine = effectiveContent(of: currentLine)
+        var cumulatedLine = contentBeforeUnquotedComment(in: currentLine).trimmingCharacters(in: .whitespaces)
         while cumulatedLine.hasSuffix("\\") {
             guard let nextLine = iterator.next() else {
                 throw FormatError.reading("Configuration file ends with an illegal line continuation character '\'")
             }
             if !nextLine.trimmingCharacters(in: .whitespaces).starts(with: "#") {
-                cumulatedLine = cumulatedLine.dropLast() + effectiveContent(of: nextLine)
+                cumulatedLine = cumulatedLine.dropLast() + contentBeforeUnquotedComment(in: nextLine).trimmingCharacters(in: .whitespaces)
             }
         }
         cumulatedLines.append(String(cumulatedLine))
@@ -372,17 +777,11 @@ private func cumulate(successiveLines: [String]) throws -> [String] {
     return cumulatedLines
 }
 
-private func effectiveContent(of line: String) -> String {
-    line
-        .prefix { $0 != "#" }
-        .trimmingCharacters(in: .whitespaces)
-}
-
 /// Serialize a set of options into either an arguments string or a file
-func serialize(options: Options,
-               swiftVersion: Version = .undefined,
-               excludingDefaults: Bool = false,
-               separator: String = "\n") -> String
+public func serialize(options: Options,
+                      swiftVersion: Version = .undefined,
+                      excludingDefaults: Bool = false,
+                      separator: String = "\n") -> String
 {
     var arguments = [[String: String]]()
     if let fileOptions = options.fileOptions {
@@ -413,13 +812,14 @@ func serialize(options: Options,
 }
 
 /// Serialize arguments
-func serialize(arguments: [String: String],
-               separator: String = "\n") -> String
-{
+func serialize(arguments: [String: String], separator: String = "\n") -> String {
     arguments.map {
         var value = $1
         if value.contains(" ") {
             value = "\"\(value.replacingOccurrences(of: "\"", with: "\\\""))\""
+        }
+        if value.contains("#") {
+            value = "\"\(value)\""
         }
         return "--\($0) \(value)"
     }.sorted().joined(separator: separator)
@@ -439,37 +839,43 @@ func argumentsFor(_ options: Options, excludingDefaults: Bool = false) -> [Strin
         do {
             if !fileOptions.excludedGlobs.isEmpty {
                 // TODO: find a better alternative to stringifying url
-                args["exclude"] = fileOptions.excludedGlobs.map { $0.description }.sorted().joined(separator: ",")
+                args["exclude"] = fileOptions.excludedGlobs.map(\.description).sorted().joined(separator: ",")
             }
             arguments.remove("exclude")
         }
         do {
             if !fileOptions.unexcludedGlobs.isEmpty {
                 // TODO: find a better alternative to stringifying url
-                args["unexclude"] = fileOptions.unexcludedGlobs.map { $0.description }.sorted().joined(separator: ",")
+                args["unexclude"] = fileOptions.unexcludedGlobs.map(\.description).sorted().joined(separator: ",")
             }
             arguments.remove("unexclude")
         }
         do {
             if !excludingDefaults || fileOptions.minVersion != FileOptions.default.minVersion {
-                args["minversion"] = fileOptions.minVersion.description
+                args["min-version"] = fileOptions.minVersion.description
             }
-            arguments.remove("minversion")
+            arguments.remove("min-version")
         }
+        arguments.remove("filter")
         assert(arguments.isEmpty)
     }
     if let formatOptions = options.formatOptions {
-        for descriptor in Descriptors.all where !descriptor.isRenamed {
+        for descriptor in Descriptors.all where !descriptor.isRenamed && !descriptor.isDeprecated {
             let value = descriptor.fromOptions(formatOptions)
             guard value != descriptor.fromOptions(.default) ||
                 (!excludingDefaults && !descriptor.isDeprecated)
             else {
                 continue
             }
-            // Special case for swiftVersion
+            // Special case for swiftVersion and languageMode
             // TODO: find a better solution for this
             if descriptor.argumentName == Descriptors.swiftVersion.argumentName,
                value == Version.undefined.rawValue
+            {
+                continue
+            }
+            if descriptor.argumentName == Descriptors.languageMode.argumentName,
+               value == defaultLanguageMode(for: formatOptions.swiftVersion).rawValue
             {
                 continue
             }
@@ -480,8 +886,6 @@ func argumentsFor(_ options: Options, excludingDefaults: Bool = false) -> [Strin
         args["lint"] = ""
     }
     if let rules = options.rules {
-        let defaultRules = allRules.subtracting(FormatRules.disabledByDefault)
-
         let enabled = rules.subtracting(defaultRules)
         if !enabled.isEmpty {
             args["enable"] = enabled.sorted().joined(separator: ",")
@@ -524,43 +928,66 @@ private func processOption(_ key: String,
 }
 
 /// Parse rule names from arguments
-public func rulesFor(_ args: [String: String], lint: Bool) throws -> Set<String> {
-    var rules = allRules
-    rules = try args["rules"].map {
-        try Set(parseRules($0))
-    } ?? rules.subtracting(FormatRules.disabledByDefault)
+public func rulesFor(_ args: [String: String], lint: Bool, initial: Set<String>? = nil,
+                     logger: Logger? = nil) throws -> Set<String>
+{
+    let parseRules = try curryParseRules(config: args, logger: logger)
+    var rules = initial.map(FormatRules.canonicalNames) ?? allRules
+
+    if let specifiedRules = try args["rules"].map({ try Set(parseRules($0)) }) {
+        rules = FormatRules.canonicalNames(specifiedRules)
+    } else if initial == nil {
+        rules = rules.subtracting(FormatRules.disabledByDefault.map(\.name))
+    }
+
     try args["disable"].map {
-        try rules.subtract(parseRules($0))
+        try rules.subtract(FormatRules.canonicalNames(parseRules($0)))
     }
+
     try args["enable"].map {
-        try rules.formUnion(parseRules($0))
+        try rules.formUnion(FormatRules.canonicalNames(parseRules($0)))
     }
-    try args["lintonly"].map { rulesString in
+
+    try args["lint-only"].map { rulesString in
         if lint {
-            try rules.formUnion(parseRules(rulesString))
+            try rules.formUnion(FormatRules.canonicalNames(parseRules(rulesString)))
         } else {
-            try rules.subtract(parseRules(rulesString))
+            try rules.subtract(FormatRules.canonicalNames(parseRules(rulesString)))
         }
     }
+
     return rules
 }
 
+private extension UnknownOptionsMode {
+    func handle(_ error: Error, logger: Logger?) throws {
+        switch self {
+        case .error: throw error
+        case .warn: logger?.warn("\(error)")
+        case .ignore: break
+        }
+    }
+}
+
 /// Parse FileOptions from arguments
-func fileOptionsFor(_ args: [String: String], in directory: String) throws -> FileOptions? {
+func fileOptionsFor(_ args: [String: String], in directory: String, logger: Logger?) throws -> FileOptions? {
+    let unknownOptions = try unknownOptionsMode(in: args)
     var options = FileOptions()
     var arguments = Set(fileArguments)
 
     var containsFileOption = false
     try processOption("symlinks", in: args, from: &arguments) {
-        containsFileOption = true
         switch $0.lowercased() {
         case "follow":
             options.followSymlinks = true
         case "ignore":
             options.followSymlinks = false
         default:
-            throw FormatError.options("")
+            let error = FormatError.options("Unsupported --symlinks value '\($0)'")
+            try unknownOptions.handle(error, logger: logger)
+            return
         }
+        containsFileOption = true
     }
     try processOption("exclude", in: args, from: &arguments) {
         containsFileOption = true
@@ -570,35 +997,99 @@ func fileOptionsFor(_ args: [String: String], in directory: String) throws -> Fi
         containsFileOption = true
         options.unexcludedGlobs += expandGlobs($0, in: directory)
     }
-    try processOption("minversion", in: args, from: &arguments) {
-        containsFileOption = true
+    try processOption("min-version", in: args, from: &arguments) {
         guard let minVersion = Version(rawValue: $0) else {
-            throw FormatError.options("Unsupported --minversion value '\($0)'")
+            let error = FormatError.options("Unsupported --min-version value '\($0)'")
+            try unknownOptions.handle(error, logger: logger)
+            return
         }
         guard minVersion <= Version(stringLiteral: swiftFormatVersion) else {
-            throw FormatError.options("Project specifies SwiftFormat --minversion of \(minVersion)")
+            throw FormatError.options("Project specifies SwiftFormat --min-version of \(minVersion)")
         }
         options.minVersion = minVersion
+        containsFileOption = true
     }
+
+    try processOption("filter", in: args, from: &arguments, handler: {
+        // Validate the value eagerly. Filters themselves are applied in `Options.addFilterArguments`.
+        do {
+            _ = try ConfigFilter.parseList($0, in: directory)
+        } catch {
+            try unknownOptions.handle(error, logger: logger)
+        }
+    })
+
     assert(arguments.isEmpty, "\(arguments.joined(separator: ","))")
     return containsFileOption ? options : nil
 }
 
 /// Parse FormatOptions from arguments
 /// Returns nil if the arguments dictionary does not contain any formatting arguments
-public func formatOptionsFor(_ args: [String: String]) throws -> FormatOptions? {
+public func formatOptionsFor(_ args: [String: String], logger: Logger? = nil) throws -> FormatOptions? {
     var options = FormatOptions.default
-    var arguments = Set(formattingArguments)
+    let containsFormatOption = try applyFormatOptions(from: args, to: &options, logger: logger)
+    return containsFormatOption ? options : nil
+}
 
+public func applyFormatOptions(from args: [String: String], to formatOptions: inout FormatOptions,
+                               logger: Logger? = nil) throws -> Bool
+{
+    var arguments = Set(formattingArguments)
     var containsFormatOption = false
+    let unknownOptions: UnknownOptionsMode
+    if args["unknown-options"] != nil || args["unknown-rules"] != nil {
+        unknownOptions = try unknownOptionsMode(in: args)
+    } else {
+        unknownOptions = formatOptions.unknownOptions
+    }
     for option in Descriptors.all {
-        try processOption(option.argumentName, in: args, from: &arguments) {
+        try processOption(option.argumentName, in: args, from: &arguments) { value in
+            var updatedOptions = formatOptions
+            do {
+                try option.toOptions(value, &updatedOptions)
+            } catch {
+                if unknownOptions != .error,
+                   option.propertyName != Descriptors.unknownOptions.propertyName
+                {
+                    if unknownOptions == .warn {
+                        let warning: Error = option.validArguments.map {
+                            FormatError.invalidOption(value, for: option.argumentName, with: $0)
+                        } ?? FormatError.options("Unsupported --\(option.argumentName) value '\(value)'")
+                        logger?.warn("\(warning)")
+                    }
+                    return
+                }
+                guard let names = option.validArguments else {
+                    throw error
+                }
+                throw FormatError.invalidOption(value, for: option.argumentName, with: names)
+            }
+            formatOptions = updatedOptions
             containsFormatOption = true
-            try option.toOptions($0, &options)
         }
     }
+    if containsFormatOption {
+        formatOptions.unknownOptions = unknownOptions
+    }
     assert(arguments.isEmpty, "\(arguments.joined(separator: ","))")
-    return containsFormatOption ? options : nil
+    return containsFormatOption
+}
+
+/// Applies additional arguments to the given `Options` struct
+func applyArguments(_ args: [String: String], lint: Bool, to options: inout Options, logger: Logger? = nil) throws {
+    var args = args
+    if args["unknown-options"] == nil, args["unknown-rules"] == nil,
+       let unknownOptions = options.formatOptions?.unknownOptions
+    {
+        args["unknown-options"] = unknownOptions.rawValue
+    }
+    options.rules = try rulesFor(args, lint: lint, initial: options.rules, logger: logger)
+
+    var formatOptions = options.formatOptions ?? .default
+    let containsFormatOption = try applyFormatOptions(from: args, to: &formatOptions, logger: logger)
+    if containsFormatOption {
+        options.formatOptions = formatOptions
+    }
 }
 
 /// Get deprecation warnings from a set of arguments
@@ -609,10 +1100,33 @@ func warningsForArguments(_ args: [String: String], ignoreUnusedOptions: Bool = 
             warnings.append("--\(option.argumentName) option is deprecated. \(message)")
         }
     }
+    guard let parseRules = try? curryParseRules(config: args, logger: nil) else {
+        return warnings
+    }
     for name in Set(rulesArguments.flatMap { (try? args[$0].map(parseRules) ?? []) ?? [] }) {
         if let message = FormatRules.byName[name]?.deprecationMessage {
             warnings.append("\(name) rule is deprecated. \(message)")
         }
+    }
+    var hasRedundantEnableOrDisable = false
+    if let enabledRules = try? args["enable"].map(parseRules) {
+        for name in enabledRules {
+            if let rule = FormatRules.byName[name], !rule.disabledByDefault, !rule.isDeprecated {
+                warnings.append("--enable \(name) is redundant: rule is already enabled by default")
+                hasRedundantEnableOrDisable = true
+            }
+        }
+    }
+    if let disabledRules = try? args["disable"].map(parseRules) {
+        for name in disabledRules {
+            if let rule = FormatRules.byName[name], rule.disabledByDefault, !rule.isDeprecated {
+                warnings.append("--disable \(name) is redundant: rule is already disabled by default")
+                hasRedundantEnableOrDisable = true
+            }
+        }
+    }
+    if hasRedundantEnableOrDisable {
+        warnings.append("You can use --rules rule1,rule2,etc to specify the exact list of enabled rules")
     }
     if !ignoreUnusedOptions, let rules = try? rulesFor(args, lint: true) {
         for arg in args.keys where formattingArguments.contains(arg) {
@@ -635,48 +1149,50 @@ let fileArguments = [
     "symlinks",
     "exclude",
     "unexclude",
-    "minversion",
+    "min-version",
+    "filter",
 ]
 
 let rulesArguments = [
     "disable",
     "enable",
-    "lintonly",
+    "lint-only",
     "rules",
 ]
 
-let formattingArguments = Descriptors.formatting.map { $0.argumentName }
-let internalArguments = Descriptors.internal.map { $0.argumentName }
+let formattingArguments = Descriptors.formatting.map(\.argumentName)
+let internalArguments = Descriptors.internal.map(\.argumentName)
 let optionsArguments = fileArguments + rulesArguments + formattingArguments + internalArguments
 
 let commandLineArguments = [
     // Input options
     "filelist",
-    "stdinpath",
-    "scriptinput",
+    "stdin-path",
+    "script-input",
     "config",
-    "baseconfig",
-    "inferoptions",
-    "linerange",
+    "base-config",
+    "infer-options",
+    "line-range",
     "output",
     "cache",
-    "dryrun",
+    "snapshot",
+    "dry-run",
     "lint",
     "lenient",
     "strict",
     "verbose",
     "quiet",
+    "color",
     "reporter",
     "report",
     // Misc
     "help",
     "version",
     "options",
-    "ruleinfo",
-    "dateformat",
+    "rule-info",
+    "date-format",
     "timezone",
+    "output-tokens",
 ] + optionsArguments
 
-let deprecatedArguments = Descriptors.all.compactMap {
-    $0.isDeprecated ? $0.argumentName : nil
-}
+let deprecatedArguments = Descriptors.deprecated.map(\.argumentName)

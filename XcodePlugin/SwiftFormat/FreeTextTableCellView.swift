@@ -31,7 +31,7 @@
 
 import Cocoa
 
-class FreeTextTableCellView: NSTableCellView {
+final class FreeTextTableCellView: NSTableCellView {
     @IBOutlet var title: NSTextField!
     @IBOutlet var freeTextField: NSTextField!
 
@@ -40,9 +40,8 @@ class FreeTextTableCellView: NSTableCellView {
             guard let model = objectValue as? UserSelectionFreeText else {
                 return
             }
-            // 显示中文说明
-            title.stringValue = model.description ?? ""
-            //title.stringValue = model.title ?? ""
+            // 优先显示中文说明，没有中文时回退到英文原名
+            title.stringValue = model.chineseHelp.isEmpty ? (model.title ?? "") : model.chineseHelp
             freeTextField.isEditable = model.isEnabled
             freeTextField.stringValue = model.selection
             updateErrorState()

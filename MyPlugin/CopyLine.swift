@@ -48,11 +48,7 @@ class CopyLine: NSObject, XCSourceEditorCommand {
             return
         }
         let length = endLine - startLine
-        if insertLine < 0 {
-            insertLine = direction == .UP ? startLine : endLine + 1
-        } else {
-            insertLine += endLine - startLine + 1
-        }
+        insertLine = direction == .UP ? startLine : endLine + 1
 
         for i in startLine ... endLine {
             guard let string = invocation.buffer.lines[i] as? String else { continue }

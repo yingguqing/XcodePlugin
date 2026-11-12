@@ -31,10 +31,17 @@
 
 import Foundation
 
+public enum UnknownOptionsMode: String, CaseIterable {
+    case error
+    case warn
+    case ignore
+}
+
 /// The indenting mode to use for #if/#endif statements
 public enum IndentMode: String, CaseIterable {
     case indent
     case noIndent = "no-indent"
+    case preserve
     case outdent
 
     public init?(rawValue: String) {
@@ -43,6 +50,8 @@ public enum IndentMode: String, CaseIterable {
             self = .indent
         case "no-indent", "noindent":
             self = .noIndent
+        case "preserve":
+            self = .preserve
         case "outdent":
             self = .outdent
         default:
@@ -97,8 +106,14 @@ public enum AttributeMode: String, CaseIterable {
     case preserve
 }
 
-/// Argument type for else position
+/// Where to place the else or catch in an if/else or do/catch statement
 public enum ElsePosition: String, CaseIterable {
+    case sameLine = "same-line"
+    case nextLine = "next-line"
+}
+
+/// Where to place the else in a guard statement
+public enum GuardElsePosition: String, CaseIterable {
     case sameLine = "same-line"
     case nextLine = "next-line"
     case auto
@@ -112,22 +127,26 @@ public enum ExtensionACLPlacement: String, CaseIterable {
 
 /// Wrapping behavior for the return type of a function declaration
 public enum WrapReturnType: String, CaseIterable {
-    case ifMultiline = "if-multiline"
     case preserve
+    /// `-> ReturnType` is wrapped to the line after the closing paren
+    /// if the function signature spans multiple lines
+    case ifMultiline = "if-multiline"
+    /// `-> ReturnType` is never wrapped, and always include on the same line as the closing paren
+    case never
 }
 
 /// Wrapping behavior for effects (`async`, `throws`)
 public enum WrapEffects: String, CaseIterable {
     case preserve
     /// `async` and `throws` are wrapped to the line after the closing paren
-    /// if the function spans multiple lines
+    /// if the function signature spans multiple lines
     case ifMultiline = "if-multiline"
     /// `async` and `throws` are never wrapped, and are always included on the same line as the closing paren
     case never
 }
 
-/// Annotation which should be kept when removing a redundant type
-public enum RedundantType: String, CaseIterable {
+/// Argument type for whether explicit or inferred properties are preferred
+public enum PropertyTypes: String, CaseIterable {
     /// Preserves the type as a part of the property definition:
     /// `let foo: Foo = Foo()` becomes `let foo: Foo = .init()`
     case explicit
@@ -166,9 +185,74 @@ public enum ClosureVoidReturn: String, CaseIterable {
     case preserve
 }
 
+/// Format for Swift Testing test case / suite names
+public enum SwiftTestingNameFormat: String, CaseIterable {
+    case preserve
+    case rawIdentifiers = "raw-identifiers"
+    case standardIdentifiers = "standard-identifiers"
+}
+
+/// Which optional binding conditions the `redundantOptionalBinding` rule should simplify
+public enum RedundantOptionalBindingMode: String, CaseIterable {
+    /// Only remove the redundant identifier when both names match, e.g. `if let foo = foo`
+    case sameNameOnly = "same-name-only"
+    /// Also rename the binding when the names differ, e.g. `if let foo = bar` → `if let bar`
+    case always
+}
+
+/// How the noGuardInTests rule handles guards with boolean conditions
+public enum BooleanGuardsInTests: String, CaseIterable {
+    /// Convert boolean guards in every test framework, the behaviour before this option existed
+    case convert
+    /// Preserve boolean guards in every test framework
+    case preserve
+    /// Preserve boolean guards under XCTest, where `XCTAssert` does not halt the test,
+    /// and convert them under Swift Testing, where `try #require` throws and so keeps the early exit
+    case preserveXCTest = "preserve-xctest"
+}
+
+public enum TrailingCommas: String, CaseIterable {
+    case never
+    case always
+    case collectionsOnly = "collections-only"
+    case multiElementLists = "multi-element-lists"
+}
+
+/// Whether to use a where clause or nested if statement to filter a for loop
+public enum ForWhereMode: String, CaseIterable {
+    case always
+    case never
+}
+
+/// How to handle single-line ternary expressions in the ifExpressions rule
+public enum SingleLineTernary: String, CaseIterable {
+    /// Preserve single-line ternaries as-is
+    case preserve
+    /// Convert single-line ternaries to single-line if expressions
+    case convert
+}
+
+/// Whether the `@ContentBuilder` result builder attribute should be implicit or explicit
+public enum ContentBuilderMode: String, CaseIterable {
+    /// Remove result builder attributes that Swift applies implicitly, or that aren't needed
+    case implicit
+    /// Add an explicit result builder attribute to declarations that return SwiftUI content
+    case explicit
+}
+
+/// Whether to insert, remove, or preserve spaces around operators
+public enum OperatorSpacingMode: String, CaseIterable {
+    case insert = "spaced"
+    case remove = "no-space"
+    case preserve
+}
+
 /// Version number wrapper
 public struct Version: RawRepresentable, Comparable, ExpressibleByStringLiteral, CustomStringConvertible {
     public let rawValue: String
+
+    /// Dot-separated numeric components, or nil if any component is non-numeric.
+    private let components: [Int]?
 
     public static let undefined = Version(rawValue: "0")!
 
@@ -182,10 +266,15 @@ public struct Version: RawRepresentable, Comparable, ExpressibleByStringLiteral,
             return nil
         }
         self.rawValue = rawValue
+        let parts = rawValue.split(separator: ".", omittingEmptySubsequences: false).map { Int($0) }
+        components = parts.allSatisfy { $0 != nil } ? parts.map { $0! } : nil
     }
 
     public static func < (lhs: Version, rhs: Version) -> Bool {
-        lhs.rawValue.compare(
+        if let lhs = lhs.components, let rhs = rhs.components {
+            return lhs.lexicographicallyPrecedes(rhs)
+        }
+        return lhs.rawValue.compare(
             rhs.rawValue,
             options: .numeric,
             locale: Locale(identifier: "en_US")
@@ -404,12 +493,39 @@ public enum Grouping: Equatable, RawRepresentable, CustomStringConvertible {
     }
 }
 
-/// Grouping for sorting imports
-public enum ImportGrouping: String, CaseIterable {
+/// Individual import sorting/grouping options. The order of the options is
+/// significant when using more than one of the separate-group options,
+/// like `testable-last` and `attributes-last`.
+public enum ImportGrouping: String, CaseIterable, Hashable {
     case alpha
     case length
+    case accessControl = "access-control"
     case testableFirst = "testable-first"
     case testableLast = "testable-last"
+    case attributesLast = "attributes-last"
+
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "alphabetized",
+             "alphabetical",
+             "alpha":
+            self = .alpha
+        case "length":
+            self = .length
+        case "access-control":
+            self = .accessControl
+        case "testable-first",
+             "testable-top":
+            self = .testableFirst
+        case "testable-last",
+             "testable-bottom":
+            self = .testableLast
+        case "attributes-last":
+            self = .attributesLast
+        default:
+            return nil
+        }
+    }
 }
 
 /// Self insertion mode
@@ -421,7 +537,8 @@ public enum SelfMode: String, CaseIterable {
 
 /// Optionals mode
 public enum OptionalsMode: String, CaseIterable {
-    case exceptProperties = "except-properties"
+    case preserveStructInits = "preserve-struct-inits"
+    case exceptPropertiesDeprecated = "except-properties"
     case always
 }
 
@@ -463,6 +580,36 @@ public enum DeclarationOrganizationMode: String, CaseIterable {
     case visibility
     /// Organize declarations by type
     case type
+}
+
+/// Treatment of MARK comments in type bodies
+public enum TypeBodyMarks: String, CaseIterable {
+    /// Preserve all existing MARK comments in type bodies
+    case preserve
+    /// Remove MARK comments that don't match expected visibility/declaration kind marks
+    case remove
+}
+
+/// Whether to insert or remove blank lines from the start / end of type bodies
+public enum TypeBlankLines: String, CaseIterable {
+    case remove
+    case insert
+    case preserve
+    case consistent
+    case startOnly = "start-only"
+    case endOnly = "end-only"
+}
+
+/// Whether to remove or preserve blank lines at the start / end of non-type scopes
+public enum ScopeBlankLines: String, CaseIterable {
+    case remove
+    case preserve
+}
+
+/// Treatment of semicolons
+public enum SemicolonsMode: String, CaseIterable {
+    case inlineOnly = "inline-only"
+    case never
 }
 
 /// Format to use when printing dates
@@ -557,6 +704,61 @@ public enum FormatTimeZone: Equatable, RawRepresentable, CustomStringConvertible
     }
 }
 
+/// Locale to use when sorting
+public enum FormatLocale: Equatable, RawRepresentable, CustomStringConvertible {
+    case system
+    case identifier(String)
+
+    public init?(rawValue: String) {
+        if rawValue.lowercased() == Self.system.rawValue {
+            self = .system
+        } else {
+            let normalizedIdentifier = rawValue.lowercased().replacingOccurrences(of: "-", with: "_")
+            guard let identifier = Locale.availableIdentifiers.first(where: {
+                $0.lowercased().replacingOccurrences(of: "-", with: "_") == normalizedIdentifier
+            }) else {
+                return nil
+            }
+            self = .identifier(identifier)
+        }
+    }
+
+    public var rawValue: String {
+        switch self {
+        case .system:
+            return "system"
+        case let .identifier(identifier):
+            return identifier
+        }
+    }
+
+    public var locale: Locale {
+        switch self {
+        case .system:
+            return Locale.current
+        case let .identifier(identifier):
+            return Locale(identifier: identifier)
+        }
+    }
+
+    func compare(_ lhs: String, _ rhs: String) -> ComparisonResult {
+        switch self {
+        case .system:
+            return lhs.localizedStandardCompare(rhs)
+        case let .identifier(identifier):
+            return lhs.compare(
+                rhs,
+                options: [.caseInsensitive, .numeric, .widthInsensitive, .forcedOrdering],
+                locale: Locale(identifier: identifier)
+            )
+        }
+    }
+
+    public var description: String {
+        rawValue
+    }
+}
+
 /// When initializing an optional value type,
 /// is it necessary to explicitly declare a default value
 public enum NilInitType: String, CaseIterable {
@@ -574,18 +776,149 @@ public enum ClosingParenPosition: String, CaseIterable {
     case `default`
 }
 
+public enum SwiftUIPropertiesSortMode: String, CaseIterable {
+    /// No sorting
+    case none
+    /// Sort alphabetically
+    case alphabetize
+    /// Group all properties of the same type in order of the first time each property appears
+    case firstAppearanceSort = "first-appearance-sort"
+}
+
+public enum EquatableMacro: Equatable, RawRepresentable, CustomStringConvertible {
+    /// No equatable macro
+    case none
+    /// The name and the module for the macro, e.g. `@Equatable,EquatableMacroLib`
+    case macro(String, module: String)
+
+    public init?(rawValue: String) {
+        let components = rawValue.components(separatedBy: ",")
+        if components.count == 2 {
+            self = .macro(components[0], module: components[1])
+        } else if rawValue == "none" {
+            self = .none
+        } else {
+            return nil
+        }
+    }
+
+    public var rawValue: String {
+        switch self {
+        case .none:
+            return "none"
+        case let .macro(name, module: module):
+            return "\(name),\(module)"
+        }
+    }
+
+    public var description: String {
+        rawValue
+    }
+}
+
+public enum BlankLineAfterSwitchCase: String, CaseIterable {
+    /// Always add blank lines after switch cases
+    case always
+    /// Add blank lines after multiline switch cases only
+    case multilineOnly = "multiline-only"
+    /// Remove blank lines after switch cases
+    case never
+}
+
+public enum URLMacro: Equatable, RawRepresentable, CustomStringConvertible {
+    /// No URL macro
+    case none
+    /// The name and the module for the macro, e.g. `#URL,URLFoundation`
+    case macro(String, module: String)
+
+    public init?(rawValue: String) {
+        let components = rawValue.components(separatedBy: ",")
+        if components.count == 2 {
+            self = .macro(components[0], module: components[1])
+        } else if rawValue == "none" {
+            self = .none
+        } else {
+            return nil
+        }
+    }
+
+    public var rawValue: String {
+        switch self {
+        case .none:
+            return "none"
+        case let .macro(name, module: module):
+            return "\(name),\(module)"
+        }
+    }
+
+    public var description: String {
+        rawValue
+    }
+}
+
+/// Mode for preferring synthesized memberwise init for internal structs
+public enum PreferSynthesizedInitMode: Equatable, CustomStringConvertible {
+    /// Never prefer synthesized init (default)
+    case never
+    /// Always prefer synthesized init for internal structs
+    case always
+    /// Prefer synthesized init only for structs conforming to specific protocols
+    case conformances([String])
+
+    public init?(rawValue: String) {
+        switch rawValue.lowercased() {
+        case "never", "false":
+            self = .never
+        case "always", "true":
+            self = .always
+        default:
+            // Parse as comma-separated list of conformances
+            let conformances = rawValue.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+            guard !conformances.isEmpty, conformances.allSatisfy({ !$0.isEmpty }) else {
+                return nil
+            }
+            self = .conformances(conformances)
+        }
+    }
+
+    public var rawValue: String {
+        switch self {
+        case .never:
+            return "never"
+        case .always:
+            return "always"
+        case let .conformances(list):
+            return list.joined(separator: ",")
+        }
+    }
+
+    public var description: String {
+        rawValue
+    }
+}
+
+/// Doc comment placement mode
+public enum DocCommentMode: String, CaseIterable {
+    /// Preserve doc comments in their current form
+    case preserve
+    /// Use doc comments before all declarations
+    case beforeDeclarations = "before-declarations"
+    /// Use doc comments before non-local declarations only
+    case beforeNonLocalDeclarations = "before-non-local-declarations"
+}
+
 /// Configuration options for formatting. These aren't actually used by the
 /// Formatter class itself, but it makes them available to the format rules.
 public struct FormatOptions: CustomStringConvertible {
     public var lineAfterMarks: Bool
     public var indent: String
     public var linebreak: String
-    public var allowInlineSemicolons: Bool
-    public var spaceAroundRangeOperators: Bool
-    public var spaceAroundOperatorDeclarations: Bool
+    public var semicolons: SemicolonsMode
+    public var spaceAroundRangeOperators: OperatorSpacingMode
+    public var spaceAroundOperatorDeclarations: OperatorSpacingMode
     public var useVoid: Bool
     public var indentCase: Bool
-    public var trailingCommas: Bool
+    public var trailingCommas: TrailingCommas
     public var truncateBlankLines: Bool
     public var insertBlankLines: Bool
     public var removeBlankLines: Bool
@@ -597,11 +930,13 @@ public struct FormatOptions: CustomStringConvertible {
     public var wrapCollections: WrapMode
     public var wrapTypealiases: WrapMode
     public var wrapEnumCases: WrapEnumCases
+    public var wrapSingleLineEnumCases: Bool
     public var closingParenPosition: ClosingParenPosition
     public var callSiteClosingParenPosition: ClosingParenPosition
     public var wrapReturnType: WrapReturnType
     public var wrapConditions: WrapMode
     public var wrapTernaryOperators: TernaryOperatorWrapMode
+    public var wrapStringInterpolation: Bool
     public var uppercaseHex: Bool
     public var uppercaseExponent: Bool
     public var decimalGrouping: Grouping
@@ -612,19 +947,22 @@ public struct FormatOptions: CustomStringConvertible {
     public var exponentGrouping: Bool
     public var hoistPatternLet: Bool
     public var stripUnusedArguments: ArgumentStrippingMode
-    public var elseOnNextLine: Bool
-    public var guardElsePosition: ElsePosition
+    public var elsePosition: ElsePosition
+    public var guardElsePosition: GuardElsePosition
     public var explicitSelf: SelfMode
     public var selfRequired: Set<String>
     public var throwCapturing: Set<String>
     public var asyncCapturing: Set<String>
     public var experimentalRules: Bool
-    public var importGrouping: ImportGrouping
+    public var importGrouping: [ImportGrouping]
+    public var hoistImports: Bool
     public var trailingClosures: Set<String>
+    public var wrapClosureBodies: Set<String>
     public var neverTrailing: Set<String>
     public var xcodeIndentation: Bool
     public var tabWidth: Int
     public var maxWidth: Int
+    public var listWrapThreshold: Int?
     public var smartTabs: Bool
     public var assetLiteralWidth: AssetLiteralWidth
     public var noSpaceOperators: Set<String>
@@ -652,28 +990,73 @@ public struct FormatOptions: CustomStringConvertible {
     public var organizeStructThreshold: Int
     public var organizeEnumThreshold: Int
     public var organizeExtensionThreshold: Int
+    public var markStructThreshold: Int
+    public var markClassThreshold: Int
+    public var markEnumThreshold: Int
+    public var markExtensionThreshold: Int
     public var organizationMode: DeclarationOrganizationMode
+    public var typeBodyMarks: TypeBodyMarks
+    public var visibilityOrder: [String]?
+    public var typeOrder: [String]?
+    public var customVisibilityMarks: Set<String>
+    public var customTypeMarks: Set<String>
+    public var blankLineAfterSubgroups: Bool
+    public var alphabeticallySortedDeclarationPatterns: Set<String>
+    public var locale: FormatLocale
+    public var swiftUIPropertiesSortMode: SwiftUIPropertiesSortMode
     public var yodaSwap: YodaMode
     public var extensionACLPlacement: ExtensionACLPlacement
-    public var redundantType: RedundantType
+    public var propertyTypes: PropertyTypes
+    public var preservedPropertyTypes: Set<String>
+    public var inferredTypesInConditionalExpressions: Bool
     public var emptyBracesSpacing: EmptyBracesSpacing
     public var acronyms: Set<String>
+    public var preserveAcronyms: Set<String>
+    public var acronymVisibility: Visibility
+    public var typoVisibility: Visibility
+    public var typos: [String: String]
+    public var ignoredTypos: Set<String>
+    public var indentBlankLines: Bool
     public var indentStrings: Bool
     public var closureVoidReturn: ClosureVoidReturn
     public var enumNamespaces: EnumNamespacesMode
-    public var removeStartOrEndBlankLinesFromTypes: Bool
+    public var typeBlankLines: TypeBlankLines
+    public var scopeBlankLines: ScopeBlankLines
     public var genericTypes: String
     public var useSomeAny: Bool
     public var wrapEffects: WrapEffects
     public var preserveAnonymousForEach: Bool
     public var preserveSingleLineForEach: Bool
-    public var preserveDocComments: Bool
+    public var forWhere: ForWhereMode
+    public var docComments: DocCommentMode
+    public var excludedDeclarationTypes: Set<String>
     public var conditionalAssignmentOnlyAfterNewProperties: Bool
     public var typeDelimiterSpacing: DelimiterSpacing
     public var initCoderNil: Bool
     public var dateFormat: DateFormat
     public var timeZone: FormatTimeZone
     public var nilInit: NilInitType
+    public var preservedPrivateDeclarations: Set<String>
+    public var additionalXCTestSymbols: Set<String>
+    public var defaultTestSuiteAttributes: [String]
+    public var equatableMacro: EquatableMacro
+    public var urlMacro: URLMacro
+    public var preferFileMacro: Bool
+    public var lineBetweenConsecutiveGuards: Bool
+    public var blankLineAfterSwitchCase: BlankLineAfterSwitchCase
+    public var redundantThrows: RedundantEffectMode
+    public var redundantAsync: RedundantEffectMode
+    public var allowPartialWrapping: Bool
+    public var preferSynthesizedInitForInternalStructs: PreferSynthesizedInitMode
+    public var testCaseNameFormat: SwiftTestingNameFormat
+    public var suiteNameFormat: SwiftTestingNameFormat
+    public var testCaseAccessControl: Visibility
+    public var guardLikeIfStatements: Bool
+    public var booleanGuardsInTests: BooleanGuardsInTests
+    public var redundantOptionalBinding: RedundantOptionalBindingMode
+    public var singleLineTernary: SingleLineTernary
+    public var contentBuilder: ContentBuilderMode
+    public var preferContentBuilder: Bool
 
     /// Deprecated
     public var indentComments: Bool
@@ -682,7 +1065,14 @@ public struct FormatOptions: CustomStringConvertible {
     public var fragment: Bool
     public var ignoreConflictMarkers: Bool
     public var swiftVersion: Version
+    public var languageMode: Version
     public var fileInfo: FileInfo
+    public var markdownFiles: MarkdownFormattingMode
+    public var unknownOptions: UnknownOptionsMode
+    public var ignoreUnknownOptions: Bool {
+        unknownOptions != .error
+    }
+
     public var timeout: TimeInterval
 
     /// Enabled rules - this is a hack used to allow rules to vary their behavior
@@ -694,12 +1084,12 @@ public struct FormatOptions: CustomStringConvertible {
     public init(lineAfterMarks: Bool = true,
                 indent: String = "    ",
                 linebreak: String = "\n",
-                allowInlineSemicolons: Bool = true,
-                spaceAroundRangeOperators: Bool = true,
-                spaceAroundOperatorDeclarations: Bool = true,
+                semicolons: SemicolonsMode = .inlineOnly,
+                spaceAroundRangeOperators: OperatorSpacingMode = .insert,
+                spaceAroundOperatorDeclarations: OperatorSpacingMode = .insert,
                 useVoid: Bool = true,
                 indentCase: Bool = false,
-                trailingCommas: Bool = true,
+                trailingCommas: TrailingCommas = .always,
                 indentComments: Bool = true,
                 truncateBlankLines: Bool = true,
                 insertBlankLines: Bool = true,
@@ -712,11 +1102,13 @@ public struct FormatOptions: CustomStringConvertible {
                 wrapCollections: WrapMode = .preserve,
                 wrapTypealiases: WrapMode = .preserve,
                 wrapEnumCases: WrapEnumCases = .always,
+                wrapSingleLineEnumCases: Bool = false,
                 closingParenPosition: ClosingParenPosition = .balanced,
                 callSiteClosingParenPosition: ClosingParenPosition = .default,
                 wrapReturnType: WrapReturnType = .preserve,
                 wrapConditions: WrapMode = .preserve,
                 wrapTernaryOperators: TernaryOperatorWrapMode = .default,
+                wrapStringInterpolation: Bool = false,
                 uppercaseHex: Bool = true,
                 uppercaseExponent: Bool = false,
                 decimalGrouping: Grouping = .group(3, 6),
@@ -727,25 +1119,31 @@ public struct FormatOptions: CustomStringConvertible {
                 exponentGrouping: Bool = false,
                 hoistPatternLet: Bool = true,
                 stripUnusedArguments: ArgumentStrippingMode = .all,
-                elseOnNextLine: Bool = false,
-                guardElsePosition: ElsePosition = .auto,
+                elsePosition: ElsePosition = .sameLine,
+                guardElsePosition: GuardElsePosition = .auto,
                 explicitSelf: SelfMode = .remove,
-                selfRequired: Set<String> = [],
+                selfRequired: Set<String> = [
+                    "notice", "info", "debug", "error", "warning",
+                    "fault", "log", "trace", "critical",
+                ],
                 throwCapturing: Set<String> = [],
                 asyncCapturing: Set<String> = [],
                 experimentalRules: Bool = false,
-                importGrouping: ImportGrouping = .alpha,
+                importGrouping: [ImportGrouping] = [.accessControl, .alpha],
+                hoistImports: Bool = true,
                 trailingClosures: Set<String> = [],
+                wrapClosureBodies: Set<String> = ["Task", "Task.detached"],
                 neverTrailing: Set<String> = [],
                 xcodeIndentation: Bool = false,
                 tabWidth: Int = 0,
                 maxWidth: Int = 0,
+                listWrapThreshold: Int? = nil,
                 smartTabs: Bool = true,
                 assetLiteralWidth: AssetLiteralWidth = .visualWidth,
                 noSpaceOperators: Set<String> = [],
                 noWrapOperators: Set<String> = [],
                 modifierOrder: [String] = [],
-                shortOptionals: OptionalsMode = .exceptProperties,
+                shortOptionals: OptionalsMode = .preserveStructInits,
                 funcAttributes: AttributeMode = .preserve,
                 typeAttributes: AttributeMode = .preserve,
                 varAttributes: AttributeMode = .preserve,
@@ -767,45 +1165,92 @@ public struct FormatOptions: CustomStringConvertible {
                 organizeStructThreshold: Int = 0,
                 organizeEnumThreshold: Int = 0,
                 organizeExtensionThreshold: Int = 0,
+                markStructThreshold: Int = 0,
+                markClassThreshold: Int = 0,
+                markEnumThreshold: Int = 0,
+                markExtensionThreshold: Int = 0,
                 organizationMode: DeclarationOrganizationMode = .visibility,
+                typeBodyMarks: TypeBodyMarks = .preserve,
+                visibilityOrder: [String]? = nil,
+                typeOrder: [String]? = nil,
+                customVisibilityMarks: Set<String> = [],
+                customTypeMarks: Set<String> = [],
+                blankLineAfterSubgroups: Bool = true,
+                alphabeticallySortedDeclarationPatterns: Set<String> = [],
+                locale: FormatLocale = .identifier("en_US"),
+                swiftUIPropertiesSortMode: SwiftUIPropertiesSortMode = .none,
                 yodaSwap: YodaMode = .always,
                 extensionACLPlacement: ExtensionACLPlacement = .onExtension,
-                redundantType: RedundantType = .inferLocalsOnly,
+                propertyTypes: PropertyTypes = .inferLocalsOnly,
+                preservedPropertyTypes: Set<String> = ["Package"],
+                inferredTypesInConditionalExpressions: Bool = false,
                 emptyBracesSpacing: EmptyBracesSpacing = .noSpace,
                 acronyms: Set<String> = ["ID", "URL", "UUID"],
+                preserveAcronyms: Set<String> = [],
+                acronymVisibility: Visibility = .internal,
+                typoVisibility: Visibility = .fileprivate,
+                typos: [String: String] = [:],
+                ignoredTypos: Set<String> = [],
+                indentBlankLines: Bool = false,
                 indentStrings: Bool = false,
                 closureVoidReturn: ClosureVoidReturn = .remove,
                 enumNamespaces: EnumNamespacesMode = .always,
-                removeStartOrEndBlankLinesFromTypes: Bool = true,
+                typeBlankLines: TypeBlankLines = .remove,
+                scopeBlankLines: ScopeBlankLines = .remove,
                 genericTypes: String = "",
                 useSomeAny: Bool = true,
                 wrapEffects: WrapEffects = .preserve,
                 preserveAnonymousForEach: Bool = false,
                 preserveSingleLineForEach: Bool = true,
-                preserveDocComments: Bool = false,
+                forWhere: ForWhereMode = .always,
+                docComments: DocCommentMode = .beforeDeclarations,
+                excludedDeclarationTypes: Set<String> = [],
                 conditionalAssignmentOnlyAfterNewProperties: Bool = true,
                 typeDelimiterSpacing: DelimiterSpacing = .spaceAfter,
                 initCoderNil: Bool = false,
                 dateFormat: DateFormat = .system,
                 timeZone: FormatTimeZone = .system,
                 nilInit: NilInitType = .remove,
+                preservedPrivateDeclarations: Set<String> = [],
+                additionalXCTestSymbols: Set<String> = [],
+                defaultTestSuiteAttributes: [String] = [],
+                equatableMacro: EquatableMacro = .none,
+                urlMacro: URLMacro = .none,
+                preferFileMacro: Bool = true,
+                lineBetweenConsecutiveGuards: Bool = false,
+                blankLineAfterSwitchCase: BlankLineAfterSwitchCase = .multilineOnly,
+                redundantThrows: RedundantEffectMode = .testsOnly,
+                redundantAsync: RedundantEffectMode = .testsOnly,
+                allowPartialWrapping: Bool = true,
+                preferSynthesizedInitForInternalStructs: PreferSynthesizedInitMode = .never,
+                testCaseNameFormat: SwiftTestingNameFormat = .rawIdentifiers,
+                suiteNameFormat: SwiftTestingNameFormat = .preserve,
+                testCaseAccessControl: Visibility = .internal,
+                guardLikeIfStatements: Bool = false,
+                booleanGuardsInTests: BooleanGuardsInTests = .preserveXCTest,
+                redundantOptionalBinding: RedundantOptionalBindingMode = .sameNameOnly,
+                singleLineTernary: SingleLineTernary = .convert,
+                contentBuilder: ContentBuilderMode = .implicit,
+                preferContentBuilder: Bool = false,
                 // Doesn't really belong here, but hard to put elsewhere
                 fragment: Bool = false,
                 ignoreConflictMarkers: Bool = false,
                 swiftVersion: Version = .undefined,
+                languageMode: Version? = nil,
                 fileInfo: FileInfo = FileInfo(),
+                markdownFiles: MarkdownFormattingMode = .ignore,
+                unknownOptions: UnknownOptionsMode = .error,
                 timeout: TimeInterval = 1)
     {
         self.lineAfterMarks = lineAfterMarks
         self.indent = indent
         self.linebreak = linebreak
-        self.allowInlineSemicolons = allowInlineSemicolons
+        self.semicolons = semicolons
         self.spaceAroundRangeOperators = spaceAroundRangeOperators
         self.spaceAroundOperatorDeclarations = spaceAroundOperatorDeclarations
         self.useVoid = useVoid
         self.indentCase = indentCase
         self.trailingCommas = trailingCommas
-        self.indentComments = indentComments
         self.truncateBlankLines = truncateBlankLines
         self.insertBlankLines = insertBlankLines
         self.removeBlankLines = removeBlankLines
@@ -817,11 +1262,13 @@ public struct FormatOptions: CustomStringConvertible {
         self.wrapCollections = wrapCollections
         self.wrapTypealiases = wrapTypealiases
         self.wrapEnumCases = wrapEnumCases
+        self.wrapSingleLineEnumCases = wrapSingleLineEnumCases
         self.closingParenPosition = closingParenPosition
         self.callSiteClosingParenPosition = callSiteClosingParenPosition
         self.wrapReturnType = wrapReturnType
         self.wrapConditions = wrapConditions
         self.wrapTernaryOperators = wrapTernaryOperators
+        self.wrapStringInterpolation = wrapStringInterpolation
         self.uppercaseHex = uppercaseHex
         self.uppercaseExponent = uppercaseExponent
         self.decimalGrouping = decimalGrouping
@@ -832,7 +1279,7 @@ public struct FormatOptions: CustomStringConvertible {
         self.hexGrouping = hexGrouping
         self.hoistPatternLet = hoistPatternLet
         self.stripUnusedArguments = stripUnusedArguments
-        self.elseOnNextLine = elseOnNextLine
+        self.elsePosition = elsePosition
         self.guardElsePosition = guardElsePosition
         self.explicitSelf = explicitSelf
         self.selfRequired = selfRequired
@@ -840,11 +1287,14 @@ public struct FormatOptions: CustomStringConvertible {
         self.asyncCapturing = asyncCapturing
         self.experimentalRules = experimentalRules
         self.importGrouping = importGrouping
+        self.hoistImports = hoistImports
         self.trailingClosures = trailingClosures
+        self.wrapClosureBodies = wrapClosureBodies
         self.neverTrailing = neverTrailing
         self.xcodeIndentation = xcodeIndentation
         self.tabWidth = tabWidth
         self.maxWidth = maxWidth
+        self.listWrapThreshold = listWrapThreshold
         self.smartTabs = smartTabs
         self.assetLiteralWidth = assetLiteralWidth
         self.noSpaceOperators = noSpaceOperators
@@ -872,33 +1322,81 @@ public struct FormatOptions: CustomStringConvertible {
         self.organizeStructThreshold = organizeStructThreshold
         self.organizeEnumThreshold = organizeEnumThreshold
         self.organizeExtensionThreshold = organizeExtensionThreshold
+        self.markStructThreshold = markStructThreshold
+        self.markClassThreshold = markClassThreshold
+        self.markEnumThreshold = markEnumThreshold
+        self.markExtensionThreshold = markExtensionThreshold
         self.organizationMode = organizationMode
+        self.typeBodyMarks = typeBodyMarks
+        self.visibilityOrder = visibilityOrder
+        self.typeOrder = typeOrder
+        self.customVisibilityMarks = customVisibilityMarks
+        self.customTypeMarks = customTypeMarks
+        self.blankLineAfterSubgroups = blankLineAfterSubgroups
+        self.alphabeticallySortedDeclarationPatterns = alphabeticallySortedDeclarationPatterns
+        self.locale = locale
+        self.swiftUIPropertiesSortMode = swiftUIPropertiesSortMode
         self.yodaSwap = yodaSwap
         self.extensionACLPlacement = extensionACLPlacement
-        self.redundantType = redundantType
+        self.propertyTypes = propertyTypes
+        self.preservedPropertyTypes = preservedPropertyTypes
+        self.inferredTypesInConditionalExpressions = inferredTypesInConditionalExpressions
         self.emptyBracesSpacing = emptyBracesSpacing
         self.acronyms = acronyms
+        self.preserveAcronyms = preserveAcronyms
+        self.acronymVisibility = acronymVisibility
+        self.typoVisibility = typoVisibility
+        self.typos = typos
+        self.ignoredTypos = ignoredTypos
+        self.indentBlankLines = indentBlankLines
         self.indentStrings = indentStrings
         self.closureVoidReturn = closureVoidReturn
         self.enumNamespaces = enumNamespaces
-        self.removeStartOrEndBlankLinesFromTypes = removeStartOrEndBlankLinesFromTypes
+        self.typeBlankLines = typeBlankLines
+        self.scopeBlankLines = scopeBlankLines
         self.genericTypes = genericTypes
         self.useSomeAny = useSomeAny
         self.wrapEffects = wrapEffects
         self.preserveAnonymousForEach = preserveAnonymousForEach
         self.preserveSingleLineForEach = preserveSingleLineForEach
-        self.preserveDocComments = preserveDocComments
+        self.forWhere = forWhere
+        self.docComments = docComments
+        self.excludedDeclarationTypes = excludedDeclarationTypes
         self.conditionalAssignmentOnlyAfterNewProperties = conditionalAssignmentOnlyAfterNewProperties
         self.typeDelimiterSpacing = typeDelimiterSpacing
         self.initCoderNil = initCoderNil
         self.dateFormat = dateFormat
         self.timeZone = timeZone
         self.nilInit = nilInit
-        // Doesn't really belong here, but hard to put elsewhere
+        self.preservedPrivateDeclarations = preservedPrivateDeclarations
+        self.additionalXCTestSymbols = additionalXCTestSymbols
+        self.defaultTestSuiteAttributes = defaultTestSuiteAttributes
+        self.equatableMacro = equatableMacro
+        self.urlMacro = urlMacro
+        self.preferFileMacro = preferFileMacro
+        self.lineBetweenConsecutiveGuards = lineBetweenConsecutiveGuards
+        self.blankLineAfterSwitchCase = blankLineAfterSwitchCase
+        self.redundantThrows = redundantThrows
+        self.redundantAsync = redundantAsync
+        self.allowPartialWrapping = allowPartialWrapping
+        self.preferSynthesizedInitForInternalStructs = preferSynthesizedInitForInternalStructs
+        self.testCaseNameFormat = testCaseNameFormat
+        self.suiteNameFormat = suiteNameFormat
+        self.testCaseAccessControl = testCaseAccessControl
+        self.guardLikeIfStatements = guardLikeIfStatements
+        self.booleanGuardsInTests = booleanGuardsInTests
+        self.redundantOptionalBinding = redundantOptionalBinding
+        self.singleLineTernary = singleLineTernary
+        self.contentBuilder = contentBuilder
+        self.preferContentBuilder = preferContentBuilder
+        self.indentComments = indentComments
         self.fragment = fragment
         self.ignoreConflictMarkers = ignoreConflictMarkers
         self.swiftVersion = swiftVersion
+        self.languageMode = languageMode ?? defaultLanguageMode(for: swiftVersion)
         self.fileInfo = fileInfo
+        self.markdownFiles = markdownFiles
+        self.unknownOptions = unknownOptions
         self.timeout = timeout
     }
 
@@ -929,12 +1427,34 @@ public struct FormatOptions: CustomStringConvertible {
                 value = array.joined(separator: ",")
             case let set as Set<String>:
                 value = set.sorted().joined(separator: ",")
+            case let dictionary as [String: String]:
+                value = dictionary.sorted(by: { $0.key < $1.key })
+                    .map { "\($0.key)=\($0.value)" }.joined(separator: ",")
+            case let array as [ImportGrouping]:
+                value = array.map(\.rawValue).joined(separator: ",")
             default:
                 break
             }
             return "\(value);".addingPercentEncoding(withAllowedCharacters: allowedCharacters)
         }.joined()
     }
+}
+
+/// When to remove redundant `throws` / `async` effects
+public enum RedundantEffectMode: String, CaseIterable {
+    /// Only remove redundant effects from test functions (default)
+    case testsOnly = "tests-only"
+    /// Remove redundant effects from all functions (can cause additional warnings / errors)
+    case always
+}
+
+public enum MarkdownFormattingMode: String, CaseIterable {
+    /// Swift code in markdown files is ignored (default)
+    case ignore
+    /// Errors in markdown code blocks are ignored
+    case lenient
+    /// Errors in markdown code blocks are reported
+    case strict
 }
 
 /// File enumeration options
@@ -947,8 +1467,11 @@ public struct FileOptions {
 
     public static let `default` = FileOptions()
 
+    /// Names of build directories, which are excluded by default
+    static let buildDirectories: Set = [".build", "Build", "DerivedData"]
+
     public init(followSymlinks: Bool = false,
-                supportedFileExtensions: [String] = ["swift"],
+                supportedFileExtensions: [String] = ["swift", "md"],
                 excludedGlobs: [Glob] = [],
                 unexcludedGlobs: [Glob] = [],
                 minVersion: Version = .undefined)
@@ -975,6 +1498,13 @@ public struct FileOptions {
         }
         return shouldSkip
     }
+
+    /// Returns true if the URL is a build directory that has not been unexcluded.
+    /// Only checked when enumerating directory contents, so build directories passed as inputs are still formatted.
+    func shouldSkipBuildDirectory(_ url: URL) -> Bool {
+        Self.buildDirectories.contains(url.lastPathComponent) &&
+            !unexcludedGlobs.contains(where: { $0.matches(url.standardizedFileURL.path) })
+    }
 }
 
 /// All options
@@ -982,31 +1512,40 @@ public struct Options {
     public var fileOptions: FileOptions?
     public var formatOptions: FormatOptions?
     public var rules: Set<String>?
-    public var configURL: URL?
+    public var configURLs: [URL]?
     public var lint: Bool
+    /// Arguments from `--filter`ed config file sections, in the order they should be applied
+    public var filterOptions: [(filters: [ConfigFilter], options: [String: String])]
 
     public static let `default` = Options(
         fileOptions: .default,
         formatOptions: .default,
-        rules: Set(FormatRules.byName.keys).subtracting(FormatRules.disabledByDefault),
-        configURL: nil,
+        rules: defaultRules,
+        configURLs: nil,
         lint: false
     )
 
     public init(fileOptions: FileOptions? = nil,
                 formatOptions: FormatOptions? = nil,
                 rules: Set<String>? = nil,
-                configURL: URL? = nil,
-                lint: Bool = false)
+                configURLs: [URL]? = nil,
+                lint: Bool = false,
+                filterOptions: [(filters: [ConfigFilter], options: [String: String])] = [])
     {
         self.fileOptions = fileOptions
         self.formatOptions = formatOptions
         self.rules = rules
-        self.configURL = configURL
+        self.configURLs = configURLs
         self.lint = lint
+        self.filterOptions = filterOptions
     }
 
     public func shouldSkipFile(_ inputURL: URL) -> Bool {
-        fileOptions?.shouldSkipFile(inputURL) ?? false
+        if inputURL.pathExtension == "md",
+           (formatOptions ?? .default).markdownFiles == .ignore
+        {
+            return true
+        }
+        return fileOptions?.shouldSkipFile(inputURL) ?? false
     }
 }

@@ -54,7 +54,7 @@
 				</dict>
 				<dict>
 					<key>XCSourceEditorCommandClassName</key>
-					<string>$(PRODUCT_MODULE_NAME).CommandLine</string>
+					<string>$(PRODUCT_MODULE_NAME).CommentLineCommand</string>
 					<key>XCSourceEditorCommandIdentifier</key>
 					<string>yingguqing.Command</string>
 					<key>XCSourceEditorCommandName</key>

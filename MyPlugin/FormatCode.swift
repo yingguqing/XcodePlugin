@@ -9,6 +9,44 @@
 import Cocoa
 import XcodeKit
 
+// MARK: - 自定义规则：删除 // MARK: 后面紧跟的空白行
+
+private extension FormatRule {
+    /// SwiftFormat 自带的 blankLinesAroundMark 只负责「插入」空行，
+    /// line-after-marks 关掉后也不会删除已有空行。这条规则补上删除逻辑。
+    /// 注意：applyRules 会按依赖关系重排规则顺序，所以这条规则不混进 rules 数组，
+    /// 而是在 format() 完成后单独再跑一次（见 formatSwift）。
+    static let removeBlankLineAfterMark = FormatRule(
+        help: "Remove blank lines immediately after MARK: comments."
+    ) { formatter in
+        formatter.forEachToken { i, token in
+            guard case let .commentBody(comment) = token,
+                  comment.hasPrefix("MARK:"),
+                  let startIndex = formatter.index(of: .nonSpace, before: i),
+                  formatter.tokens[startIndex] == .startOfScope("//"),
+                  let linebreakIndex = formatter.index(of: .linebreak, after: i)
+            else { return }
+
+            // 跳过空格后仍是换行符 => MARK 行后面跟着空白行。
+            // 连同空白行里的空格一起删掉，只保留 MARK 行本身的换行。
+            while let nextIndex = formatter.index(of: .nonSpace, after: linebreakIndex),
+                  formatter.tokens[nextIndex].isLinebreak
+            {
+                formatter.removeTokens(in: linebreakIndex + 1 ... nextIndex)
+            }
+        }
+    } examples: {
+        """
+        ```diff
+        - // MARK: Properties
+        -
+        + // MARK: Properties
+          let name: String
+        ```
+        """
+    }
+}
+
 // MARK: 格式化代码
 class FormatCode : NSObject, XCSourceEditorCommand {
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
@@ -47,9 +85,17 @@ class FormatCode : NSObject, XCSourceEditorCommand {
             formatOptions.fileHeader = .ignore
         }
 
-        let output: [Token]
+        var output: [Token]
         do {
-            output = try format(input, rules: rules, options: formatOptions)
+            output = try format(input, rules: rules, options: formatOptions).tokens
+            // 后处理：删除 // MARK: 后面紧跟的空白行。
+            // SwiftFormat 的 applyRules 会重排规则顺序，所以这里单独再跑一次，
+            // 保证一定在 blankLinesAroundMark / organizeDeclarations 等规则之后执行。
+            // 想恢复 SwiftFormat 原生行为时，注释掉下面这一段即可。
+            output = try applyRules(
+                [.removeBlankLineAfterMark], to: output,
+                with: formatOptions, trackChanges: false, range: nil
+            ).tokens
         } catch {
             throw error
         }
@@ -155,17 +201,25 @@ class FormatCode : NSObject, XCSourceEditorCommand {
     // 命令：brew install uncrustify
     // 使用本地的uncrustify
     func formatWith(ocCode:String) throws -> [String] {
-        guard let cachesPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first else { return [] }
-        let filePath = URL(fileURLWithPath: cachesPath).appendingPathComponent("\(Date().timeIntervalSince1970)")
+        guard let path = Bundle.main.path(forResource: "uncrustify", ofType: nil),
+              let cfgPath = Bundle.main.path(forResource: "uncrustify.cfg", ofType: nil)
+        else { return [] }
+
+        // 临时文件只写在扩展自己的沙盒容器内。
+        // 之前用 NSSearchPathForDirectoriesInDomains(.documentDirectory) 会指向用户「文稿」目录，
+        // 属于 macOS 受 TCC 保护的位置，每次格式化都会弹「想要访问…文件夹中的文件」授权框。
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("XcodePluginFormatter", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let filePath = dir.appendingPathComponent(UUID().uuidString + ".m")
+        defer { try? FileManager.default.removeItem(at: filePath) }
+
         try ocCode.write(to: filePath, atomically: true, encoding: .utf8)
-        guard let path = Bundle.main.path(forResource: "uncrustify", ofType: nil) else { return [] }
-        guard let cfgPath = Bundle.main.path(forResource: "uncrustify.cfg", ofType: nil) else { return [] }
         let command = [path, "-c", cfgPath, "-l", "OC", "-q", "--no-backup", "--replace", filePath.path]
         let shell = Shell()
         let result = shell.capture(command)
         _ = try result.get()
         let data = try Data(contentsOf: filePath)
-        try? FileManager.default.removeItem(at: filePath)
         guard let string = String(data: data, encoding: .utf8) else { return [] }
         return string.components(separatedBy: "\n")
     }

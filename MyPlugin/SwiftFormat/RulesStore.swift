@@ -33,7 +33,7 @@ import Foundation
 import NaturalLanguage
 
 extension UserDefaults {
-    static let groupDomain = "com.yingguqing.xcode.plugin"
+    static let groupDomain = "com.charcoaldesign.SwiftFormat"
 
     func clearAll(in domainName: String) {
         persistentDomain(forName: domainName)?.forEach {
@@ -60,7 +60,7 @@ extension Rule: Comparable {
     /// Space-separated, lowercased text terms that this rule might by found by.
     var searchableText: String {
         var items = [name]
-        if let formatRule = formatRule {
+        if let formatRule {
             items.append(formatRule.help.keywords.joined(separator: " "))
             items.append(formatRule.options.joined(separator: " "))
             items.append(formatRule.sharedOptions.joined(separator: " "))
@@ -133,8 +133,8 @@ struct RulesStore {
     }
 
     func resetRulesToDefaults() {
-        let allRuleNames = Set(FormatRules.byName.keys)
-        let disabledRules = Set(FormatRules.disabledByDefault)
+        let allRuleNames = Set(FormatRules.all.map(\.name))
+        let disabledRules = Set(FormatRules.disabledByDefault.map(\.name))
         let activeRules = allRuleNames.subtracting(disabledRules)
 
         clear()
@@ -157,13 +157,13 @@ extension RulesStore {
     private func addNewRulesIfNeeded() {
         let currentRules = load()
         let currentRuleNames = Set(currentRules.keys)
-        let allRuleNames = Set(FormatRules.byName.keys)
+        let allRuleNames = Set(FormatRules.all.map(\.name))
         let newRuleNames = allRuleNames.subtracting(currentRuleNames)
         if newRuleNames.isEmpty {
             return
         }
 
-        let disabledRules = Set(FormatRules.disabledByDefault)
+        let disabledRules = Set(FormatRules.disabledByDefault.map(\.name))
         var rules = currentRules
         for newRuleName in newRuleNames {
             rules[newRuleName] = !disabledRules.contains(newRuleName)

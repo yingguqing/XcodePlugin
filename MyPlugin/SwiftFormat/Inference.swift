@@ -104,9 +104,9 @@ private struct Inference {
                 break
             }
         }
-        if let indent = indents.sorted(by: {
+        if let indent = indents.min(by: {
             $0.count > $1.count
-        }).first.map({ $0.indent }) {
+        }).map(\.indent) {
             options.indent = indent
         }
     }
@@ -138,7 +138,7 @@ private struct Inference {
         options.linebreak = linebreak
     }
 
-    let allowInlineSemicolons = OptionInferrer { formatter, options in
+    let semicolons = OptionInferrer { formatter, options in
         var allow = false
         for (i, token) in formatter.tokens.enumerated() {
             guard case .delimiter(";") = token else {
@@ -149,7 +149,7 @@ private struct Inference {
                 break
             }
         }
-        options.allowInlineSemicolons = allow
+        options.semicolons = allow ? .inlineOnly : .never
     }
 
     let noSpaceOperators = OptionInferrer { formatter, options in
@@ -235,7 +235,7 @@ private struct Inference {
                 noTrailing += 1
             }
         }
-        options.trailingCommas = (trailing >= noTrailing)
+        options.trailingCommas = (trailing >= noTrailing) ? .always : .never
     }
 
     let truncateBlankLines = OptionInferrer { formatter, options in
@@ -302,7 +302,8 @@ private struct Inference {
     }
 
     let ifdefIndent = OptionInferrer { formatter, options in
-        var indented = 0, notIndented = 0, outdented = 0
+        var indented = 0, notIndented = 0, outdented = 0, preserveCandidates = 0
+
         formatter.forEach(.startOfScope("#if")) { i, _ in
             if let indent = formatter.token(at: i - 1), case let .space(string) = indent,
                !string.isEmpty
@@ -318,6 +319,11 @@ private struct Inference {
                             return
                         } else if innerString == string {
                             notIndented += 1
+                            if let token = formatter.next(.nonSpaceOrCommentOrLinebreak, after: nextLineIndex),
+                               case .operator(".", _) = token
+                            {
+                                preserveCandidates += 1
+                            }
                         } else {
                             // Assume more indented, as less would be a mistake
                             indented += 1
@@ -360,7 +366,13 @@ private struct Inference {
             // Error?
         }
         if notIndented > indented {
-            options.ifdefIndent = outdented > notIndented ? .outdent : .noIndent
+            if outdented > notIndented {
+                options.ifdefIndent = .outdent
+            } else if preserveCandidates > 0 {
+                options.ifdefIndent = .preserve
+            } else {
+                options.ifdefIndent = .noIndent
+            }
         } else {
             options.ifdefIndent = outdented > indented ? .outdent : .indent
         }
@@ -408,7 +420,7 @@ private struct Inference {
         }
 
         // Decide on callSiteClosingParenPosition
-        if functionCallSameLine > functionCallBalanced && functionDeclarationBalanced > functionDeclarationSameLine {
+        if functionCallSameLine > functionCallBalanced, functionDeclarationBalanced > functionDeclarationSameLine {
             options.callSiteClosingParenPosition = .sameLine
         } else {
             options.callSiteClosingParenPosition = .balanced
@@ -563,7 +575,7 @@ private struct Inference {
         var functionArgsRemoved = 0, functionArgsKept = 0
         var unnamedFunctionArgsRemoved = 0, unnamedFunctionArgsKept = 0
 
-        func removeUsed<T>(from argNames: inout [String], with associatedData: inout [T], in range: CountableRange<Int>) {
+        func removeUsed(from argNames: inout [String], with associatedData: inout [some Any], in range: CountableRange<Int>) {
             for i in range {
                 let token = formatter.tokens[i]
                 if case .identifier = token, let index = argNames.firstIndex(of: token.unescaped()),
@@ -581,9 +593,12 @@ private struct Inference {
         }
         // Function arguments
         formatter.forEachToken { i, token in
-            guard case let .keyword(keyword) = token, ["func", "init", "subscript"].contains(keyword),
+            guard case let .keyword(keyword) = token, keyword.isFunctionDeclarationKeyword,
                   let startIndex = formatter.index(of: .startOfScope("("), after: i),
-                  let endIndex = formatter.index(of: .endOfScope(")"), after: startIndex) else { return }
+                  let endIndex = formatter.index(of: .endOfScope(")"), after: startIndex)
+            else {
+                return
+            }
             let isOperator = (keyword == "subscript") ||
                 (keyword == "func" && formatter.next(.nonSpaceOrCommentOrLinebreak, after: i)?.isOperator == true)
             var index = startIndex
@@ -591,12 +606,14 @@ private struct Inference {
             var nameIndices = [Int]()
             while index < endIndex {
                 guard let externalNameIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, after: index, if: {
-                    if case .identifier = $0 { return true }
-                    // Probably an empty argument list
-                    return false
-                }) else { return }
-                guard let nextIndex =
-                    formatter.index(of: .nonSpaceOrCommentOrLinebreak, after: externalNameIndex) else { return }
+                          if case .identifier = $0 {
+                              return true
+                          }
+                          // Probably an empty argument list
+                          return false
+                      }),
+                      let nextIndex =
+                      formatter.index(of: .nonSpaceOrCommentOrLinebreak, after: externalNameIndex) else { return }
                 let nextToken = formatter.tokens[nextIndex]
                 switch nextToken {
                 case let .identifier(name):
@@ -625,21 +642,23 @@ private struct Inference {
                 index = formatter.index(of: .delimiter(","), after: index) ?? endIndex
             }
             guard !argNames.isEmpty, let bodyStartIndex = formatter.index(after: endIndex, where: {
-                switch $0 {
-                case .startOfScope("{"): // What we're looking for
-                    return true
-                case .keyword("throws"),
-                     .keyword("rethrows"),
-                     .keyword("where"),
-                     .keyword("is"):
-                    return false // Keep looking
-                case .keyword:
-                    return true // Not valid between end of arguments and start of body
-                default:
-                    return false // Keep looking
-                }
-            }), formatter.tokens[bodyStartIndex] == .startOfScope("{"),
-            let bodyEndIndex = formatter.index(of: .endOfScope("}"), after: bodyStartIndex) else {
+                      switch $0 {
+                      case .startOfScope("{"): // What we're looking for
+                          return true
+                      case .keyword("throws"),
+                           .keyword("rethrows"),
+                           .keyword("where"),
+                           .keyword("is"):
+                          return false // Keep looking
+                      case .keyword:
+                          return true // Not valid between end of arguments and start of body
+                      default:
+                          return false // Keep looking
+                      }
+                  }),
+                  formatter.tokens[bodyStartIndex] == .startOfScope("{"),
+                  let bodyEndIndex = formatter.index(of: .endOfScope("}"), after: bodyStartIndex)
+            else {
                 return
             }
             removeUsed(from: &argNames, with: &nameIndices, in: bodyStartIndex + 1 ..< bodyEndIndex)
@@ -670,7 +689,9 @@ private struct Inference {
                          isTypeRoot: Bool,
                          isInit: Bool)
         {
-            var selfRequired: Set<String> { formatter.options.selfRequired }
+            var selfRequired: Set<String> {
+                formatter.options.selfRequired
+            }
             let currentScope = formatter.currentScope(at: index)
             let isWhereClause = index > 0 && formatter.tokens[index - 1] == .keyword("where")
             assert(isWhereClause || currentScope.map { token -> Bool in
@@ -758,7 +779,7 @@ private struct Inference {
                     i += 1
                 }
             }
-            if let type = type {
+            if let type {
                 membersByType[type] = members
                 classMembersByType[type] = classMembers
             }
@@ -862,7 +883,10 @@ private struct Inference {
                     guard let keywordIndex = formatter.index(of: .keyword, before: index),
                           let prevKeywordIndex = formatter.index(of: .keyword, before: keywordIndex),
                           let prevKeywordToken = formatter.token(at: prevKeywordIndex),
-                          case .keyword("for") = prevKeywordToken else { return }
+                          case .keyword("for") = prevKeywordToken
+                    else {
+                        return
+                    }
                     for token in formatter.tokens[prevKeywordIndex + 1 ..< keywordIndex] {
                         if case let .identifier(name) = token, name != "_" {
                             localNames.insert(token.unescaped())
@@ -880,14 +904,9 @@ private struct Inference {
                 case let .keyword(name):
                     lastKeyword = name
                     lastKeywordIndex = index
-                case .startOfScope("//"), .startOfScope("/*"):
-                    if case let .commentBody(comment)? = formatter.next(.nonSpace, after: index) {
-                        formatter.processCommentBody(comment, at: index)
-                        if token == .startOfScope("//") {
-                            formatter.processLinebreak()
-                        }
-                    }
+                case .startOfScope("/*"), .startOfScope("//"):
                     index = formatter.endOfScope(at: index) ?? (formatter.tokens.count - 1)
+                    formatter.updateEnablement(at: index)
                 case .startOfScope("("):
                     if case let .identifier(fn)? = formatter.last(.nonSpaceOrCommentOrLinebreak, before: index),
                        selfRequired.contains(fn) || fn == "expect"
@@ -917,7 +936,10 @@ private struct Inference {
                     guard let keywordIndex = formatter.index(of: .keyword, before: index),
                           let prevKeywordIndex = formatter.index(of: .keyword, before: keywordIndex),
                           let prevKeywordToken = formatter.token(at: prevKeywordIndex),
-                          case .keyword("for") = prevKeywordToken else { return }
+                          case .keyword("for") = prevKeywordToken
+                    else {
+                        return
+                    }
                     for token in formatter.tokens[prevKeywordIndex + 1 ..< keywordIndex] {
                         if case let .identifier(name) = token, name != "_" {
                             localNames.insert(token.unescaped())
@@ -979,7 +1001,7 @@ private struct Inference {
                     continue
                 case .startOfScope("{") where lastKeyword == "var":
                     lastKeyword = ""
-                    if formatter.isStartOfClosure(at: index, in: scopeStack.last) {
+                    if formatter.isStartOfClosure(at: index) {
                         fallthrough
                     }
                     var prevIndex = index - 1
@@ -997,8 +1019,8 @@ private struct Inference {
                         }
                         prevIndex -= 1
                     }
-                    if let name = name {
-                        processAccessors(["get", "set", "willSet", "didSet", "init", "_modify"], for: name,
+                    if let name {
+                        processAccessors({ $0.isPropertyAccessorKeyword }, for: name,
                                          at: &index, localNames: localNames, members: members,
                                          typeStack: &typeStack, membersByType: &membersByType,
                                          classMembersByType: &classMembersByType,
@@ -1107,14 +1129,14 @@ private struct Inference {
                         return
                     }
                 case .linebreak:
-                    formatter.processLinebreak()
+                    formatter.updateEnablement(at: index)
                 default:
                     break
                 }
                 index += 1
             }
         }
-        func processAccessors(_ names: [String], for name: String, at index: inout Int,
+        func processAccessors(_ isAccessor: (Token) -> Bool, for name: String, at index: inout Int,
                               localNames: Set<String>, members: Set<String>,
                               typeStack: inout [String],
                               membersByType: inout [String: Set<String>],
@@ -1125,7 +1147,11 @@ private struct Inference {
             var foundAccessors = false
             var localNames = localNames
             while let nextIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, after: index, if: {
-                if case let .identifier(name) = $0, names.contains(name) { return true } else { return false }
+                if case .identifier = $0, isAccessor($0) {
+                    return true
+                } else {
+                    return false
+                }
             }), let startIndex = formatter.index(of: .startOfScope("{"), after: nextIndex) {
                 foundAccessors = true
                 index = startIndex + 1
@@ -1135,7 +1161,7 @@ private struct Inference {
                     localNames.insert(varToken.unescaped())
                 } else {
                     switch formatter.tokens[nextIndex].string {
-                    case "get":
+                    case "get", "_read", "_modify":
                         localNames.insert(name)
                     case "set":
                         localNames.insert(name)
@@ -1221,7 +1247,7 @@ private struct Inference {
             }
             if startToken == .keyword("subscript") {
                 index = bodyStartIndex
-                processAccessors(["get", "set"], for: "", at: &index, localNames: localNames,
+                processAccessors({ $0.isSubscriptAccessorKeyword }, for: "", at: &index, localNames: localNames,
                                  members: members, typeStack: &typeStack, membersByType: &membersByType,
                                  classMembersByType: &classMembersByType,
                                  removed: &removed, unremoved: &unremoved,
@@ -1273,10 +1299,10 @@ private struct Inference {
                 nospace += 1
             }
         }
-        options.spaceAroundOperatorDeclarations = (nospace <= space)
+        options.spaceAroundOperatorDeclarations = nospace > space ? .remove : .insert
     }
 
-    let elseOnNextLine = OptionInferrer { formatter, options in
+    let elsePosition = OptionInferrer { formatter, options in
         var sameLine = 0, nextLine = 0
         formatter.forEach(.keyword) { i, token in
             guard [.keyword("else"), .keyword("catch"), .keyword("while")].contains(token) else { return }
@@ -1297,7 +1323,7 @@ private struct Inference {
                 sameLine += 1
             }
         }
-        options.elseOnNextLine = (sameLine < nextLine)
+        options.elsePosition = sameLine < nextLine ? .nextLine : .sameLine
     }
 
     let indentCase = OptionInferrer { formatter, options in
@@ -1383,10 +1409,9 @@ private extension Formatter {
     func grouping(for numberType: NumberType) -> Grouping {
         var grouping = [(group: Int, threshold: Int, count: Int)](), lowest = Int.max
         forEachToken { _, token in
-            guard case let .number(number, type) = token else {
-                return
-            }
-            guard numberType == type || numberType == .decimal && type == .integer else {
+            guard case let .number(number, type) = token,
+                  numberType == type || numberType == .decimal && type == .integer
+            else {
                 return
             }
             // Strip prefix/suffix

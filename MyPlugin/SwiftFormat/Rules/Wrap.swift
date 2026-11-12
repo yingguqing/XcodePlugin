@@ -1,0 +1,79 @@
+//
+//  Wrap.swift
+//  SwiftFormat
+//
+//  Created by Nick Lockwood on 11/17/19.
+//  Copyright © 2024 Nick Lockwood. All rights reserved.
+//
+
+import Foundation
+
+public extension FormatRule {
+    static let wrap = FormatRule(
+        help: "Wrap lines that exceed the specified maximum width.",
+        options: ["max-width", "list-wrap-threshold", "no-wrap-operators", "asset-literals", "wrap-ternary", "wrap-string-interpolation"],
+        sharedOptions: ["wrap-arguments", "wrap-parameters", "wrap-collections", "closing-paren", "call-site-paren", "indent",
+                        "trim-whitespace", "linebreaks", "tab-width", "max-width", "smart-tabs",
+                        "wrap-return-type", "wrap-conditions", "wrap-type-aliases", "wrap-ternary", "wrap-effects",
+                        "allow-partial-wrapping"]
+    ) { formatter in
+        let maxWidth = formatter.options.maxWidth
+        guard maxWidth > 0 else { return }
+
+        // Wrap collections first to avoid conflict
+        formatter.wrapCollectionsAndArguments(completePartialWrapping: false,
+                                              wrapSingleArguments: false)
+
+        // Wrap other line types
+        var currentIndex = 0
+        var indent = ""
+        var alreadyLinewrapped = false
+
+        func isLinewrapToken(_ token: Token?) -> Bool {
+            switch token {
+            case .delimiter?, .operator(_, .infix)?:
+                return true
+            default:
+                return false
+            }
+        }
+
+        formatter.forEachToken(onlyWhereEnabled: false) { i, token in
+            if i < currentIndex {
+                return
+            }
+            if token.isLinebreak {
+                indent = formatter.currentIndentForLine(at: i + 1)
+                alreadyLinewrapped = isLinewrapToken(formatter.last(.nonSpaceOrComment, before: i))
+                currentIndex = i + 1
+            } else if let breakPoint = formatter.indexWhereLineShouldWrapInLine(at: i) {
+                if !alreadyLinewrapped {
+                    indent += formatter.linewrapIndent(at: breakPoint)
+                }
+                alreadyLinewrapped = true
+                if formatter.isEnabled {
+                    let spaceAdded = formatter.insertSpace(indent, at: breakPoint + 1)
+                    formatter.insertLinebreak(at: breakPoint + 1)
+                    currentIndex = breakPoint + spaceAdded + 2
+                } else {
+                    currentIndex = breakPoint + 1
+                }
+            } else {
+                currentIndex = formatter.endOfLine(at: i)
+            }
+        }
+
+        formatter.wrapCollectionsAndArguments(completePartialWrapping: true,
+                                              wrapSingleArguments: true)
+    } examples: {
+        """
+        `--max-width 40`
+
+        ```diff
+        - let foo = bar(baz: 1, quux: 2) + bar(baz: 3, quux: 4)
+        + let foo = bar(baz: 1, quux: 2) +
+        +     bar(baz: 3, quux: 4)
+        ```
+        """
+    }
+}

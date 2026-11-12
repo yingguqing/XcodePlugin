@@ -31,7 +31,7 @@
 
 import Cocoa
 
-class ListSelectionTableCellView: NSTableCellView {
+final class ListSelectionTableCellView: NSTableCellView {
     @IBOutlet var title: NSTextField!
     @IBOutlet var dropDown: NSPopUpButton!
     @IBAction func listSelectionChanged(_: NSPopUpButton) {
@@ -46,14 +46,10 @@ class ListSelectionTableCellView: NSTableCellView {
             guard let model = objectValue as? UserSelectionList else {
                 return
             }
-            // 显示中文说明
-            if !model.chineseHelp.isEmpty {
-                title.stringValue = model.chineseHelp
-            } else {
-                title.stringValue = model.title ?? ""
-                toolTip = model.description
-            }
             title.textColor = model.isEnabled ? .textColor : .disabledControlTextColor
+            // 优先显示中文说明，没有中文时回退到英文原名
+            title.stringValue = model.chineseHelp.isEmpty ? (model.title ?? "") : model.chineseHelp
+            toolTip = model.description
             dropDown.isEnabled = model.isEnabled
             dropDown.removeAllItems()
             dropDown.addItems(withTitles: model.options.map { $0 })

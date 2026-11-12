@@ -26,7 +26,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let options: Options
         do {
-            let args = try parseConfigFile(data)
+            // 0.55+ 起 parseConfigFile 支持配置文件的分段写法，返回 [[String: String]]；
+            // 本 App 不做分段配置，只取第一段。
+            let configs = try parseConfigFile(data)
+            if configs.count > 1 {
+                showError(FormatError.options("配置文件包含多个分段，仅加载第一段。"))
+            }
+            let args = configs.first ?? [:]
             options = try Options(args, in: url.deletingLastPathComponent().path)
             OptionsStore().inferOptions = Set(args.keys)
                 .intersection(formattingArguments)
@@ -37,7 +43,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return false
         }
 
-        let rules = options.rules ?? allRules.subtracting(FormatRules.disabledByDefault)
+        // 0.55+ 移除了 allRules.subtracting(FormatRules.disabledByDefault)，改用 defaultRules
+        let rules = options.rules ?? defaultRules
         RulesStore().restore(Set(FormatRules.byName.keys).map {
             Rule(name: $0, isEnabled: rules.contains($0))
         })

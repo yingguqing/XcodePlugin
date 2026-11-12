@@ -9,7 +9,8 @@
 import Cocoa
 
 /// 基于NSRegularExpression api 的正则处理工具类
-public struct Regex {
+/// 注意：不要命名为 Regex，会遮蔽 Swift 标准库的 Regex（SwiftFormat 0.64+ 会用到）
+public struct LegacyRegex {
     
     private let regularExpression: NSRegularExpression
     
@@ -68,7 +69,7 @@ public struct Regex {
 }
 
 //正则匹配可选项
-extension Regex {
+extension LegacyRegex {
     /// Options 定义了正则表达式匹配时的行为
     public struct Options: OptionSet {
         
@@ -114,7 +115,7 @@ extension Regex {
 }
 
 //正则匹配结果
-extension Regex {
+extension LegacyRegex {
     // Match 封装有单个匹配结果
     public class Match: CustomStringConvertible {
         //匹配的字符串

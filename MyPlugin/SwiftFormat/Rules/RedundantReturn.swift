@@ -1,0 +1,343 @@
+//
+//  RedundantReturn.swift
+//  SwiftFormat
+//
+//  Created by Nick Lockwood on 3/7/17.
+//  Copyright © 2024 Nick Lockwood. All rights reserved.
+//
+
+import Foundation
+
+public extension FormatRule {
+    /// Remove redundant return keyword
+    static let redundantReturn = FormatRule(
+        help: "Remove unneeded `return` keyword.",
+        orderAfter: [.nestedIf]
+    ) { formatter in
+        // indices of returns that are safe to remove
+        var returnIndices = [Int]()
+
+        // Also handle redundant void returns in void functions, which can always be removed.
+        //  - The following code is the original implementation of the `redundantReturn` rule
+        //    and is partially redundant with the below code so could be simplified in the future.
+        formatter.forEach(.keyword("return")) { i, _ in
+            guard let startIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, before: i) else {
+                return
+            }
+            defer {
+                // Check return wasn't removed already
+                if formatter.token(at: i) == .keyword("return") {
+                    returnIndices.append(i)
+                }
+            }
+            switch formatter.tokens[startIndex] {
+            case .keyword("in"):
+                break
+            case .startOfScope("{"):
+                guard var prevIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, before: startIndex) else {
+                    break
+                }
+                if formatter.options.swiftVersion < "5.1", formatter.isAccessorKeyword(at: prevIndex) {
+                    return
+                }
+                if formatter.tokens[prevIndex] == .endOfScope(")"),
+                   let j = formatter.index(of: .startOfScope("("), before: prevIndex)
+                {
+                    prevIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, before: j) ?? j
+                    if formatter.tokens[prevIndex] == .operator("?", .postfix) {
+                        prevIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, before: prevIndex) ?? prevIndex
+                    }
+                    let prevToken = formatter.tokens[prevIndex]
+                    guard prevToken.isIdentifier || prevToken == .keyword("init") else {
+                        return
+                    }
+                }
+                let prevToken = formatter.tokens[prevIndex]
+                guard ![.delimiter(":"), .startOfScope("(")].contains(prevToken),
+                      var prevKeywordIndex = formatter.indexOfLastSignificantKeyword(
+                          at: startIndex, excluding: ["where"]
+                      )
+                else {
+                    break
+                }
+                switch formatter.tokens[prevKeywordIndex].string {
+                case "let", "var":
+                    guard formatter.options.swiftVersion >= "5.1" || prevToken == .operator("=", .infix) ||
+                        formatter.lastIndex(of: .operator("=", .infix), in: prevKeywordIndex + 1 ..< prevIndex) != nil,
+                        !formatter.isConditionalStatement(at: prevKeywordIndex)
+                    else {
+                        return
+                    }
+                case "func", "throws", "rethrows", "init", "subscript":
+                    if formatter.options.swiftVersion < "5.1",
+                       formatter.next(.nonSpaceOrCommentOrLinebreak, after: i) != .endOfScope("}")
+                    {
+                        return
+                    }
+                default:
+                    return
+                }
+            default:
+                guard let endIndex = formatter.index(of: .nonSpaceOrCommentOrLinebreak, after: i, if: {
+                    $0 == .endOfScope("}")
+                }), let startIndex = formatter.index(of: .startOfScope("{"), before: endIndex) else {
+                    return
+                }
+                if !formatter.isStartOfClosure(at: startIndex), !["func", "rethrows"]
+                    .contains(formatter.lastSignificantKeyword(at: startIndex, excluding: ["where", "throws"]) ?? "")
+                {
+                    return
+                }
+            }
+            // Don't remove return if it's followed by more code
+            guard let endIndex = formatter.endOfScope(at: i),
+                  formatter.index(of: .nonSpaceOrCommentOrLinebreak, after: i) == endIndex
+            else {
+                return
+            }
+            // Don't remove bare return in a closure if removing it would leave the body
+            // as a single expression, which would change the closure's inferred return
+            // type from Void to the expression's type (see #1749)
+            if let startOfScopeIndex = formatter.startOfScope(at: i),
+               formatter.tokens[startOfScopeIndex] == .startOfScope("{"),
+               formatter.isStartOfClosure(at: startOfScopeIndex),
+               let lastTokenBeforeReturn = formatter.index(of: .nonSpaceOrCommentOrLinebreak, before: i),
+               let expressionRange = formatter.parseExpressionRange(endingAt: lastTokenBeforeReturn),
+               let tokenBeforeExpression = formatter.index(of: .nonSpaceOrCommentOrLinebreak, before: expressionRange.lowerBound),
+               formatter.tokens[tokenBeforeExpression] == .keyword("in") || formatter.tokens[tokenBeforeExpression] == .startOfScope("{")
+            {
+                return
+            }
+            if formatter.index(of: .nonSpaceOrLinebreak, after: i) == endIndex,
+               let startIndex = formatter.index(of: .nonSpaceOrLinebreak, before: i)
+            {
+                formatter.removeTokens(in: startIndex + 1 ... i)
+                return
+            }
+            formatter.removeToken(at: i)
+            if var nextIndex = formatter.index(of: .nonSpace, after: i - 1, if: { $0.isLinebreak }) {
+                if let i = formatter.index(of: .nonSpaceOrLinebreak, after: nextIndex) {
+                    nextIndex = i - 1
+                }
+                formatter.removeTokens(in: i ... nextIndex)
+            } else if formatter.token(at: i)?.isSpace == true {
+                formatter.removeToken(at: i)
+            }
+        }
+
+        // Explicit returns are redundant in closures, functions, etc with a single statement body
+        formatter.forEach(.startOfScope("{")) { startOfScopeIndex, _ in
+            // Closures always supported implicit returns, but other types of scopes
+            // only support implicit return in Swift 5.1+ (SE-0255)
+            let isClosure = formatter.isStartOfClosure(at: startOfScopeIndex)
+
+            // Removing the return from a single-statement `switch`/`if` inside a `flatMap`
+            // closure with an inferred return type can break compilation, since the branches
+            // may produce different `Sequence`-conforming types (e.g. `Set` vs `Array`).
+            // (https://github.com/nicklockwood/SwiftFormat/issues/2605)
+            if isClosure, formatter.isFlatMapClosureWithInferredReturnType(at: startOfScopeIndex) {
+                return
+            }
+
+            if formatter.options.swiftVersion < "5.1", !isClosure {
+                return
+            }
+
+            // Make sure this is a type of scope that supports implicit returns
+            let lastKeyword = isClosure ? "" : formatter.lastSignificantKeyword(
+                at: startOfScopeIndex,
+                excluding: ["throws", "where"]
+            )
+            if !isClosure, formatter.isConditionalStatement(at: startOfScopeIndex, excluding: ["where"]) ||
+                ["do", "else", "catch"].contains(lastKeyword)
+            {
+                return
+            }
+
+            // Don't strip the return from a function that returns `Void`. The `return` gives
+            // its expression the `Void` type, and without it the generic result type of a
+            // call may no longer be inferred (e.g. `withCheckedThrowingContinuation`).
+            // (https://github.com/nicklockwood/SwiftFormat/issues/1818)
+            if !isClosure, formatter.isBodyOfVoidFunction(at: startOfScopeIndex) {
+                return
+            }
+
+            // Only strip return from conditional block if conditionalAssignment rule is enabled
+            var stripConditionalReturn = formatter.options.enabledRules.contains("conditionalAssignment")
+
+            // Don't strip return if type is opaque
+            // (https://github.com/nicklockwood/SwiftFormat/issues/1819)
+            if stripConditionalReturn,
+               lastKeyword == "func",
+               let arrowIndex = formatter.index(of: .operator("->", .infix), before: startOfScopeIndex),
+               formatter.tokens[arrowIndex ..< startOfScopeIndex].contains(.identifier("some"))
+            {
+                stripConditionalReturn = false
+            }
+
+            // Make sure the body only has a single statement
+            var allowed: Formatter.SingleExpressionOptions = [.returnStatement, .conditionalExpressions, .conditionalCompilationBlocks]
+            if stripConditionalReturn {
+                allowed.insert(.returnStatementsInConditionalBranches)
+            }
+            guard formatter.scopeBodyIsSingleExpression(at: startOfScopeIndex, allowing: allowed) else {
+                return
+            }
+
+            // Make sure we aren't in a failable `init?`, where explicit return is required unless it's the only statement
+            if !isClosure, let lastSignificantKeywordIndex = formatter.indexOfLastSignificantKeyword(at: startOfScopeIndex),
+               formatter.next(.nonSpaceOrCommentOrLinebreak, after: startOfScopeIndex) != .keyword("return"),
+               formatter.tokens[lastSignificantKeywordIndex] == .keyword("init"),
+               let nextToken = formatter.next(.nonSpaceOrCommentOrLinebreak, after: lastSignificantKeywordIndex),
+               nextToken == .operator("?", .postfix)
+            {
+                return
+            }
+
+            // Find all of the return keywords to remove before we remove any of them,
+            // so we can apply additional validation first.
+            guard let endOfScopeIndex = formatter.endOfScope(at: startOfScopeIndex),
+                  let returnKeywordRangesToRemove = formatter.returnKeywordRangesToRemove(
+                      in: formatter.startOfBody(atStartOfScope: startOfScopeIndex) + 1 ..< endOfScopeIndex,
+                      returnIndices: &returnIndices
+                  )
+            else { return }
+
+            for returnKeywordRangeToRemove in returnKeywordRangesToRemove.sorted(by: { $0.startIndex > $1.startIndex }) {
+                formatter.removeTokens(in: returnKeywordRangeToRemove)
+            }
+        }
+    } examples: {
+        """
+        ```diff
+        - array.filter { return $0.foo == bar }
+        + array.filter { $0.foo == bar }
+
+          var foo: String {
+        -     return "foo"
+        +     "foo"
+          }
+
+          func foo(_ condition: Bool) -> String {
+              if condition {
+        -         return "foo"
+        +         "foo"
+              } else {
+        -         return "bar"
+        +         "bar"
+              }
+          }
+        ```
+        """
+    }
+}
+
+extension Formatter {
+    /// Whether the closure starting at the given index is the argument to a `flatMap`
+    /// call and has an inferred (rather than explicit) return type. An explicit return
+    /// type pins the closure's type, so removing `return` from its body remains safe.
+    func isFlatMapClosureWithInferredReturnType(at closureStartIndex: Int) -> Bool {
+        // Find the identifier preceding the closure, handling both the trailing-closure
+        // form (`xs.flatMap { ... }`) and the parenthesized form (`xs.flatMap({ ... })`).
+        var precedingIndex = index(of: .nonSpaceOrCommentOrLinebreak, before: closureStartIndex)
+        if let parenIndex = precedingIndex,
+           tokens[parenIndex] == .startOfScope("("),
+           startOfScope(at: closureStartIndex) == parenIndex
+        {
+            precedingIndex = index(of: .nonSpaceOrCommentOrLinebreak, before: parenIndex)
+        }
+
+        guard let precedingIndex, tokens[precedingIndex] == .identifier("flatMap") else {
+            return false
+        }
+
+        return parseClosureArguments(at: closureStartIndex)?.returnTypeRange == nil
+    }
+
+    /// Whether the scope starting at the given index is the body of a function
+    /// that returns `Void`, either implicitly or with an explicit return type.
+    func isBodyOfVoidFunction(at startOfScopeIndex: Int) -> Bool {
+        guard let keywordIndex = indexOfLastSignificantKeyword(
+                  at: startOfScopeIndex, excluding: ["throws", "rethrows", "where"]
+              ),
+              tokens[keywordIndex] == .keyword("func"),
+              let function = parseFunctionDeclaration(keywordIndex: keywordIndex),
+              function.bodyRange?.lowerBound == startOfScopeIndex
+        else {
+            return false
+        }
+
+        return [nil, "Void", "Swift.Void", "()"].contains(function.returnType?.string)
+    }
+
+    /// The ranges of the `return` keywords to remove from the given body, including from each branch
+    func returnKeywordRangesToRemove(in range: Range<Int>, returnIndices: inout [Int]) -> [Range<Int>]? {
+        var returnKeywordRangesToRemove = [Range<Int>]()
+        guard let firstTokenInBody = index(of: .nonSpaceOrCommentOrLinebreak, in: range) else {
+            return returnKeywordRangesToRemove
+        }
+
+        // If this is an `#if` block, remove the return from each branch
+        if let branches = conditionalCompilationBranches(at: firstTokenInBody) {
+            for branch in branches.reversed() {
+                returnKeywordRangesToRemove.append(contentsOf: self.returnKeywordRangesToRemove(in: branch.startOfBranch + 1 ..< branch.endOfBranch, returnIndices: &returnIndices) ?? [])
+            }
+        }
+
+        // If this is a single-statement if or switch statement then we have to recursively
+        // remove the return from each branch of the if statement
+        else if let conditionalBranches = conditionalBranches(at: firstTokenInBody) {
+            for branch in conditionalBranches.reversed() where !isThrowingBranch(branch) {
+                // In Swift 5.9, there's a bug that prevents you from writing an
+                // if or switch expression using an `as?` on one of the branches:
+                // https://github.com/apple/swift/issues/68764
+                //
+                //  if condition {
+                //    foo as? String
+                //  } else {
+                //    "bar"
+                //  }
+                //
+                if conditionalBranchHasUnsupportedCastOperator(
+                    startOfScopeIndex: branch.startOfBranch
+                ) {
+                    return nil
+                }
+
+                let branchRange = branch.startOfBranch + 1 ..< branch.endOfBranch
+                let branchRanges = self.returnKeywordRangesToRemove(in: branchRange, returnIndices: &returnIndices) ?? []
+
+                // A nested if / switch whose branches all throw has no value,
+                // so it can't be used as an expression
+                if branchRanges.isEmpty,
+                   let firstInBranch = index(of: .nonSpaceOrCommentOrLinebreak, in: branchRange),
+                   self.conditionalBranches(at: firstInBranch) != nil
+                {
+                    return nil
+                }
+
+                returnKeywordRangesToRemove.append(contentsOf: branchRanges)
+            }
+        }
+
+        // Otherwise this is a simple case with a single return at the start of the body
+        else if tokens[firstTokenInBody] == .keyword("return"),
+                returnIndices.contains(firstTokenInBody),
+                let nextIndex = index(of: .nonSpaceOrLinebreak, after: firstTokenInBody),
+                index(of: .nonSpaceOrCommentOrLinebreak, in: firstTokenInBody + 1 ..< range.upperBound) != nil
+        {
+            let returnIndex = firstTokenInBody
+            let returnKeywordRange = returnIndex ..< nextIndex
+            for (i, index) in returnIndices.enumerated().reversed() {
+                if returnKeywordRange.contains(index) {
+                    returnIndices.remove(at: i)
+                } else if index > returnIndex {
+                    returnIndices[i] -= returnKeywordRange.count
+                }
+            }
+            returnKeywordRangesToRemove.append(returnKeywordRange)
+        }
+
+        return returnKeywordRangesToRemove
+    }
+}

@@ -8,7 +8,7 @@
 	<array>
 		<string>com.yingguqing.xcode.plugin</string>
 	</array>
-	<key>com.apple.security.files.user-selected.read-write</key>
-	<true/>
+	<!-- 扩展不再访问任何用户文件：格式化全程在内存/沙盒容器内完成，
+	     去掉 user-selected 权限可避免 macOS 反复请求「访问文件与文件夹」授权。 -->
 </dict>
 </plist>

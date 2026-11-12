@@ -1,5 +1,5 @@
 //
-//  RuleSelectionTableCellView.swift
+//  BinarySelectionTableCellView.swift
 //  SwiftFormat for Xcode
 //
 //  Created by Vincent Bernier on 28/01/18.
@@ -46,14 +46,10 @@ final class BinarySelectionTableCellView: NSTableCellView {
             guard let model = objectValue as? UserSelectionBinary else {
                 return
             }
-            // 显示中文说明
-            if !model.chineseHelp.isEmpty {
-                checkbox.title = model.chineseHelp
-            } else {
-                toolTip = model.description
-                checkbox.title = model.title ?? ""
-            }
+            toolTip = model.description
             checkbox.isEnabled = model.isEnabled
+            // 优先显示中文说明，没有中文时回退到英文原名
+            checkbox.title = model.chineseHelp.isEmpty ? (model.title ?? "") : model.chineseHelp
             checkbox.state = model.selection ? .on : .off
         }
     }

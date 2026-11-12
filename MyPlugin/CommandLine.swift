@@ -21,7 +21,9 @@ private extension Language {
 }
 
 //MARK: 使用// 注释代码
-class CommandLine : NSObject, XCSourceEditorCommand {
+// 注意：类名不要叫 CommandLine，会遮蔽 Swift 标准库的 CommandLine
+// （SwiftFormat 0.64+ 的 CLI 代码要用到 CommandLine.arguments）
+class CommentLineCommand : NSObject, XCSourceEditorCommand {
     
     private enum CommandType {
         case Add,Del

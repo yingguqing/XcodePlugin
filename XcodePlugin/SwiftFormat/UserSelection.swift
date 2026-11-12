@@ -42,11 +42,13 @@ class UserSelection {
     let title: String?
     let description: String?
     let isEnabled: Bool
-    lazy var chineseHelp:String = {
+
+    /// 中文说明：以 title 为 key 查 Localizable.xcstrings。
+    /// 查不到时返回空串，界面回退到英文原文（英文 help 仍作为 tooltip 保留）。
+    lazy var chineseHelp: String = {
         guard let title, !title.isEmpty else { return "" }
         let value = NSLocalizedString(title, comment: "")
-        guard value != title else { return "" }
-        return value
+        return value == title ? "" : value
     }()
 
     init(identifier: String, title: String?, description: String?, isEnabled: Bool) {
@@ -116,7 +118,7 @@ final class UserSelectionFreeText: UserSelection {
     }
 
     var isValid: Bool {
-        return validationStrategy(selection)
+        validationStrategy(selection)
     }
 
     private let validationStrategy: (String) -> Bool
