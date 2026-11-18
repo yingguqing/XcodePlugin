@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>com.yingguqing.xcode.plugin</string>
+		<string>F35YF899E4.com.yingguqing.xcode.plugin</string>
 	</array>
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>

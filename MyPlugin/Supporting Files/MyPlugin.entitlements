@@ -6,9 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>com.yingguqing.xcode.plugin</string>
+		<string>F35YF899E4.com.yingguqing.xcode.plugin</string>
 	</array>
-	<!-- 扩展不再访问任何用户文件：格式化全程在内存/沙盒容器内完成，
-	     去掉 user-selected 权限可避免 macOS 反复请求「访问文件与文件夹」授权。 -->
 </dict>
 </plist>

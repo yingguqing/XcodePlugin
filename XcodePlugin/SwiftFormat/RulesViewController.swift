@@ -252,9 +252,9 @@ extension RulesViewController: NSTableViewDelegate {
     func tableView(_: NSTableView, didAdd rowView: NSTableRowView, forRow row: Int) {
         switch model(forRow: row) {
         case .binary:
-            rowView.backgroundColor = NSColor.controlAlternatingRowBackgroundColors[1]
+            rowView.backgroundColor = NSColor.alternatingContentBackgroundColors[1]
         case .list, .freeText:
-            rowView.backgroundColor = NSColor.controlAlternatingRowBackgroundColors[0]
+            rowView.backgroundColor = NSColor.alternatingContentBackgroundColors[0]
         }
     }
 }
